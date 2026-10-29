@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,9 +13,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +29,7 @@ import com.gestorcuentas.app.data.entity.CuentaConVentas
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.utils.MensajeEntregaUtils
+import com.gestorcuentas.app.utils.PhoneUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,11 +106,13 @@ fun NuevaVentaScreen(
             if (cuentasActivasConVentas.isEmpty()) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f))
                 ) {
                     Text(
                         "No tienes cuentas activas disponibles. Registra una cuenta o habilita una inhabilitada antes de vender.",
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(14.dp),
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
@@ -124,7 +131,7 @@ fun NuevaVentaScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(14.dp)
                     )
                     ExposedDropdownMenu(
                         expanded = expandedDropdown,
@@ -155,18 +162,37 @@ fun NuevaVentaScreen(
                 }
             }
 
-            // 2. Número de Celular del Cliente
+            // 2. Número de Celular del Cliente con Pegado Inteligente WhatsApp
             Text("2. Datos del Cliente", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
             OutlinedTextField(
                 value = numeroCelular,
                 onValueChange = { numeroCelular = it },
                 label = { Text("Número de Celular") },
-                placeholder = { Text("Ej: +58 412 1234567") },
+                placeholder = { Text("Pega o escribe (+591 76992490)") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                shape = RoundedCornerShape(12.dp)
+                trailingIcon = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (numeroCelular.isNotEmpty()) {
+                            IconButton(onClick = { numeroCelular = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Borrar celular")
+                            }
+                        }
+                        IconButton(onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clipText = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                            if (clipText.isNotBlank()) {
+                                val limpio = PhoneUtils.extraerDigitosSignificativos(clipText)
+                                numeroCelular = if (limpio.isNotBlank()) limpio else clipText.trim()
+                            }
+                        }) {
+                            Icon(Icons.Default.ContentPaste, contentDescription = "Pegar número de WhatsApp")
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(14.dp)
             )
 
             // 3. Precio de Venta (1 perfil por defecto)
@@ -180,7 +206,7 @@ fun NuevaVentaScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(14.dp)
             )
 
             // 4. Duración (Opciones predeterminadas: 30, 60, 90)
@@ -211,7 +237,7 @@ fun NuevaVentaScreen(
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(14.dp)
                 )
 
                 OutlinedTextField(
@@ -221,17 +247,19 @@ fun NuevaVentaScreen(
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(14.dp)
                 )
             }
 
-            // Card Informativo del Cálculo Automático
+            // Card Informativo del Cálculo Automático con Estilo Unificado
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Column(modifier = Modifier.padding(14.dp)) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -245,7 +273,7 @@ fun NuevaVentaScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -305,9 +333,9 @@ fun NuevaVentaScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Registrar Venta", style = MaterialTheme.typography.titleMedium)
+                Text("Registrar Venta", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

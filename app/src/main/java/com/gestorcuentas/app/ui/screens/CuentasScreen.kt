@@ -1,5 +1,8 @@
 package com.gestorcuentas.app.ui.screens
 
+import android.content.ClipboardManager
+import android.content.Context
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,17 +10,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gestorcuentas.app.data.entity.CuentaConVentas
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.WarningAmber
 import com.gestorcuentas.app.utils.DateUtils
+import com.gestorcuentas.app.utils.PhoneUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,14 +36,19 @@ fun CuentasScreen(
 ) {
     val cuentasConVentas by viewModel.cuentasConVentas.collectAsState()
     var filtroTexto by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
+    // Búsqueda inteligente: tolera números de WhatsApp (+591 76992490 -> 76992490), correo o servicio
     val cuentasFiltradas = remember(cuentasConVentas, filtroTexto) {
         if (filtroTexto.isBlank()) {
             cuentasConVentas
         } else {
-            cuentasConVentas.filter {
-                it.cuenta.tipoCuenta.contains(filtroTexto, ignoreCase = true) ||
-                it.cuenta.correo.contains(filtroTexto, ignoreCase = true)
+            cuentasConVentas.filter { item ->
+                item.cuenta.tipoCuenta.contains(filtroTexto, ignoreCase = true) ||
+                item.cuenta.correo.contains(filtroTexto, ignoreCase = true) ||
+                item.ventas.any { venta ->
+                    PhoneUtils.coincideNumero(venta.numeroCelularCliente, filtroTexto)
+                }
             }
         }
     }
@@ -66,17 +78,35 @@ fun CuentasScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Buscador por tipo de cuenta o correo
+            // Buscador por tipo de cuenta, correo o celular de cliente con botón borrar y pegar
             OutlinedTextField(
                 value = filtroTexto,
                 onValueChange = { filtroTexto = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                placeholder = { Text("Buscar por servicio o correo...") },
+                placeholder = { Text("Buscar por servicio, correo o celular...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (filtroTexto.isNotEmpty()) {
+                            IconButton(onClick = { filtroTexto = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Borrar búsqueda")
+                            }
+                        }
+                        IconButton(onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clipText = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                            if (clipText.isNotBlank()) {
+                                filtroTexto = clipText.trim()
+                            }
+                        }) {
+                            Icon(Icons.Default.ContentPaste, contentDescription = "Pegar número o texto")
+                        }
+                    }
+                },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(14.dp)
             )
 
             if (cuentasFiltradas.isEmpty()) {
@@ -87,7 +117,8 @@ fun CuentasScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (filtroTexto.isEmpty()) "No hay cuentas registradas en el inventario.\nToca el botón + para registrar la primera." else "No se encontraron cuentas con '$filtroTexto'.",
+                        text = if (filtroTexto.isEmpty()) "No hay cuentas registradas en el inventario.\nToca el botón + para registrar la primera."
+                               else "No se encontraron cuentas con '$filtroTexto'.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -110,6 +141,9 @@ fun CuentasScreen(
     }
 }
 
+/**
+ * Item unificado de Cuenta en inventario con el mismo estilo de Card de toda la aplicación
+ */
 @Composable
 fun CuentaItemCard(
     cuentaConVentas: CuentaConVentas,
@@ -123,9 +157,10 @@ fun CuentaItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -147,7 +182,7 @@ fun CuentaItemCard(
                     if (cuenta.estado == "inhabilitada") {
                         Spacer(modifier = Modifier.width(6.dp))
                         Surface(
-                            shape = RoundedCornerShape(4.dp),
+                            shape = RoundedCornerShape(6.dp),
                             color = MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
                         ) {
                             Text(
@@ -162,21 +197,21 @@ fun CuentaItemCard(
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(8.dp),
                     color = if (esRentable) AccentGreen.copy(alpha = 0.15f) else WarningAmber.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = if (esRentable) "✅ En Ganancia (+${DateUtils.formatearMoneda(gananciaNeta)})"
                                else "⏳ Recuperando (-${DateUtils.formatearMoneda(-gananciaNeta)})",
                         color = if (esRentable) AccentGreen else WarningAmber,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = cuenta.correo,

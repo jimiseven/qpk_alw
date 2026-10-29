@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -66,7 +67,7 @@ fun CuentaDetalleScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(cuentaConVentas?.cuenta?.tipoCuenta?.uppercase() ?: "Detalle Cuenta") },
+                title = { Text(cuentaConVentas?.cuenta?.tipoCuenta?.uppercase() ?: "Detalle Cuenta", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
@@ -89,7 +90,7 @@ fun CuentaDetalleScreen(
                 ExtendedFloatingActionButton(
                     onClick = { onNavigateToNuevaVenta(cuentaConVentas.cuenta.id) },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Vender Perfil") },
+                    text = { Text("Vender Perfil", fontWeight = FontWeight.Bold) },
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             }
@@ -102,7 +103,7 @@ fun CuentaDetalleScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Cuenta no encontrada.")
+                Text("No se encontró la cuenta.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             val cuenta = cuentaConVentas.cuenta
@@ -116,21 +117,25 @@ fun CuentaDetalleScreen(
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+                item { Spacer(modifier = Modifier.height(2.dp)) }
+
                 // Alerta si está inhabilitada
                 if (estaInhabilitada) {
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = DangerRed.copy(alpha = 0.15f))
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, DangerRed.copy(alpha = 0.5f)),
+                            colors = CardDefaults.cardColors(containerColor = DangerRed.copy(alpha = 0.12f))
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(12.dp),
+                                    .padding(14.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    "🔴 Cuenta Inhabilitada: No disponible para registrar nuevas ventas.",
+                                    "🔴 Cuenta Inhabilitada: No está disponible para registrar nuevas ventas.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = DangerRed
@@ -140,12 +145,14 @@ fun CuentaDetalleScreen(
                     }
                 }
 
-                // Card de Credenciales
+                // Card Unificada de Credenciales
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(
@@ -160,13 +167,13 @@ fun CuentaDetalleScreen(
                                 )
 
                                 Surface(
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = RoundedCornerShape(8.dp),
                                     color = if (estaInhabilitada) DangerRed.copy(alpha = 0.15f) else AccentGreen.copy(alpha = 0.15f)
                                 ) {
                                     Text(
                                         text = if (estaInhabilitada) "INHABILITADA" else "ACTIVA",
                                         color = if (estaInhabilitada) DangerRed else AccentGreen,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -263,12 +270,14 @@ fun CuentaDetalleScreen(
                     }
                 }
 
-                // Card de Rentabilidad de esta Cuenta
+                // Card Unificada de Rentabilidad de esta Cuenta
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
@@ -385,7 +394,8 @@ fun CuentaDetalleScreen(
     ventaAEliminar?.let { venta ->
         AlertDialog(
             onDismissRequest = { ventaAEliminar = null },
-            title = { Text("¿Eliminar Venta?") },
+            shape = RoundedCornerShape(16.dp),
+            title = { Text("¿Eliminar Venta?", fontWeight = FontWeight.Bold) },
             text = { Text("Se eliminará la venta registrada para el cliente ${venta.numeroCelularCliente}. Esta acción no se puede deshacer.") },
             confirmButton = {
                 Button(
@@ -395,7 +405,8 @@ fun CuentaDetalleScreen(
                             ventaAEliminar = null
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Eliminar")
                 }
@@ -412,7 +423,8 @@ fun CuentaDetalleScreen(
     if (mostrarDialogoEliminarCuenta && cuentaConVentas != null) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoEliminarCuenta = false },
-            title = { Text("¿Eliminar Cuenta y sus Ventas?") },
+            shape = RoundedCornerShape(16.dp),
+            title = { Text("¿Eliminar Cuenta y sus Ventas?", fontWeight = FontWeight.Bold) },
             text = {
                 Text("Se eliminará esta cuenta maestra y TODAS las ${cuentaConVentas.ventas.size} ventas de perfiles vinculadas a ella de forma permanente.")
             },
@@ -425,7 +437,8 @@ fun CuentaDetalleScreen(
                             onNavigateBack()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Eliminar Todo")
                 }
@@ -439,6 +452,9 @@ fun CuentaDetalleScreen(
     }
 }
 
+/**
+ * Item unificado de Venta dentro del detalle de cuenta
+ */
 @Composable
 fun VentaItemCard(
     venta: Venta,
@@ -459,13 +475,15 @@ fun VentaItemCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -480,7 +498,7 @@ fun VentaItemCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
-                        shape = RoundedCornerShape(4.dp),
+                        shape = RoundedCornerShape(6.dp),
                         color = colorBadge.copy(alpha = 0.15f)
                     ) {
                         Text(

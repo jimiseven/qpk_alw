@@ -1,31 +1,39 @@
 package com.gestorcuentas.app.ui.theme
 
-import android.os.Build
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import com.gestorcuentas.app.utils.AppThemeMode
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryBlueDark,
-    secondary = SecondaryTeal,
+    primaryContainer = PrimaryBlueContainerDark,
+    onPrimaryContainer = OnPrimaryBlueContainerDark,
+    secondary = SecondaryTealDark,
     background = BackgroundDark,
     surface = SurfaceDark,
     surfaceVariant = SurfaceVariantDark,
-    onPrimary = SurfaceDark,
-    onSecondary = SurfaceDark,
+    onPrimary = BackgroundDark,
+    onSecondary = BackgroundDark,
     onBackground = TextPrimaryDark,
     onSurface = TextPrimaryDark,
-    onSurfaceVariant = TextSecondaryDark
+    onSurfaceVariant = TextSecondaryDark,
+    outline = OutlineDark,
+    outlineVariant = OutlineVariantDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = PrimaryBlue,
-    secondary = SecondaryTeal,
+    primary = PrimaryBlueLight,
+    primaryContainer = PrimaryBlueContainerLight,
+    onPrimaryContainer = OnPrimaryBlueContainerLight,
+    secondary = SecondaryTealLight,
     background = BackgroundLight,
     surface = SurfaceLight,
     surfaceVariant = SurfaceVariantLight,
@@ -33,23 +41,37 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = SurfaceLight,
     onBackground = TextPrimaryLight,
     onSurface = TextPrimaryLight,
-    onSurfaceVariant = TextSecondaryLight
+    onSurfaceVariant = TextSecondaryLight,
+    outline = OutlineLight,
+    outlineVariant = OutlineVariantLight
 )
 
 @Composable
 fun GestorCuentasTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    themeMode: AppThemeMode = AppThemeMode.SISTEMA,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        // Aprovecha la personalización dinámica de Android 13 en Honor (Material You)
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val isSystemDark = isSystemInDarkTheme()
+    val isDark = when (themeMode) {
+        AppThemeMode.SISTEMA -> isSystemDark
+        AppThemeMode.CLARO -> false
+        AppThemeMode.OSCURO -> true
+    }
+
+    val colorScheme = if (isDark) DarkColorScheme else LightColorScheme
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window
+            if (window != null) {
+                window.statusBarColor = colorScheme.background.toArgb()
+                window.navigationBarColor = colorScheme.background.toArgb()
+                val insetsController = WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = !isDark
+                insetsController.isAppearanceLightNavigationBars = !isDark
+            }
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
     }
 
     MaterialTheme(

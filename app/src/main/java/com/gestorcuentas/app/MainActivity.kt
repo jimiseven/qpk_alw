@@ -1,16 +1,15 @@
 package com.gestorcuentas.app
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
@@ -18,28 +17,71 @@ import androidx.navigation.navArgument
 import com.gestorcuentas.app.ui.navigation.Screen
 import com.gestorcuentas.app.ui.screens.*
 import com.gestorcuentas.app.ui.theme.GestorCuentasTheme
+import com.gestorcuentas.app.utils.AppPreferences
+import com.gestorcuentas.app.utils.AppThemeMode
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 import com.gestorcuentas.app.viewmodel.InventarioViewModelFactory
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private val viewModel: InventarioViewModel by viewModels {
         val app = application as CuentasApp
         InventarioViewModelFactory(app.repository)
     }
 
+    private lateinit var preferences: AppPreferences
+    private val isUnlockedState = mutableStateOf(true)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        preferences = AppPreferences(this)
+        isUnlockedState.value = !preferences.isSecurityEnabled
+
         setContent {
-            GestorCuentasTheme {
-                MainAppContent(viewModel = viewModel)
+            var themeMode by remember { mutableStateOf(preferences.themeMode) }
+            var isUnlocked by remember { isUnlockedState }
+            var mostrarConfiguracionSeguridad by remember { mutableStateOf(false) }
+
+            GestorCuentasTheme(themeMode = themeMode) {
+                if (!isUnlocked && preferences.isSecurityEnabled) {
+                    LockScreen(
+                        preferences = preferences,
+                        onUnlocked = { isUnlocked = true }
+                    )
+                } else {
+                    MainAppContent(
+                        viewModel = viewModel,
+                        onOpenConfiguracion = { mostrarConfiguracionSeguridad = true }
+                    )
+
+                    if (mostrarConfiguracionSeguridad) {
+                        ConfiguracionSeguridadDialog(
+                            preferences = preferences,
+                            onDismiss = { mostrarConfiguracionSeguridad = false },
+                            onThemeChanged = { newTheme ->
+                                themeMode = newTheme
+                            }
+                        )
+                    }
+                }
             }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Si el bloqueo está habilitado, bloquear al salir de la aplicación
+        if (::preferences.isInitialized && preferences.isSecurityEnabled) {
+            isUnlockedState.value = false
         }
     }
 }
 
 @Composable
-fun MainAppContent(viewModel: InventarioViewModel) {
+fun MainAppContent(
+    viewModel: InventarioViewModel,
+    onOpenConfiguracion: () -> Unit
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -117,7 +159,8 @@ fun MainAppContent(viewModel: InventarioViewModel) {
                     },
                     onNavigateToNuevaCuenta = {
                         navController.navigate(Screen.NuevaCuenta.route)
-                    }
+                    },
+                    onOpenConfiguracion = onOpenConfiguracion
                 )
             }
 

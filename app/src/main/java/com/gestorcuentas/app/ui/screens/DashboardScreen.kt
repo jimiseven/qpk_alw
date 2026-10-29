@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,19 +19,25 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gestorcuentas.app.R
 import com.gestorcuentas.app.data.entity.CuentaConVentas
 import com.gestorcuentas.app.data.entity.Venta
 import com.gestorcuentas.app.data.entity.VentaConCuenta
@@ -39,6 +46,7 @@ import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.ui.theme.WarningAmber
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.utils.MensajeEntregaUtils
+import com.gestorcuentas.app.utils.PhoneUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
 enum class DashboardTab {
@@ -52,7 +60,8 @@ fun DashboardScreen(
     viewModel: InventarioViewModel,
     onCuentaClick: (Int) -> Unit = {},
     onNavigateToNuevaVenta: () -> Unit,
-    onNavigateToNuevaCuenta: () -> Unit
+    onNavigateToNuevaCuenta: () -> Unit,
+    onOpenConfiguracion: () -> Unit = {}
 ) {
     val resumen by viewModel.resumenFinanciero.collectAsState()
     val cuentasConVentas by viewModel.cuentasConVentas.collectAsState()
@@ -61,6 +70,9 @@ fun DashboardScreen(
 
     // Estado de la Card seleccionada: Por defecto "Cuentas Activas"
     var selectedTab by remember { mutableStateOf(DashboardTab.CUENTAS_ACTIVAS) }
+
+    // Buscador para la lista de ventas
+    var busquedaVentas by remember { mutableStateOf("") }
 
     // Estados para edición y eliminación de venta
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
@@ -105,19 +117,47 @@ fun DashboardScreen(
         cuentasConVentas.filter { it.cuenta.estado.equals("activa", ignoreCase = true) }
     }
 
+    // Filtrar ventas con búsqueda inteligente de teléfono / WhatsApp
+    val ventasFiltradas = remember(allVentasConCuenta, busquedaVentas) {
+        if (busquedaVentas.isBlank()) {
+            allVentasConCuenta
+        } else {
+            allVentasConCuenta.filter { item ->
+                PhoneUtils.coincideNumero(item.venta.numeroCelularCliente, busquedaVentas) ||
+                (item.cuenta?.tipoCuenta?.contains(busquedaVentas, ignoreCase = true) == true) ||
+                (item.cuenta?.correo?.contains(busquedaVentas, ignoreCase = true) == true)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Panel Principal",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_cat_logo),
+                            contentDescription = "Logo Gatito",
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text(
+                            "Panel Principal",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
+                    // Botón Configuración (Tema Oscuro/Claro & PIN/Huella)
+                    IconButton(onClick = onOpenConfiguracion) {
+                        Icon(Icons.Default.Settings, contentDescription = "Configuración y Seguridad")
+                    }
+
                     // Botón de Estadísticas (al lado del icono de Backup)
                     IconButton(onClick = { mostrarEstadisticas = true }) {
                         Icon(Icons.Default.BarChart, contentDescription = "Estadísticas del Negocio")
@@ -161,7 +201,6 @@ fun DashboardScreen(
             )
         }
     ) { padding ->
-        // Contenedor principal sin scroll global para máximo rendimiento y fluidez
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -169,19 +208,21 @@ fun DashboardScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // ==========================================
-            // 1. BANNER FINANCIERO COMPACTO (FIJO)
+            // 1. BANNER FINANCIERO COMPACTO UNIFICADO (FIJO)
             // ==========================================
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -221,10 +262,16 @@ fun DashboardScreen(
                     modifier = Modifier
                         .weight(1f)
                         .clickable { selectedTab = DashboardTab.CUENTAS_ACTIVAS },
-                    shape = RoundedCornerShape(12.dp),
-                    border = if (isCuentasSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                    shape = RoundedCornerShape(16.dp),
+                    border = if (isCuentasSelected)
+                        BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                    else
+                        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isCuentasSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = if (isCuentasSelected)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = if (isCuentasSelected) 4.dp else 1.dp)
                 ) {
@@ -269,10 +316,16 @@ fun DashboardScreen(
                     modifier = Modifier
                         .weight(1f)
                         .clickable { selectedTab = DashboardTab.TODAS_LAS_VENTAS },
-                    shape = RoundedCornerShape(12.dp),
-                    border = if (isVentasSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                    shape = RoundedCornerShape(16.dp),
+                    border = if (isVentasSelected)
+                        BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                    else
+                        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isVentasSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = if (isVentasSelected)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = if (isVentasSelected) 4.dp else 1.dp)
                 ) {
@@ -315,7 +368,7 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             // ==========================================
-            // 3. LISTADO DINÁMICO (ÚNICO ÁREA CON SCROLL)
+            // 3. LISTADO DINÁMICO (CON SCROLL FLUIDO)
             // ==========================================
             Box(
                 modifier = Modifier
@@ -335,7 +388,7 @@ fun DashboardScreen(
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
                             contentPadding = PaddingValues(bottom = 12.dp)
                         ) {
                             items(cuentasActivas, key = { it.cuenta.id }) { item ->
@@ -347,51 +400,80 @@ fun DashboardScreen(
                         }
                     }
                 } else {
-                    // Vista B: Todas las Ventas con sus DÍAS DISPONIBLES, editar, eliminar y copiar mensaje
-                    if (allVentasConCuenta.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                "No hay ventas registradas aún.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(bottom = 12.dp)
-                        ) {
-                            items(allVentasConCuenta, key = { it.venta.id }) { item ->
-                                VentaConDiasItem(
-                                    item = item,
-                                    onEditarVenta = {
-                                        ventaAEditar = item.venta
-                                    },
-                                    onEliminarVenta = {
-                                        ventaAEliminar = item.venta
-                                    },
-                                    onCopiarMensaje = {
-                                        val cuenta = item.cuenta
-                                        val venta = item.venta
-                                        if (cuenta != null) {
-                                            val mensaje = MensajeEntregaUtils.generarMensaje(
-                                                tipoCuenta = cuenta.tipoCuenta,
-                                                duracionDias = venta.duracionDias,
-                                                correo = cuenta.correo,
-                                                contrasenaPlataforma = cuenta.contrasenaPlataforma,
-                                                fechaInicio = venta.fechaInicio,
-                                                fechaFin = venta.fechaFin
-                                            )
-                                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                            val clip = ClipData.newPlainText("Datos Cuenta", mensaje)
-                                            clipboard.setPrimaryClip(clip)
-                                            Toast.makeText(context, "¡Mensaje de acceso copiado al portapapeles!", Toast.LENGTH_SHORT).show()
-                                        } else {
-                                            Toast.makeText(context, "No se encontraron datos de la cuenta", Toast.LENGTH_SHORT).show()
+                    // Vista B: Todas las Ventas con buscador con botón borrar
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Buscador de Ventas por Celular o Servicio con Botón Borrar y Pegar
+                        OutlinedTextField(
+                            value = busquedaVentas,
+                            onValueChange = { busquedaVentas = it },
+                            placeholder = { Text("Buscar venta por celular o servicio...") },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            trailingIcon = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (busquedaVentas.isNotEmpty()) {
+                                        IconButton(onClick = { busquedaVentas = "" }) {
+                                            Icon(Icons.Default.Clear, contentDescription = "Borrar búsqueda")
                                         }
                                     }
+                                    IconButton(onClick = {
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        val clipText = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                                        if (clipText.isNotBlank()) {
+                                            busquedaVentas = clipText.trim()
+                                        }
+                                    }) {
+                                        Icon(Icons.Default.ContentPaste, contentDescription = "Pegar número o texto")
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                        )
+
+                        if (ventasFiltradas.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(
+                                    if (busquedaVentas.isBlank()) "No hay ventas registradas aún." else "No se encontraron ventas para '$busquedaVentas'.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                contentPadding = PaddingValues(bottom = 12.dp)
+                            ) {
+                                items(ventasFiltradas, key = { it.venta.id }) { item ->
+                                    VentaConDiasItem(
+                                        item = item,
+                                        onEditarVenta = { ventaAEditar = item.venta },
+                                        onEliminarVenta = { ventaAEliminar = item.venta },
+                                        onCopiarMensaje = {
+                                            val cuenta = item.cuenta
+                                            val venta = item.venta
+                                            if (cuenta != null) {
+                                                val mensaje = MensajeEntregaUtils.generarMensaje(
+                                                    tipoCuenta = cuenta.tipoCuenta,
+                                                    duracionDias = venta.duracionDias,
+                                                    correo = cuenta.correo,
+                                                    contrasenaPlataforma = cuenta.contrasenaPlataforma,
+                                                    fechaInicio = venta.fechaInicio,
+                                                    fechaFin = venta.fechaFin
+                                                )
+                                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                                val clip = ClipData.newPlainText("Datos Cuenta", mensaje)
+                                                clipboard.setPrimaryClip(clip)
+                                                Toast.makeText(context, "¡Mensaje de acceso copiado al portapapeles!", Toast.LENGTH_SHORT).show()
+                                            } else {
+                                                Toast.makeText(context, "No se encontraron datos de la cuenta", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -421,7 +503,8 @@ fun DashboardScreen(
     ventaAEliminar?.let { venta ->
         AlertDialog(
             onDismissRequest = { ventaAEliminar = null },
-            title = { Text("¿Eliminar Venta?") },
+            shape = RoundedCornerShape(16.dp),
+            title = { Text("¿Eliminar Venta?", fontWeight = FontWeight.Bold) },
             text = { Text("Se eliminará la venta registrada para el cliente ${venta.numeroCelularCliente}. Esta acción no se puede deshacer.") },
             confirmButton = {
                 Button(
@@ -431,7 +514,8 @@ fun DashboardScreen(
                             ventaAEliminar = null
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Eliminar")
                 }
@@ -448,7 +532,8 @@ fun DashboardScreen(
     uriImportarPendiente?.let { uri ->
         AlertDialog(
             onDismissRequest = { uriImportarPendiente = null },
-            title = { Text("¿Restaurar Copia de Seguridad?") },
+            shape = RoundedCornerShape(16.dp),
+            title = { Text("¿Restaurar Copia de Seguridad?", fontWeight = FontWeight.Bold) },
             text = { Text("Se importarán las cuentas y ventas del archivo seleccionado. Los datos actuales se reemplazarán por los del respaldo.") },
             confirmButton = {
                 Button(
@@ -475,7 +560,8 @@ fun DashboardScreen(
                             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                             uriImportarPendiente = null
                         }
-                    }
+                    },
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Restaurar")
                 }
@@ -490,7 +576,7 @@ fun DashboardScreen(
 }
 
 /**
- * Item de la lista de Cuentas Activas con contador de ventas
+ * Item unificado de la lista de Cuentas Activas con contador de ventas
  */
 @Composable
 fun CuentaActivaItem(
@@ -506,13 +592,15 @@ fun CuentaActivaItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -528,23 +616,23 @@ fun CuentaActivaItem(
 
                 // Badge de Ventas de esta cuenta
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = if (totalVentas == 1) "1 venta" else "$totalVentas ventas",
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(cuenta.correo, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -566,7 +654,7 @@ fun CuentaActivaItem(
 }
 
 /**
- * Item de la lista de Todas las Ventas con DÍAS DISPONIBLES, botón editar, botón eliminar y botón para copiar mensaje
+ * Item unificado de la lista de Todas las Ventas con DÍAS DISPONIBLES
  */
 @Composable
 fun VentaConDiasItem(
@@ -588,13 +676,15 @@ fun VentaConDiasItem(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -610,20 +700,20 @@ fun VentaConDiasItem(
 
                 // Badge de Días Disponibles
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(8.dp),
                     color = badgeColor.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = badgeText,
                         color = badgeColor,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -644,7 +734,7 @@ fun VentaConDiasItem(
                     )
                 }
 
-                Row {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     // Botón Copiar Mensaje Cliente
                     FilledTonalIconButton(
                         onClick = onCopiarMensaje,
