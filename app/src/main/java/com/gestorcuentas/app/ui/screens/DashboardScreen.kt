@@ -83,32 +83,55 @@ fun DashboardScreen(
 
     // Menú de Backup
     var menuBackupExpandido by remember { mutableStateOf(false) }
-    var uriImportarPendiente by remember { mutableStateOf<Uri?>(null) }
+    var jsonImportarPendiente by remember { mutableStateOf<String?>(null) }
+    var resumenImportarCuentas by remember { mutableStateOf(0) }
+    var resumenImportarVentas by remember { mutableStateOf(0) }
 
-    // Launcher para Exportar Backup (Crear Documento JSON)
+    // Launcher para Exportar Backup (Crear Documento JSON con truncado y sincronización forzada)
     val exportarBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
         if (uri != null) {
             viewModel.exportarBackup { jsonString ->
                 try {
-                    context.contentResolver.openOutputStream(uri)?.use { output ->
-                        output.write(jsonString.toByteArray(Charsets.UTF_8))
+                    context.contentResolver.openOutputStream(uri, "wt")?.use { output ->
+                        val bytes = jsonString.toByteArray(Charsets.UTF_8)
+                        output.write(bytes)
+                        output.flush()
+                        (output as? java.io.FileOutputStream)?.fd?.sync()
                     }
                     Toast.makeText(context, "✅ Copia de seguridad guardada exitosamente", Toast.LENGTH_LONG).show()
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Error al guardar archivo: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error al guardar archivo: ${e.localizedMessage ?: e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    // Launcher para Importar Backup (Abrir Documento JSON)
+    // Launcher para Importar Backup (Lectura inmediata y segura de bytes)
     val importarBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            uriImportarPendiente = uri
+            try {
+                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                if (bytes == null || bytes.isEmpty()) {
+                    Toast.makeText(context, "El archivo seleccionado está vacío (0 bytes)", Toast.LENGTH_LONG).show()
+                    return@rememberLauncherForActivityResult
+                }
+                val text = String(bytes, Charsets.UTF_8).trim().removePrefix("\uFEFF").trim()
+                if (text.isEmpty()) {
+                    Toast.makeText(context, "El archivo no contiene texto legible", Toast.LENGTH_LONG).show()
+                    return@rememberLauncherForActivityResult
+                }
+                // Pre-validar JSON y contar elementos antes de mostrar confirmación
+                val (cuentas, ventas) = com.gestorcuentas.app.utils.BackupUtils.parsearBackup(text)
+                resumenImportarCuentas = cuentas.size
+                resumenImportarVentas = ventas.size
+                jsonImportarPendiente = text
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error al leer respaldo: ${e.localizedMessage ?: e.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -528,38 +551,29 @@ fun DashboardScreen(
         )
     }
 
-    // Diálogo de Confirmación para Importar Backup
-    uriImportarPendiente?.let { uri ->
+    // Diálogo de Confirmación para Importar Backup con detalle de elementos
+    jsonImportarPendiente?.let { jsonString ->
         AlertDialog(
-            onDismissRequest = { uriImportarPendiente = null },
+            onDismissRequest = { jsonImportarPendiente = null },
             shape = RoundedCornerShape(16.dp),
             title = { Text("¿Restaurar Copia de Seguridad?", fontWeight = FontWeight.Bold) },
-            text = { Text("Se importarán las cuentas y ventas del archivo seleccionado. Los datos actuales se reemplazarán por los del respaldo.") },
+            text = {
+                Text("Se importarán $resumenImportarCuentas cuentas y $resumenImportarVentas ventas. La base de datos actual se actualizará con estos datos.")
+            },
             confirmButton = {
                 Button(
                     onClick = {
-                        try {
-                            val jsonString = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-                            if (jsonString != null) {
-                                viewModel.restaurarBackup(
-                                    jsonString = jsonString,
-                                    onSuccess = { cuentasRest, ventasRest ->
-                                        Toast.makeText(context, "✅ Base de datos restaurada: $cuentasRest cuentas y $ventasRest ventas", Toast.LENGTH_LONG).show()
-                                        uriImportarPendiente = null
-                                    },
-                                    onError = { errorMsg ->
-                                        Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
-                                        uriImportarPendiente = null
-                                    }
-                                )
-                            } else {
-                                Toast.makeText(context, "El archivo está vacío", Toast.LENGTH_SHORT).show()
-                                uriImportarPendiente = null
+                        viewModel.restaurarBackup(
+                            jsonString = jsonString,
+                            onSuccess = { cuentasRest, ventasRest ->
+                                Toast.makeText(context, "✅ Base de datos restaurada: $cuentasRest cuentas y $ventasRest ventas", Toast.LENGTH_LONG).show()
+                                jsonImportarPendiente = null
+                            },
+                            onError = { errorMsg ->
+                                Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+                                jsonImportarPendiente = null
                             }
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                            uriImportarPendiente = null
-                        }
+                        )
                     },
                     shape = RoundedCornerShape(10.dp)
                 ) {
@@ -567,7 +581,7 @@ fun DashboardScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { uriImportarPendiente = null }) {
+                TextButton(onClick = { jsonImportarPendiente = null }) {
                     Text("Cancelar")
                 }
             }

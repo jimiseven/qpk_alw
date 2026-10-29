@@ -10,8 +10,8 @@ enum class AppThemeMode {
 }
 
 /**
- * Gestión de preferencias locales (Tema Claro/Oscuro y Bloqueo de Seguridad).
- * Persistencia local 100% offline sin necesidad de permisos extra.
+ * Gestión ultra-ligera de preferencias locales (Tema Claro/Oscuro y Bloqueo por PIN).
+ * 100% Offline, sin consumo de batería en segundo plano.
  */
 class AppPreferences(context: Context) {
     private val prefs: SharedPreferences =
@@ -33,8 +33,4 @@ class AppPreferences(context: Context) {
     var securityPin: String
         get() = prefs.getString("security_pin", "") ?: ""
         set(value) = prefs.edit().putString("security_pin", value).apply()
-
-    var useBiometrics: Boolean
-        get() = prefs.getBoolean("use_biometrics", true)
-        set(value) = prefs.edit().putBoolean("use_biometrics", value).apply()
 }

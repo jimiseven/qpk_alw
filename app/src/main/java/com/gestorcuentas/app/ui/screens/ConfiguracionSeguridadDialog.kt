@@ -1,16 +1,13 @@
 package com.gestorcuentas.app.ui.screens
 
 import android.widget.Toast
-import androidx.biometric.BiometricManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
@@ -38,16 +35,9 @@ fun ConfiguracionSeguridadDialog(
 
     var currentTheme by remember { mutableStateOf(preferences.themeMode) }
     var securityEnabled by remember { mutableStateOf(preferences.isSecurityEnabled) }
-    var useBiometrics by remember { mutableStateOf(preferences.useBiometrics) }
     var pinValue by remember { mutableStateOf(preferences.securityPin) }
     var mostrarEditorPin by remember { mutableStateOf(false) }
     var nuevoPin by remember { mutableStateOf("") }
-
-    val biometricManager = remember { BiometricManager.from(context) }
-    val deviceHasBiometrics = remember {
-        val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
-        biometricManager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
-    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -127,7 +117,7 @@ fun ConfiguracionSeguridadDialog(
                     }
                 }
 
-                // SECCIÓN 2: BLOQUEO POR PIN Y HUELLA
+                // SECCIÓN 2: BLOQUEO POR PIN (SOLO PIN)
                 Card(
                     shape = RoundedCornerShape(16.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
@@ -154,12 +144,12 @@ fun ConfiguracionSeguridadDialog(
                                 )
                                 Column {
                                     Text(
-                                        "Bloqueo de Seguridad",
+                                        "Bloqueo por PIN",
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        "Proteger con Huella / PIN",
+                                        "Al abrir la aplicación",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -189,7 +179,7 @@ fun ConfiguracionSeguridadDialog(
                             ) {
                                 Column {
                                     Text(
-                                        "PIN de Seguridad",
+                                        "Código de Seguridad",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium
                                     )
@@ -209,38 +199,6 @@ fun ConfiguracionSeguridadDialog(
                                     Text(if (pinValue.isBlank()) "Crear PIN" else "Cambiar")
                                 }
                             }
-
-                            // Switch Huella Dactilar
-                            if (deviceHasBiometrics) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Fingerprint,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            "Huella Dactilar",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    }
-                                    Switch(
-                                        checked = useBiometrics,
-                                        onCheckedChange = { checked ->
-                                            useBiometrics = checked
-                                            preferences.useBiometrics = checked
-                                        }
-                                    )
-                                }
-                            }
                         }
                     }
                 }
@@ -251,7 +209,7 @@ fun ConfiguracionSeguridadDialog(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Cerrar")
+                Text("Listo")
             }
         }
     )
@@ -272,7 +230,7 @@ fun ConfiguracionSeguridadDialog(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "Introduce un código numérico de 4 dígitos para desbloquear tu inventario:",
+                        "Introduce un código de 4 números para acceder a tu inventario:",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     OutlinedTextField(

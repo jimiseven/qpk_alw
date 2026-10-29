@@ -1,6 +1,7 @@
 package com.gestorcuentas.app
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
@@ -9,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
@@ -18,11 +18,10 @@ import com.gestorcuentas.app.ui.navigation.Screen
 import com.gestorcuentas.app.ui.screens.*
 import com.gestorcuentas.app.ui.theme.GestorCuentasTheme
 import com.gestorcuentas.app.utils.AppPreferences
-import com.gestorcuentas.app.utils.AppThemeMode
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 import com.gestorcuentas.app.viewmodel.InventarioViewModelFactory
 
-class MainActivity : FragmentActivity() {
+class MainActivity : ComponentActivity() {
 
     private val viewModel: InventarioViewModel by viewModels {
         val app = application as CuentasApp
@@ -30,6 +29,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private lateinit var preferences: AppPreferences
+    // Estado de desbloqueo: solo se solicita el PIN la primera vez al abrir la aplicación
     private val isUnlockedState = mutableStateOf(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,14 +67,6 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-
-    override fun onStop() {
-        super.onStop()
-        // Si el bloqueo está habilitado, bloquear al salir de la aplicación
-        if (::preferences.isInitialized && preferences.isSecurityEnabled) {
-            isUnlockedState.value = false
-        }
-    }
 }
 
 @Composable
@@ -106,7 +98,7 @@ fun MainAppContent(
         bottomBar = {
             if (shouldShowBottomBar) {
                 NavigationBar(
-                    tonalElevation = 6.dp
+                    tonalElevation = 4.dp
                 ) {
                     bottomNavItems.forEach { screen ->
                         val isSelected = currentRoute == screen.route

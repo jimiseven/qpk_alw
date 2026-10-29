@@ -7,7 +7,7 @@ import org.json.JSONObject
 
 /**
  * Utilidades para serialización y deserialización JSON de la base de datos completa.
- * Permite copias de seguridad 100% seguras y portables entre dispositivos.
+ * Permite copias de seguridad 100% seguras y portables entre versiones.
  */
 object BackupUtils {
 
@@ -16,7 +16,7 @@ object BackupUtils {
      */
     fun exportarAJson(cuentas: List<Cuenta>, ventas: List<Venta>): String {
         val root = JSONObject()
-        root.put("version", 1)
+        root.put("version", 2)
         root.put("fecha_exportacion", DateUtils.obtenerFechaHoy())
         root.put("total_cuentas", cuentas.size)
         root.put("total_ventas", ventas.size)
@@ -57,9 +57,18 @@ object BackupUtils {
 
     /**
      * Parsea un string JSON y extrae las listas de Cuenta y Venta.
+     * Totalmente tolerante a versiones antiguas, campos ausentes, espacios y UTF-8 BOM.
      */
     fun parsearBackup(jsonString: String): Pair<List<Cuenta>, List<Venta>> {
-        val root = JSONObject(jsonString)
+        val clean = jsonString.trim().removePrefix("\uFEFF").trim()
+        if (clean.isEmpty()) {
+            throw IllegalArgumentException("El archivo de respaldo está vacío (0 bytes).")
+        }
+        if (!clean.startsWith("{")) {
+            throw IllegalArgumentException("El archivo no tiene formato JSON válido.")
+        }
+
+        val root = JSONObject(clean)
         val cuentasList = mutableListOf<Cuenta>()
         val ventasList = mutableListOf<Venta>()
 
@@ -70,11 +79,11 @@ object BackupUtils {
                 cuentasList.add(
                     Cuenta(
                         id = c.optInt("id", 0),
-                        correo = c.getString("correo"),
+                        correo = c.optString("correo", ""),
                         contrasenaCorreo = c.optString("contrasena_correo", ""),
                         contrasenaPlataforma = c.optString("contrasena_plataforma", ""),
-                        tipoCuenta = c.getString("tipo_cuenta"),
-                        costoCompra = c.getDouble("costo_compra"),
+                        tipoCuenta = c.optString("tipo_cuenta", "Otros"),
+                        costoCompra = c.optDouble("costo_compra", 0.0),
                         fechaCreacion = c.optString("fecha_creacion", DateUtils.obtenerFechaHoy()),
                         fechaFin = c.optString("fecha_fin", ""),
                         estado = c.optString("estado", "activa")
@@ -90,13 +99,13 @@ object BackupUtils {
                 ventasList.add(
                     Venta(
                         id = v.optInt("id", 0),
-                        cuentaId = v.getInt("cuenta_id"),
-                        numeroCelularCliente = v.getString("numero_celular_cliente"),
+                        cuentaId = v.optInt("cuenta_id", 0),
+                        numeroCelularCliente = v.optString("numero_celular_cliente", ""),
                         cantidadPerfiles = v.optInt("cantidad_perfiles", 1),
-                        precioVentaPorPerfil = v.getDouble("precio_venta_por_perfil"),
-                        duracionDias = v.getInt("duracion_dias"),
-                        fechaInicio = v.getString("fecha_inicio"),
-                        fechaFin = v.getString("fecha_fin")
+                        precioVentaPorPerfil = v.optDouble("precio_venta_por_perfil", 0.0),
+                        duracionDias = v.optInt("duracion_dias", 30),
+                        fechaInicio = v.optString("fecha_inicio", DateUtils.obtenerFechaHoy()),
+                        fechaFin = v.optString("fecha_fin", "")
                     )
                 )
             }

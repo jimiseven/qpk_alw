@@ -9,6 +9,7 @@ import com.gestorcuentas.app.data.entity.Venta
 import com.gestorcuentas.app.data.entity.VentaConCuenta
 import com.gestorcuentas.app.repository.InventarioRepository
 import com.gestorcuentas.app.utils.DateUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,8 +17,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Resumen de indicadores financieros y de operación.
@@ -47,9 +50,7 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
 
     // Cuentas activas junto a sus ventas registradas (para listas con contador de ventas)
     val cuentasActivasConVentas: StateFlow<List<CuentaConVentas>> = cuentasConVentas
-        .combine(repository.cuentasActivas) { todasConVentas, _ ->
-            todasConVentas.filter { it.cuenta.estado.equals("activa", ignoreCase = true) }
-        }
+        .map { list -> list.filter { it.cuenta.estado.equals("activa", ignoreCase = true) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Ventas por vencer en los próximos 7 días
@@ -84,16 +85,6 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     // Estado para búsqueda de historial por celular
     private val _busquedaCelular = MutableStateFlow("")
     val busquedaCelular: StateFlow<String> = _busquedaCelular.asStateFlow()
-
-    val historialCliente: StateFlow<List<VentaConCuenta>> = _busquedaCelular
-        .flatMapLatest { celular ->
-            if (celular.isBlank()) {
-                repository.allVentasConCuenta
-            } else {
-                repository.getVentasPorCliente(celular)
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun actualizarBusquedaCelular(query: String) {
         _busquedaCelular.value = query
@@ -229,11 +220,13 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     // ==========================================
 
     fun exportarBackup(onResult: (String) -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val cuentas = repository.getAllCuentasSnapshot()
             val ventas = repository.getAllVentasSnapshot()
             val json = com.gestorcuentas.app.utils.BackupUtils.exportarAJson(cuentas, ventas)
-            onResult(json)
+            withContext(Dispatchers.Main) {
+                onResult(json)
+            }
         }
     }
 
@@ -242,13 +235,17 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
         onSuccess: (cuentasRestauradas: Int, ventasRestauradas: Int) -> Unit,
         onError: (String) -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val (cuentas, ventas) = com.gestorcuentas.app.utils.BackupUtils.parsearBackup(jsonString)
                 repository.restaurarBaseDeDatos(cuentas, ventas)
-                onSuccess(cuentas.size, ventas.size)
+                withContext(Dispatchers.Main) {
+                    onSuccess(cuentas.size, ventas.size)
+                }
             } catch (e: Exception) {
-                onError("Error al importar el archivo: ${e.localizedMessage ?: "Formato inválido"}")
+                withContext(Dispatchers.Main) {
+                    onError("Error al importar el archivo: ${e.localizedMessage ?: "Formato inválido"}")
+                }
             }
         }
     }
