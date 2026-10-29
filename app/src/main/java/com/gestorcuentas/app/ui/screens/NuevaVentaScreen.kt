@@ -1,5 +1,8 @@
 package com.gestorcuentas.app.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,19 +12,22 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.gestorcuentas.app.data.entity.Cuenta
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.utils.DateUtils
+import com.gestorcuentas.app.utils.MensajeEntregaUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +44,6 @@ fun NuevaVentaScreen(
         mutableStateOf(cuentasActivas.find { it.id == initialCuentaId })
     }
 
-    // Efecto para asignar la cuenta inicial una vez cargadas las cuentas
     LaunchedEffect(cuentasActivas, initialCuentaId) {
         if (selectedCuenta == null && initialCuentaId != null) {
             selectedCuenta = cuentasActivas.find { it.id == initialCuentaId }
@@ -55,6 +60,10 @@ fun NuevaVentaScreen(
 
     var expandedDropdown by remember { mutableStateOf(false) }
 
+    // Estado del diálogo con el mensaje de entrega generado
+    var mensajeEntregaGenerado by remember { mutableStateOf<String?>(null) }
+    var mostrarDialogoMensaje by remember { mutableStateOf(false) }
+
     // Cálculos en tiempo real
     val duracionDias = duracionDiasTexto.toIntOrNull() ?: 0
     val cantidadPerfiles = cantidadPerfilesTexto.toIntOrNull() ?: 0
@@ -64,7 +73,6 @@ fun NuevaVentaScreen(
         if (duracionDias > 0) DateUtils.calcularFechaFin(fechaInicio, duracionDias) else fechaInicio
     }
 
-    // Validación
     val formularioValido = selectedCuenta != null &&
             numeroCelular.isNotBlank() &&
             cantidadPerfiles > 0 &&
@@ -89,9 +97,9 @@ fun NuevaVentaScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // 1. Selector de Cuenta Maestra
             Text("1. Seleccionar Cuenta del Inventario", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
@@ -190,7 +198,6 @@ fun NuevaVentaScreen(
             // 4. Duración y Fecha de Vencimiento
             Text("4. Duración del Acceso", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
-            // Chips de acceso rápido para días comunes
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -235,7 +242,7 @@ fun NuevaVentaScreen(
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(14.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -249,7 +256,7 @@ fun NuevaVentaScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -279,8 +286,17 @@ fun NuevaVentaScreen(
                             duracionDias = duracionDias,
                             fechaInicio = fechaInicio,
                             onSuccess = {
-                                Toast.makeText(context, "Venta registrada con éxito", Toast.LENGTH_SHORT).show()
-                                onNavigateBack()
+                                // Generar mensaje formateado para el cliente
+                                val mensaje = MensajeEntregaUtils.generarMensaje(
+                                    tipoCuenta = cuenta.tipoCuenta,
+                                    duracionDias = duracionDias,
+                                    correo = cuenta.correo,
+                                    contrasenaPlataforma = cuenta.contrasenaPlataforma,
+                                    fechaInicio = fechaInicio,
+                                    fechaFin = fechaFinCalculada
+                                )
+                                mensajeEntregaGenerado = mensaje
+                                mostrarDialogoMensaje = true
                             }
                         )
                     }
@@ -296,5 +312,76 @@ fun NuevaVentaScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    // ==========================================
+    // DIÁLOGO CON EL MENSAJE GENERADO
+    // ==========================================
+    if (mostrarDialogoMensaje && mensajeEntregaGenerado != null) {
+        AlertDialog(
+            onDismissRequest = {
+                mostrarDialogoMensaje = false
+                onNavigateBack()
+            },
+            title = {
+                Text("¡Venta Registrada!", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 380.dp)
+                ) {
+                    Text(
+                        "Mensaje generado para el cliente:",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Text(
+                            text = mensajeEntregaGenerado!!,
+                            modifier = Modifier.padding(10.dp),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp
+                            )
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Datos Cuenta Cliente", mensajeEntregaGenerado)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "¡Mensaje copiado al portapapeles!", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Copiar Mensaje")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoMensaje = false
+                        onNavigateBack()
+                    }
+                ) {
+                    Text("Cerrar")
+                }
+            }
+        )
     }
 }

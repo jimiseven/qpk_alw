@@ -42,6 +42,19 @@ object DateUtils {
     }
 
     /**
+     * Formatea una fecha YYYY-MM-DD a formato legible (ej: 28 oct 2026).
+     */
+    fun formatearFechaLegible(fechaIso: String): String {
+        return try {
+            val date = LocalDate.parse(fechaIso, FORMATTER)
+            val monthNames = arrayOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
+            "${date.dayOfMonth} ${monthNames[date.monthValue - 1]} ${date.year}"
+        } catch (e: Exception) {
+            fechaIso
+        }
+    }
+
+    /**
      * Retorna la diferencia de días entre la fecha de hoy y la fecha_fin.
      * Número negativo significa que ya venció.
      * 0 significa que vence hoy.

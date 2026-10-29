@@ -25,6 +25,7 @@ import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.ui.theme.WarningAmber
 import com.gestorcuentas.app.utils.DateUtils
+import com.gestorcuentas.app.utils.MensajeEntregaUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +44,7 @@ fun HistorialClienteScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Historial de Clientes", fontWeight = FontWeight.Bold) },
+                title = { Text("Área de Clientes", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -56,7 +57,7 @@ fun HistorialClienteScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Buscador por número de celular
+            // Buscador por número de celular (Fijo en la parte superior)
             OutlinedTextField(
                 value = busquedaCelular,
                 onValueChange = { viewModel.actualizarBusquedaCelular(it) },
@@ -65,7 +66,7 @@ fun HistorialClienteScreen(
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 6.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 shape = RoundedCornerShape(12.dp)
@@ -75,14 +76,14 @@ fun HistorialClienteScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .padding(bottom = 6.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(12.dp),
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -116,11 +117,25 @@ fun HistorialClienteScreen(
                     items(historial, key = { it.venta.id }) { item ->
                         HistorialVentaCard(
                             item = item,
-                            onCopiar = { texto ->
-                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("Info Venta", texto)
-                                clipboard.setPrimaryClip(clip)
-                                Toast.makeText(context, "Copiado", Toast.LENGTH_SHORT).show()
+                            onCopiarMensaje = {
+                                val cuenta = item.cuenta
+                                val venta = item.venta
+                                if (cuenta != null) {
+                                    val mensaje = MensajeEntregaUtils.generarMensaje(
+                                        tipoCuenta = cuenta.tipoCuenta,
+                                        duracionDias = venta.duracionDias,
+                                        correo = cuenta.correo,
+                                        contrasenaPlataforma = cuenta.contrasenaPlataforma,
+                                        fechaInicio = venta.fechaInicio,
+                                        fechaFin = venta.fechaFin
+                                    )
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    val clip = ClipData.newPlainText("Datos Cuenta Cliente", mensaje)
+                                    clipboard.setPrimaryClip(clip)
+                                    Toast.makeText(context, "¡Mensaje de acceso copiado al portapapeles!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "No se encontraron datos de la cuenta", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         )
                     }
@@ -133,18 +148,17 @@ fun HistorialClienteScreen(
 @Composable
 fun HistorialVentaCard(
     item: VentaConCuenta,
-    onCopiar: (String) -> Unit
+    onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
     val cuenta = item.cuenta
-    val estado = DateUtils.obtenerEstadoVencimiento(venta.fechaFin)
     val dias = DateUtils.calcularDiasRestantes(venta.fechaFin)
 
-    val (badgeColor, badgeText) = when (estado) {
-        DateUtils.EstadoVencimiento.VENCIDA -> DangerRed to "Vencida"
-        DateUtils.EstadoVencimiento.VENCE_HOY -> WarningAmber to "¡Vence Hoy!"
-        DateUtils.EstadoVencimiento.POR_VENCER -> WarningAmber to "Vence en ${dias}d"
-        DateUtils.EstadoVencimiento.ACTIVA -> AccentGreen to "Activa (${dias}d)"
+    val (badgeColor, badgeText) = when {
+        dias < 0 -> DangerRed to "Vencida hace ${-dias}d"
+        dias == 0L -> WarningAmber to "¡Vence Hoy!"
+        dias in 1..3 -> WarningAmber to "$dias días disponibles"
+        else -> AccentGreen to "$dias días disponibles"
     }
 
     Card(
@@ -181,12 +195,12 @@ fun HistorialVentaCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text("Cliente: ${venta.numeroCelularCliente}", fontWeight = FontWeight.SemiBold)
+            Text("Cliente: ${venta.numeroCelularCliente}", fontWeight = FontWeight.Bold)
             if (cuenta != null) {
                 Text("Cuenta: ${cuenta.correo}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -199,10 +213,27 @@ fun HistorialVentaCard(
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "${venta.fechaInicio} al ${venta.fechaFin}",
+                    text = "${DateUtils.formatearFechaLegible(venta.fechaInicio)} al ${DateUtils.formatearFechaLegible(venta.fechaFin)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Botón explícito para copiar el mensaje al portapapeles
+            OutlinedButton(
+                onClick = onCopiarMensaje,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(
+                    Icons.Default.ContentCopy,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Copiar Mensaje para Cliente", style = MaterialTheme.typography.labelLarge)
             }
         }
     }

@@ -98,6 +98,9 @@ fun MainAppContent(viewModel: InventarioViewModel) {
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
                     viewModel = viewModel,
+                    onCuentaClick = { cuentaId ->
+                        navController.navigate(Screen.CuentaDetalle.createRoute(cuentaId))
+                    },
                     onNavigateToNuevaVenta = {
                         navController.navigate(Screen.NuevaVenta.createRoute())
                     },

@@ -267,7 +267,22 @@ fun CuentaDetalleScreen(
                     items(cuentaConVentas.ventas, key = { it.id }) { venta ->
                         VentaItemCard(
                             venta = venta,
-                            onEliminar = { viewModel.eliminarVenta(venta) }
+                            cuenta = cuenta,
+                            onEliminar = { viewModel.eliminarVenta(venta) },
+                            onCopiarMensaje = {
+                                val mensaje = com.gestorcuentas.app.utils.MensajeEntregaUtils.generarMensaje(
+                                    tipoCuenta = cuenta.tipoCuenta,
+                                    duracionDias = venta.duracionDias,
+                                    correo = cuenta.correo,
+                                    contrasenaPlataforma = cuenta.contrasenaPlataforma,
+                                    fechaInicio = venta.fechaInicio,
+                                    fechaFin = venta.fechaFin
+                                )
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("Datos Cuenta Cliente", mensaje)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "¡Mensaje de acceso copiado al portapapeles!", Toast.LENGTH_SHORT).show()
+                            }
                         )
                     }
                 }
@@ -308,7 +323,9 @@ fun CuentaDetalleScreen(
 @Composable
 fun VentaItemCard(
     venta: Venta,
-    onEliminar: () -> Unit
+    cuenta: com.gestorcuentas.app.data.entity.Cuenta,
+    onEliminar: () -> Unit,
+    onCopiarMensaje: () -> Unit
 ) {
     val estado = DateUtils.obtenerEstadoVencimiento(venta.fechaFin)
     val diasRestantes = DateUtils.calcularDiasRestantes(venta.fechaFin)
@@ -325,14 +342,16 @@ fun VentaItemCard(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(12.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         venta.numeroCelularCliente,
@@ -353,21 +372,26 @@ fun VentaItemCard(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "${venta.cantidadPerfiles} perfil/es • ${DateUtils.formatearMoneda(venta.precioVentaPorPerfil * venta.cantidadPerfiles)}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "Desde ${venta.fechaInicio} hasta ${venta.fechaFin} (${venta.duracionDias} días)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
 
-            IconButton(onClick = onEliminar) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = MaterialTheme.colorScheme.error)
+                Row {
+                    IconButton(onClick = onCopiarMensaje) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copiar Mensaje", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                    }
+                    IconButton(onClick = onEliminar) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+                    }
+                }
             }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${venta.cantidadPerfiles} perfil/es • ${DateUtils.formatearMoneda(venta.precioVentaPorPerfil * venta.cantidadPerfiles)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Desde ${DateUtils.formatearFechaLegible(venta.fechaInicio)} hasta ${DateUtils.formatearFechaLegible(venta.fechaFin)} (${venta.duracionDias} días)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
