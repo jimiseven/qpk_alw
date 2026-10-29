@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.gestorcuentas.app.data.entity.Cuenta
 import com.gestorcuentas.app.ui.theme.DangerRed
+import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
 @Composable
@@ -37,6 +38,13 @@ fun EditarCuentaDialog(
     var contrasenaPlataforma by remember { mutableStateOf(cuenta.contrasenaPlataforma) }
     var contrasenaCorreo by remember { mutableStateOf(cuenta.contrasenaCorreo) }
     var costoCompraTexto by remember { mutableStateOf(cuenta.costoCompra.toString()) }
+    var fechaInicio by remember { mutableStateOf(cuenta.fechaCreacion) }
+    var fechaFin by remember {
+        mutableStateOf(
+            if (cuenta.fechaFin.isNotBlank()) cuenta.fechaFin
+            else DateUtils.calcularFechaFin(cuenta.fechaCreacion, 30)
+        )
+    }
     var estado by remember { mutableStateOf(cuenta.estado) } // "activa" o "inhabilitada"
 
     val tipoCuentaFinal = if (opcionSeleccionada == "Otros") otroServicioTexto.trim() else opcionSeleccionada
@@ -45,6 +53,7 @@ fun EditarCuentaDialog(
     val formularioValido = tipoCuentaFinal.isNotBlank() &&
             correo.isNotBlank() &&
             contrasenaPlataforma.isNotBlank() &&
+            fechaInicio.isNotBlank() &&
             costoCompra >= 0.0
 
     AlertDialog(
@@ -121,6 +130,32 @@ fun EditarCuentaDialog(
                     shape = RoundedCornerShape(10.dp)
                 )
 
+                // Fechas de Inicio y Fin de la Cuenta Maestra
+                Text("Vigencia de la Cuenta (Proveedor)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = fechaInicio,
+                        onValueChange = { fechaInicio = it },
+                        label = { Text("Fecha Inicio") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = fechaFin,
+                        onValueChange = { fechaFin = it },
+                        label = { Text("Fecha Fin") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                }
+
                 // Estado de la cuenta: Activa vs Inhabilitada
                 Text("Estado de Disponibilidad", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
 
@@ -161,6 +196,8 @@ fun EditarCuentaDialog(
                                 contrasenaPlataforma = contrasenaPlataforma.trim(),
                                 contrasenaCorreo = contrasenaCorreo.trim(),
                                 costoCompra = costoCompra,
+                                fechaCreacion = fechaInicio.trim(),
+                                fechaFin = fechaFin.trim(),
                                 estado = estado
                             ),
                             onSuccess = {

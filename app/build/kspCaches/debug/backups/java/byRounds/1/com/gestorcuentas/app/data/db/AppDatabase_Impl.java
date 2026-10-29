@@ -34,15 +34,15 @@ public final class AppDatabase_Impl extends AppDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(1) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS `cuentas` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `correo` TEXT NOT NULL, `contrasena_correo` TEXT NOT NULL, `contrasena_plataforma` TEXT NOT NULL, `tipo_cuenta` TEXT NOT NULL, `costo_compra` REAL NOT NULL, `fecha_creacion` TEXT NOT NULL, `estado` TEXT NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `cuentas` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `correo` TEXT NOT NULL, `contrasena_correo` TEXT NOT NULL, `contrasena_plataforma` TEXT NOT NULL, `tipo_cuenta` TEXT NOT NULL, `costo_compra` REAL NOT NULL, `fecha_creacion` TEXT NOT NULL, `fecha_fin` TEXT NOT NULL DEFAULT '', `estado` TEXT NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `ventas` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cuenta_id` INTEGER NOT NULL, `numero_celular_cliente` TEXT NOT NULL, `cantidad_perfiles` INTEGER NOT NULL, `precio_venta_por_perfil` REAL NOT NULL, `duracion_dias` INTEGER NOT NULL, `fecha_inicio` TEXT NOT NULL, `fecha_fin` TEXT NOT NULL, FOREIGN KEY(`cuenta_id`) REFERENCES `cuentas`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_ventas_cuenta_id` ON `ventas` (`cuenta_id`)");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_ventas_numero_celular_cliente` ON `ventas` (`numero_celular_cliente`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b172bde8f5470867fc2a3680c2d45035')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2584af6d3a3214e442689ec56aa39275')");
       }
 
       @Override
@@ -93,7 +93,7 @@ public final class AppDatabase_Impl extends AppDatabase {
       @NonNull
       public RoomOpenHelper.ValidationResult onValidateSchema(
           @NonNull final SupportSQLiteDatabase db) {
-        final HashMap<String, TableInfo.Column> _columnsCuentas = new HashMap<String, TableInfo.Column>(8);
+        final HashMap<String, TableInfo.Column> _columnsCuentas = new HashMap<String, TableInfo.Column>(9);
         _columnsCuentas.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCuentas.put("correo", new TableInfo.Column("correo", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCuentas.put("contrasena_correo", new TableInfo.Column("contrasena_correo", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -101,6 +101,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsCuentas.put("tipo_cuenta", new TableInfo.Column("tipo_cuenta", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCuentas.put("costo_compra", new TableInfo.Column("costo_compra", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsCuentas.put("fecha_creacion", new TableInfo.Column("fecha_creacion", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsCuentas.put("fecha_fin", new TableInfo.Column("fecha_fin", "TEXT", true, 0, "''", TableInfo.CREATED_FROM_ENTITY));
         _columnsCuentas.put("estado", new TableInfo.Column("estado", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysCuentas = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesCuentas = new HashSet<TableInfo.Index>(0);
@@ -134,7 +135,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "b172bde8f5470867fc2a3680c2d45035", "59bfb595bc5b4d88c5f4c2c593fe844d");
+    }, "2584af6d3a3214e442689ec56aa39275", "1f741fd8272c18dd54eed84ccbdc3d93");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

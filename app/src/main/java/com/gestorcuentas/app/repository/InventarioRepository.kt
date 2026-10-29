@@ -57,6 +57,7 @@ class InventarioRepository(private val dao: InventarioDao) {
     suspend fun insertCuenta(cuenta: Cuenta): Long = dao.insertCuenta(cuenta)
     suspend fun updateCuenta(cuenta: Cuenta) = dao.updateCuenta(cuenta)
     suspend fun deleteCuenta(cuenta: Cuenta) = dao.deleteCuenta(cuenta)
+    suspend fun eliminarCuentaConVentas(cuentaId: Int) = dao.eliminarCuentaConVentas(cuentaId)
 
     // Operaciones de escritura para Ventas
     suspend fun insertVenta(venta: Venta): Long = dao.insertVenta(venta)

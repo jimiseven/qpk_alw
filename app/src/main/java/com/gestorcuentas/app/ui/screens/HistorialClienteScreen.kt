@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -40,9 +41,10 @@ fun HistorialClienteScreen(
     val context = LocalContext.current
 
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
+    var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
 
     val totalRecaudadoCliente = remember(historial) {
-        historial.sumOf { it.venta.cantidadPerfiles * it.venta.precioVentaPorPerfil }
+        historial.sumOf { it.venta.precioVentaPorPerfil }
     }
 
     Scaffold(
@@ -124,6 +126,9 @@ fun HistorialClienteScreen(
                             onEditarVenta = {
                                 ventaAEditar = item.venta
                             },
+                            onEliminarVenta = {
+                                ventaAEliminar = item.venta
+                            },
                             onCopiarMensaje = {
                                 val cuenta = item.cuenta
                                 val venta = item.venta
@@ -159,12 +164,40 @@ fun HistorialClienteScreen(
             onDismiss = { ventaAEditar = null }
         )
     }
+
+    // Diálogo de confirmación para eliminar venta
+    ventaAEliminar?.let { venta ->
+        AlertDialog(
+            onDismissRequest = { ventaAEliminar = null },
+            title = { Text("¿Eliminar Venta?") },
+            text = { Text("Se eliminará la venta registrada para el cliente ${venta.numeroCelularCliente}. Esta acción no se puede deshacer.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.eliminarVenta(venta) {
+                            Toast.makeText(context, "Venta eliminada", Toast.LENGTH_SHORT).show()
+                            ventaAEliminar = null
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { ventaAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun HistorialVentaCard(
     item: VentaConCuenta,
     onEditarVenta: () -> Unit,
+    onEliminarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
@@ -225,9 +258,10 @@ fun HistorialVentaCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${venta.cantidadPerfiles} perfil/es • ${DateUtils.formatearMoneda(item.totalVenta)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
+                    text = DateUtils.formatearMoneda(venta.precioVentaPorPerfil),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = AccentGreen
                 )
                 Text(
                     text = "${DateUtils.formatearFechaLegible(venta.fechaInicio)} al ${DateUtils.formatearFechaLegible(venta.fechaFin)}",
@@ -238,29 +272,35 @@ fun HistorialVentaCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Botones de acción: Editar y Copiar Mensaje
+            // Botones de acción: Copiar Mensaje, Editar y Eliminar
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
-                    onClick = onEditarVenta,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Editar", style = MaterialTheme.typography.labelMedium)
-                }
-
                 Button(
                     onClick = onCopiarMensaje,
-                    modifier = Modifier.weight(2f),
+                    modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Copiar Mensaje", style = MaterialTheme.typography.labelMedium)
+                }
+
+                OutlinedButton(
+                    onClick = onEditarVenta,
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "Editar", modifier = Modifier.size(16.dp))
+                }
+
+                IconButton(
+                    onClick = onEliminarVenta,
+                    modifier = Modifier.size(38.dp)
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = DangerRed, modifier = Modifier.size(18.dp))
                 }
             }
         }

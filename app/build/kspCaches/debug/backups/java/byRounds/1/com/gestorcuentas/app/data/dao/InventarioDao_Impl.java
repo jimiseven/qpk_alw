@@ -55,6 +55,10 @@ public final class InventarioDao_Impl implements InventarioDao {
 
   private final EntityDeletionOrUpdateAdapter<Venta> __updateAdapterOfVenta;
 
+  private final SharedSQLiteStatement __preparedStmtOfDeleteCuentaById;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteVentasByCuentaId;
+
   private final SharedSQLiteStatement __preparedStmtOfDeleteAllVentas;
 
   private final SharedSQLiteStatement __preparedStmtOfDeleteAllCuentas;
@@ -65,7 +69,7 @@ public final class InventarioDao_Impl implements InventarioDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `cuentas` (`id`,`correo`,`contrasena_correo`,`contrasena_plataforma`,`tipo_cuenta`,`costo_compra`,`fecha_creacion`,`estado`) VALUES (nullif(?, 0),?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `cuentas` (`id`,`correo`,`contrasena_correo`,`contrasena_plataforma`,`tipo_cuenta`,`costo_compra`,`fecha_creacion`,`fecha_fin`,`estado`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -78,7 +82,8 @@ public final class InventarioDao_Impl implements InventarioDao {
         statement.bindString(5, entity.getTipoCuenta());
         statement.bindDouble(6, entity.getCostoCompra());
         statement.bindString(7, entity.getFechaCreacion());
-        statement.bindString(8, entity.getEstado());
+        statement.bindString(8, entity.getFechaFin());
+        statement.bindString(9, entity.getEstado());
       }
     };
     this.__insertionAdapterOfVenta = new EntityInsertionAdapter<Venta>(__db) {
@@ -131,7 +136,7 @@ public final class InventarioDao_Impl implements InventarioDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE OR ABORT `cuentas` SET `id` = ?,`correo` = ?,`contrasena_correo` = ?,`contrasena_plataforma` = ?,`tipo_cuenta` = ?,`costo_compra` = ?,`fecha_creacion` = ?,`estado` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `cuentas` SET `id` = ?,`correo` = ?,`contrasena_correo` = ?,`contrasena_plataforma` = ?,`tipo_cuenta` = ?,`costo_compra` = ?,`fecha_creacion` = ?,`fecha_fin` = ?,`estado` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -144,8 +149,9 @@ public final class InventarioDao_Impl implements InventarioDao {
         statement.bindString(5, entity.getTipoCuenta());
         statement.bindDouble(6, entity.getCostoCompra());
         statement.bindString(7, entity.getFechaCreacion());
-        statement.bindString(8, entity.getEstado());
-        statement.bindLong(9, entity.getId());
+        statement.bindString(8, entity.getFechaFin());
+        statement.bindString(9, entity.getEstado());
+        statement.bindLong(10, entity.getId());
       }
     };
     this.__updateAdapterOfVenta = new EntityDeletionOrUpdateAdapter<Venta>(__db) {
@@ -167,6 +173,22 @@ public final class InventarioDao_Impl implements InventarioDao {
         statement.bindString(7, entity.getFechaInicio());
         statement.bindString(8, entity.getFechaFin());
         statement.bindLong(9, entity.getId());
+      }
+    };
+    this.__preparedStmtOfDeleteCuentaById = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM cuentas WHERE id = ?";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfDeleteVentasByCuentaId = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM ventas WHERE cuenta_id = ?";
+        return _query;
       }
     };
     this.__preparedStmtOfDeleteAllVentas = new SharedSQLiteStatement(__db) {
@@ -334,9 +356,66 @@ public final class InventarioDao_Impl implements InventarioDao {
   }
 
   @Override
+  public Object eliminarCuentaConVentas(final int cuentaId,
+      final Continuation<? super Unit> $completion) {
+    return RoomDatabaseKt.withTransaction(__db, (__cont) -> InventarioDao.DefaultImpls.eliminarCuentaConVentas(InventarioDao_Impl.this, cuentaId, __cont), $completion);
+  }
+
+  @Override
   public Object restaurarBaseDeDatos(final List<Cuenta> cuentas, final List<Venta> ventas,
       final Continuation<? super Unit> $completion) {
     return RoomDatabaseKt.withTransaction(__db, (__cont) -> InventarioDao.DefaultImpls.restaurarBaseDeDatos(InventarioDao_Impl.this, cuentas, ventas, __cont), $completion);
+  }
+
+  @Override
+  public Object deleteCuentaById(final int cuentaId, final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteCuentaById.acquire();
+        int _argIndex = 1;
+        _stmt.bindLong(_argIndex, cuentaId);
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteCuentaById.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteVentasByCuentaId(final int cuentaId,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteVentasByCuentaId.acquire();
+        int _argIndex = 1;
+        _stmt.bindLong(_argIndex, cuentaId);
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteVentasByCuentaId.release(_stmt);
+        }
+      }
+    }, $completion);
   }
 
   @Override
@@ -402,6 +481,7 @@ public final class InventarioDao_Impl implements InventarioDao {
           final int _cursorIndexOfTipoCuenta = CursorUtil.getColumnIndexOrThrow(_cursor, "tipo_cuenta");
           final int _cursorIndexOfCostoCompra = CursorUtil.getColumnIndexOrThrow(_cursor, "costo_compra");
           final int _cursorIndexOfFechaCreacion = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_creacion");
+          final int _cursorIndexOfFechaFin = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_fin");
           final int _cursorIndexOfEstado = CursorUtil.getColumnIndexOrThrow(_cursor, "estado");
           final List<Cuenta> _result = new ArrayList<Cuenta>(_cursor.getCount());
           while (_cursor.moveToNext()) {
@@ -420,9 +500,11 @@ public final class InventarioDao_Impl implements InventarioDao {
             _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
             final String _tmpFechaCreacion;
             _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+            final String _tmpFechaFin;
+            _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
             final String _tmpEstado;
             _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
-            _item = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+            _item = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpFechaFin,_tmpEstado);
             _result.add(_item);
           }
           return _result;
@@ -457,6 +539,7 @@ public final class InventarioDao_Impl implements InventarioDao {
           final int _cursorIndexOfTipoCuenta = CursorUtil.getColumnIndexOrThrow(_cursor, "tipo_cuenta");
           final int _cursorIndexOfCostoCompra = CursorUtil.getColumnIndexOrThrow(_cursor, "costo_compra");
           final int _cursorIndexOfFechaCreacion = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_creacion");
+          final int _cursorIndexOfFechaFin = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_fin");
           final int _cursorIndexOfEstado = CursorUtil.getColumnIndexOrThrow(_cursor, "estado");
           final Cuenta _result;
           if (_cursor.moveToFirst()) {
@@ -474,9 +557,11 @@ public final class InventarioDao_Impl implements InventarioDao {
             _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
             final String _tmpFechaCreacion;
             _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+            final String _tmpFechaFin;
+            _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
             final String _tmpEstado;
             _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
-            _result = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+            _result = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpFechaFin,_tmpEstado);
           } else {
             _result = null;
           }
@@ -510,6 +595,7 @@ public final class InventarioDao_Impl implements InventarioDao {
           final int _cursorIndexOfTipoCuenta = CursorUtil.getColumnIndexOrThrow(_cursor, "tipo_cuenta");
           final int _cursorIndexOfCostoCompra = CursorUtil.getColumnIndexOrThrow(_cursor, "costo_compra");
           final int _cursorIndexOfFechaCreacion = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_creacion");
+          final int _cursorIndexOfFechaFin = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_fin");
           final int _cursorIndexOfEstado = CursorUtil.getColumnIndexOrThrow(_cursor, "estado");
           final List<Cuenta> _result = new ArrayList<Cuenta>(_cursor.getCount());
           while (_cursor.moveToNext()) {
@@ -528,9 +614,11 @@ public final class InventarioDao_Impl implements InventarioDao {
             _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
             final String _tmpFechaCreacion;
             _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+            final String _tmpFechaFin;
+            _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
             final String _tmpEstado;
             _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
-            _item = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+            _item = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpFechaFin,_tmpEstado);
             _result.add(_item);
           }
           return _result;
@@ -564,6 +652,7 @@ public final class InventarioDao_Impl implements InventarioDao {
           final int _cursorIndexOfTipoCuenta = CursorUtil.getColumnIndexOrThrow(_cursor, "tipo_cuenta");
           final int _cursorIndexOfCostoCompra = CursorUtil.getColumnIndexOrThrow(_cursor, "costo_compra");
           final int _cursorIndexOfFechaCreacion = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_creacion");
+          final int _cursorIndexOfFechaFin = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_fin");
           final int _cursorIndexOfEstado = CursorUtil.getColumnIndexOrThrow(_cursor, "estado");
           final List<Cuenta> _result = new ArrayList<Cuenta>(_cursor.getCount());
           while (_cursor.moveToNext()) {
@@ -582,9 +671,11 @@ public final class InventarioDao_Impl implements InventarioDao {
             _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
             final String _tmpFechaCreacion;
             _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+            final String _tmpFechaFin;
+            _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
             final String _tmpEstado;
             _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
-            _item = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+            _item = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpFechaFin,_tmpEstado);
             _result.add(_item);
           }
           return _result;
@@ -941,6 +1032,7 @@ public final class InventarioDao_Impl implements InventarioDao {
             final int _cursorIndexOfTipoCuenta = CursorUtil.getColumnIndexOrThrow(_cursor, "tipo_cuenta");
             final int _cursorIndexOfCostoCompra = CursorUtil.getColumnIndexOrThrow(_cursor, "costo_compra");
             final int _cursorIndexOfFechaCreacion = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_creacion");
+            final int _cursorIndexOfFechaFin = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_fin");
             final int _cursorIndexOfEstado = CursorUtil.getColumnIndexOrThrow(_cursor, "estado");
             final LongSparseArray<ArrayList<Venta>> _collectionVentas = new LongSparseArray<ArrayList<Venta>>();
             while (_cursor.moveToNext()) {
@@ -970,9 +1062,11 @@ public final class InventarioDao_Impl implements InventarioDao {
               _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
               final String _tmpFechaCreacion;
               _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+              final String _tmpFechaFin;
+              _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
               final String _tmpEstado;
               _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
-              _tmpCuenta = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+              _tmpCuenta = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpFechaFin,_tmpEstado);
               final ArrayList<Venta> _tmpVentasCollection;
               final long _tmpKey_1;
               _tmpKey_1 = _cursor.getLong(_cursorIndexOfId);
@@ -1019,6 +1113,7 @@ public final class InventarioDao_Impl implements InventarioDao {
             final int _cursorIndexOfTipoCuenta = CursorUtil.getColumnIndexOrThrow(_cursor, "tipo_cuenta");
             final int _cursorIndexOfCostoCompra = CursorUtil.getColumnIndexOrThrow(_cursor, "costo_compra");
             final int _cursorIndexOfFechaCreacion = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_creacion");
+            final int _cursorIndexOfFechaFin = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_fin");
             final int _cursorIndexOfEstado = CursorUtil.getColumnIndexOrThrow(_cursor, "estado");
             final LongSparseArray<ArrayList<Venta>> _collectionVentas = new LongSparseArray<ArrayList<Venta>>();
             while (_cursor.moveToNext()) {
@@ -1047,9 +1142,11 @@ public final class InventarioDao_Impl implements InventarioDao {
               _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
               final String _tmpFechaCreacion;
               _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+              final String _tmpFechaFin;
+              _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
               final String _tmpEstado;
               _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
-              _tmpCuenta = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+              _tmpCuenta = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpFechaFin,_tmpEstado);
               final ArrayList<Venta> _tmpVentasCollection;
               final long _tmpKey_1;
               _tmpKey_1 = _cursor.getLong(_cursorIndexOfId);
@@ -1393,7 +1490,7 @@ public final class InventarioDao_Impl implements InventarioDao {
       return;
     }
     final StringBuilder _stringBuilder = StringUtil.newStringBuilder();
-    _stringBuilder.append("SELECT `id`,`correo`,`contrasena_correo`,`contrasena_plataforma`,`tipo_cuenta`,`costo_compra`,`fecha_creacion`,`estado` FROM `cuentas` WHERE `id` IN (");
+    _stringBuilder.append("SELECT `id`,`correo`,`contrasena_correo`,`contrasena_plataforma`,`tipo_cuenta`,`costo_compra`,`fecha_creacion`,`fecha_fin`,`estado` FROM `cuentas` WHERE `id` IN (");
     final int _inputSize = _map.size();
     StringUtil.appendPlaceholders(_stringBuilder, _inputSize);
     _stringBuilder.append(")");
@@ -1419,7 +1516,8 @@ public final class InventarioDao_Impl implements InventarioDao {
       final int _cursorIndexOfTipoCuenta = 4;
       final int _cursorIndexOfCostoCompra = 5;
       final int _cursorIndexOfFechaCreacion = 6;
-      final int _cursorIndexOfEstado = 7;
+      final int _cursorIndexOfFechaFin = 7;
+      final int _cursorIndexOfEstado = 8;
       while (_cursor.moveToNext()) {
         final long _tmpKey;
         _tmpKey = _cursor.getLong(_itemKeyIndex);
@@ -1439,9 +1537,11 @@ public final class InventarioDao_Impl implements InventarioDao {
           _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
           final String _tmpFechaCreacion;
           _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+          final String _tmpFechaFin;
+          _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
           final String _tmpEstado;
           _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
-          _item_1 = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+          _item_1 = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpFechaFin,_tmpEstado);
           _map.put(_tmpKey, _item_1);
         }
       }

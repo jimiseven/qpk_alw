@@ -31,6 +31,7 @@ object BackupUtils {
             obj.put("tipo_cuenta", c.tipoCuenta)
             obj.put("costo_compra", c.costoCompra)
             obj.put("fecha_creacion", c.fechaCreacion)
+            obj.put("fecha_fin", c.fechaFin)
             obj.put("estado", c.estado)
             cuentasArray.put(obj)
         }
@@ -75,6 +76,7 @@ object BackupUtils {
                         tipoCuenta = c.getString("tipo_cuenta"),
                         costoCompra = c.getDouble("costo_compra"),
                         fechaCreacion = c.optString("fecha_creacion", DateUtils.obtenerFechaHoy()),
+                        fechaFin = c.optString("fecha_fin", ""),
                         estado = c.optString("estado", "activa")
                     )
                 )

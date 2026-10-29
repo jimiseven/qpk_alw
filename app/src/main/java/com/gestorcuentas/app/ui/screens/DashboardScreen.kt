@@ -16,12 +16,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,8 +62,12 @@ fun DashboardScreen(
     // Estado de la Card seleccionada: Por defecto "Cuentas Activas"
     var selectedTab by remember { mutableStateOf(DashboardTab.CUENTAS_ACTIVAS) }
 
-    // Estado para edición de venta
+    // Estados para edición y eliminación de venta
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
+    var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
+
+    // Diálogo de Estadísticas
+    var mostrarEstadisticas by remember { mutableStateOf(false) }
 
     // Menú de Backup
     var menuBackupExpandido by remember { mutableStateOf(false) }
@@ -113,6 +118,11 @@ fun DashboardScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
+                    // Botón de Estadísticas (al lado del icono de Backup)
+                    IconButton(onClick = { mostrarEstadisticas = true }) {
+                        Icon(Icons.Default.BarChart, contentDescription = "Estadísticas del Negocio")
+                    }
+
                     // Botón de Backup / Restaurar
                     Box {
                         IconButton(onClick = { menuBackupExpandido = true }) {
@@ -337,7 +347,7 @@ fun DashboardScreen(
                         }
                     }
                 } else {
-                    // Vista B: Todas las Ventas con sus DÍAS DISPONIBLES, editar y copiar mensaje
+                    // Vista B: Todas las Ventas con sus DÍAS DISPONIBLES, editar, eliminar y copiar mensaje
                     if (allVentasConCuenta.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
@@ -357,6 +367,9 @@ fun DashboardScreen(
                                     item = item,
                                     onEditarVenta = {
                                         ventaAEditar = item.venta
+                                    },
+                                    onEliminarVenta = {
+                                        ventaAEliminar = item.venta
                                     },
                                     onCopiarMensaje = {
                                         val cuenta = item.cuenta
@@ -387,12 +400,47 @@ fun DashboardScreen(
         }
     }
 
+    // Diálogo para Visualizar Estadísticas del Negocio (Por Mes o Rango de Fechas)
+    if (mostrarEstadisticas) {
+        EstadisticasDialog(
+            viewModel = viewModel,
+            onDismiss = { mostrarEstadisticas = false }
+        )
+    }
+
     // Diálogo para Editar Venta
     ventaAEditar?.let { venta ->
         EditarVentaDialog(
             venta = venta,
             viewModel = viewModel,
             onDismiss = { ventaAEditar = null }
+        )
+    }
+
+    // Diálogo de Confirmación para Eliminar Venta
+    ventaAEliminar?.let { venta ->
+        AlertDialog(
+            onDismissRequest = { ventaAEliminar = null },
+            title = { Text("¿Eliminar Venta?") },
+            text = { Text("Se eliminará la venta registrada para el cliente ${venta.numeroCelularCliente}. Esta acción no se puede deshacer.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.eliminarVenta(venta) {
+                            Toast.makeText(context, "Venta eliminada", Toast.LENGTH_SHORT).show()
+                            ventaAEliminar = null
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { ventaAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 
@@ -451,7 +499,6 @@ fun CuentaActivaItem(
 ) {
     val cuenta = item.cuenta
     val totalVentas = item.ventas.size
-    val totalPerfiles = item.perfilesVendidosTotales
     val esRentable = item.esRentable
     val ganancia = item.gananciaNeta
 
@@ -485,7 +532,7 @@ fun CuentaActivaItem(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                 ) {
                     Text(
-                        text = if (totalVentas == 1) "1 venta ($totalPerfiles perfil)" else "$totalVentas ventas ($totalPerfiles perfiles)",
+                        text = if (totalVentas == 1) "1 venta" else "$totalVentas ventas",
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         style = MaterialTheme.typography.labelSmall,
@@ -519,12 +566,13 @@ fun CuentaActivaItem(
 }
 
 /**
- * Item de la lista de Todas las Ventas con DÍAS DISPONIBLES, botón editar y botón para copiar mensaje
+ * Item de la lista de Todas las Ventas con DÍAS DISPONIBLES, botón editar, botón eliminar y botón para copiar mensaje
  */
 @Composable
 fun VentaConDiasItem(
     item: VentaConCuenta,
     onEditarVenta: () -> Unit,
+    onEliminarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
@@ -589,13 +637,27 @@ fun VentaConDiasItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        "${venta.cantidadPerfiles} perfil/es • ${DateUtils.formatearMoneda(item.totalVenta)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
+                        DateUtils.formatearMoneda(venta.precioVentaPorPerfil),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = AccentGreen
                     )
                 }
 
                 Row {
+                    // Botón Copiar Mensaje Cliente
+                    FilledTonalIconButton(
+                        onClick = onCopiarMensaje,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = "Copiar Mensaje",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
                     // Botón Editar Venta
                     IconButton(
                         onClick = onEditarVenta,
@@ -608,15 +670,15 @@ fun VentaConDiasItem(
                         )
                     }
 
-                    // Botón Copiar Mensaje Cliente
-                    FilledTonalIconButton(
-                        onClick = onCopiarMensaje,
+                    // Botón Eliminar Venta
+                    IconButton(
+                        onClick = onEliminarVenta,
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
-                            Icons.Default.ContentCopy,
-                            contentDescription = "Copiar Mensaje",
-                            tint = MaterialTheme.colorScheme.primary,
+                            Icons.Default.Delete,
+                            contentDescription = "Eliminar Venta",
+                            tint = DangerRed,
                             modifier = Modifier.size(18.dp)
                         )
                     }

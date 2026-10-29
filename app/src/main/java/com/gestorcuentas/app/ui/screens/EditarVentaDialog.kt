@@ -27,27 +27,30 @@ fun EditarVentaDialog(
     val context = LocalContext.current
 
     var numeroCelular by remember { mutableStateOf(venta.numeroCelularCliente) }
-    var cantidadPerfilesTexto by remember { mutableStateOf(venta.cantidadPerfiles.toString()) }
-    var precioPorPerfilTexto by remember { mutableStateOf(venta.precioVentaPorPerfil.toString()) }
+    var precioVentaTexto by remember { mutableStateOf(venta.precioVentaPorPerfil.toString()) }
     var duracionDiasTexto by remember { mutableStateOf(venta.duracionDias.toString()) }
     var fechaInicio by remember { mutableStateOf(venta.fechaInicio) }
+    var fechaFin by remember { mutableStateOf(venta.fechaFin) }
 
     val duracionDias = duracionDiasTexto.toIntOrNull() ?: 0
-    val cantidadPerfiles = cantidadPerfilesTexto.toIntOrNull() ?: 0
-    val precioPorPerfil = precioPorPerfilTexto.toDoubleOrNull() ?: 0.0
-    val totalCobro = cantidadPerfiles * precioPorPerfil
-    val fechaFinCalculada = remember(fechaInicio, duracionDias) {
-        if (duracionDias > 0) DateUtils.calcularFechaFin(fechaInicio, duracionDias) else fechaInicio
+    val precioVenta = precioVentaTexto.toDoubleOrNull() ?: 0.0
+
+    // Si cambia los días o fecha de inicio, sugerir actualización de fecha fin
+    LaunchedEffect(duracionDias, fechaInicio) {
+        if (duracionDias > 0) {
+            fechaFin = DateUtils.calcularFechaFin(fechaInicio, duracionDias)
+        }
     }
 
     val formularioValido = numeroCelular.isNotBlank() &&
-            cantidadPerfiles > 0 &&
-            precioPorPerfil > 0.0 &&
-            duracionDias > 0
+            precioVenta > 0.0 &&
+            duracionDias > 0 &&
+            fechaInicio.isNotBlank() &&
+            fechaFin.isNotBlank()
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Editar Venta", fontWeight = FontWeight.Bold) },
+        title = { Text("Editar Venta de Perfil", fontWeight = FontWeight.Bold) },
         text = {
             Column(
                 modifier = Modifier
@@ -65,51 +68,47 @@ fun EditarVentaDialog(
                     shape = RoundedCornerShape(10.dp)
                 )
 
+                OutlinedTextField(
+                    value = precioVentaTexto,
+                    onValueChange = { precioVentaTexto = it },
+                    label = { Text("Precio de Venta ($)") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = duracionDiasTexto,
+                    onValueChange = { duracionDiasTexto = it },
+                    label = { Text("Duración en Días") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                Text("Fechas de Vigencia", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = cantidadPerfilesTexto,
-                        onValueChange = { cantidadPerfilesTexto = it },
-                        label = { Text("Perfiles") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = precioPorPerfilTexto,
-                        onValueChange = { precioPorPerfilTexto = it },
-                        label = { Text("Precio c/u ($)") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = duracionDiasTexto,
-                        onValueChange = { duracionDiasTexto = it },
-                        label = { Text("Días") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
                     OutlinedTextField(
                         value = fechaInicio,
                         onValueChange = { fechaInicio = it },
                         label = { Text("Fecha Inicio") },
-                        modifier = Modifier.weight(1f),
                         singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = fechaFin,
+                        onValueChange = { fechaFin = it },
+                        label = { Text("Fecha Fin") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp)
                     )
                 }
@@ -119,8 +118,8 @@ fun EditarVentaDialog(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Column(modifier = Modifier.padding(10.dp)) {
-                        Text("Nueva fecha fin: $fechaFinCalculada", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                        Text("Nuevo cobro: ${DateUtils.formatearMoneda(totalCobro)}", style = MaterialTheme.typography.bodySmall, color = AccentGreen, fontWeight = FontWeight.Bold)
+                        Text("Vigencia calculada: $fechaInicio al $fechaFin", style = MaterialTheme.typography.bodySmall)
+                        Text("Total a cobrar: ${DateUtils.formatearMoneda(precioVenta)}", style = MaterialTheme.typography.bodySmall, color = AccentGreen, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -133,12 +132,12 @@ fun EditarVentaDialog(
                             ventaId = venta.id,
                             cuentaId = venta.cuentaId,
                             numeroCelularCliente = numeroCelular,
-                            cantidadPerfiles = cantidadPerfiles,
-                            precioVentaPorPerfil = precioPorPerfil,
+                            cantidadPerfiles = 1, // Siempre 1 perfil
+                            precioVentaPorPerfil = precioVenta,
                             duracionDias = duracionDias,
                             fechaInicio = fechaInicio,
                             onSuccess = {
-                                Toast.makeText(context, "Venta actualizada", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Venta actualizada correctamente", Toast.LENGTH_SHORT).show()
                                 onDismiss()
                             }
                         )

@@ -33,6 +33,18 @@ interface InventarioDao {
     @Delete
     suspend fun deleteCuenta(cuenta: Cuenta)
 
+    @Query("DELETE FROM cuentas WHERE id = :cuentaId")
+    suspend fun deleteCuentaById(cuentaId: Int)
+
+    @Query("DELETE FROM ventas WHERE cuenta_id = :cuentaId")
+    suspend fun deleteVentasByCuentaId(cuentaId: Int)
+
+    @Transaction
+    suspend fun eliminarCuentaConVentas(cuentaId: Int) {
+        deleteVentasByCuentaId(cuentaId)
+        deleteCuentaById(cuentaId)
+    }
+
     @Query("SELECT * FROM cuentas ORDER BY id DESC")
     fun getAllCuentas(): Flow<List<Cuenta>>
 

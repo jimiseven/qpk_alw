@@ -30,5 +30,8 @@ data class Cuenta(
     @ColumnInfo(name = "fecha_creacion")
     val fechaCreacion: String, // Formato YYYY-MM-DD
 
-    val estado: String = "activa" // 'activa', 'pausada', 'agotada', etc.
+    @ColumnInfo(name = "fecha_fin", defaultValue = "''")
+    val fechaFin: String = "", // Fecha de vencimiento de la cuenta con el proveedor
+
+    val estado: String = "activa" // 'activa', 'inhabilitada'
 )

@@ -110,6 +110,7 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
         tipoCuenta: String,
         costoCompra: Double,
         fechaCreacion: String = DateUtils.obtenerFechaHoy(),
+        fechaFin: String = "",
         onSuccess: () -> Unit = {}
     ) {
         viewModelScope.launch {
@@ -120,6 +121,7 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
                 tipoCuenta = tipoCuenta.trim(),
                 costoCompra = costoCompra,
                 fechaCreacion = fechaCreacion,
+                fechaFin = fechaFin,
                 estado = "activa"
             )
             repository.insertCuenta(nuevaCuenta)
@@ -127,9 +129,10 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
         }
     }
 
-    fun eliminarCuenta(cuenta: Cuenta) {
+    fun eliminarCuenta(cuenta: Cuenta, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
-            repository.deleteCuenta(cuenta)
+            repository.eliminarCuentaConVentas(cuenta.id)
+            onSuccess()
         }
     }
 
@@ -184,9 +187,10 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
         }
     }
 
-    fun eliminarVenta(venta: Venta) {
+    fun eliminarVenta(venta: Venta, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             repository.deleteVenta(venta)
+            onSuccess()
         }
     }
 

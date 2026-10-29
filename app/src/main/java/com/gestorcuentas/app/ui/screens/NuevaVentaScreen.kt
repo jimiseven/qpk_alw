@@ -51,18 +51,18 @@ fun NuevaVentaScreen(
     }
 
     var numeroCelular by remember { mutableStateOf("") }
-    var cantidadPerfilesTexto by remember { mutableStateOf("1") }
     var precioPorPerfilTexto by remember { mutableStateOf("") }
-    var duracionDiasTexto by remember { mutableStateOf("30") }
+    var duracionDiasTexto by remember { mutableStateOf("30") } // 30 días por defecto
     var fechaInicio by remember { mutableStateOf(DateUtils.obtenerFechaHoy()) }
 
     var expandedDropdown by remember { mutableStateOf(false) }
 
-    // Cálculos en tiempo real
+    // Opciones de duración requeridas: 3 opciones predeterminadas (30, 60, 90)
+    val opcionesDuracion = listOf(30, 60, 90)
+
+    // Cálculos en tiempo real (siempre 1 perfil por venta)
     val duracionDias = duracionDiasTexto.toIntOrNull() ?: 0
-    val cantidadPerfiles = cantidadPerfilesTexto.toIntOrNull() ?: 0
-    val precioPorPerfil = precioPorPerfilTexto.toDoubleOrNull() ?: 0.0
-    val totalCobro = cantidadPerfiles * precioPorPerfil
+    val precioVenta = precioPorPerfilTexto.toDoubleOrNull() ?: 0.0
     val fechaFinCalculada = remember(fechaInicio, duracionDias) {
         if (duracionDias > 0) DateUtils.calcularFechaFin(fechaInicio, duracionDias) else fechaInicio
     }
@@ -70,8 +70,7 @@ fun NuevaVentaScreen(
     val selectedCuenta = selectedCuentaItem?.cuenta
     val formularioValido = selectedCuenta != null &&
             numeroCelular.isNotBlank() &&
-            cantidadPerfiles > 0 &&
-            precioPorPerfil > 0.0 &&
+            precioVenta > 0.0 &&
             duracionDias > 0
 
     Scaffold(
@@ -141,7 +140,7 @@ fun NuevaVentaScreen(
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                         Text(
-                                            "${item.cuenta.correo} (${item.perfilesVendidosTotales} perfiles vendidos)",
+                                            item.cuenta.correo,
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -170,47 +169,33 @@ fun NuevaVentaScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // 3. Cantidad y Precio
-            Text("3. Perfiles y Cobro", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            // 3. Precio de Venta (1 perfil por defecto)
+            Text("3. Precio del Acceso", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
-            Row(
+            OutlinedTextField(
+                value = precioPorPerfilTexto,
+                onValueChange = { precioPorPerfilTexto = it },
+                label = { Text("Precio de Venta ($)") },
+                placeholder = { Text("0.00") },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = cantidadPerfilesTexto,
-                    onValueChange = { cantidadPerfilesTexto = it },
-                    label = { Text("Cantidad Perfiles") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                shape = RoundedCornerShape(12.dp)
+            )
 
-                OutlinedTextField(
-                    value = precioPorPerfilTexto,
-                    onValueChange = { precioPorPerfilTexto = it },
-                    label = { Text("Precio x Perfil ($)") },
-                    placeholder = { Text("0.00") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    shape = RoundedCornerShape(12.dp)
-                )
-            }
-
-            // 4. Duración y Fecha de Vencimiento
+            // 4. Duración (Opciones predeterminadas: 30, 60, 90)
             Text("4. Duración del Acceso", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                listOf(7, 15, 30, 60, 90).forEach { dias ->
+                opcionesDuracion.forEach { dias ->
                     FilterChip(
                         selected = duracionDiasTexto == dias.toString(),
                         onClick = { duracionDiasTexto = dias.toString() },
-                        label = { Text("${dias}d") }
+                        label = { Text("${dias} días", fontWeight = FontWeight.SemiBold) },
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -222,7 +207,7 @@ fun NuevaVentaScreen(
                 OutlinedTextField(
                     value = duracionDiasTexto,
                     onValueChange = { duracionDiasTexto = it },
-                    label = { Text("Duración (Días)") },
+                    label = { Text("Días (Personalizado)") },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -268,7 +253,7 @@ fun NuevaVentaScreen(
                     ) {
                         Text("Total a Cobrar:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Text(
-                            DateUtils.formatearMoneda(totalCobro),
+                            DateUtils.formatearMoneda(precioVenta),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = AccentGreen
@@ -285,8 +270,8 @@ fun NuevaVentaScreen(
                         viewModel.registrarVenta(
                             cuentaId = cuenta.id,
                             numeroCelularCliente = numeroCelular,
-                            cantidadPerfiles = cantidadPerfiles,
-                            precioVentaPorPerfil = precioPorPerfil,
+                            cantidadPerfiles = 1, // Siempre 1 perfil por venta
+                            precioVentaPorPerfil = precioVenta,
                             duracionDias = duracionDias,
                             fechaInicio = fechaInicio,
                             onSuccess = {

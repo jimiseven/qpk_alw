@@ -40,15 +40,19 @@ fun CuentaDetalleScreen(
     onNavigateBack: () -> Unit,
     onNavigateToNuevaVenta: (Int) -> Unit
 ) {
-    val cuentaConVentasState = viewModel.obtenerCuentaConVentas(cuentaId).collectAsState(initial = null)
-    val cuentaConVentas = cuentaConVentasState.value
+    // Obtenemos directamente de la lista reactiva de ViewModel sin crear flujos nuevos (EVITA EL PARPADEO)
+    val todasLasCuentas by viewModel.cuentasConVentas.collectAsState()
+    val cuentaConVentas = remember(todasLasCuentas, cuentaId) {
+        todasLasCuentas.find { it.cuenta.id == cuentaId }
+    }
     val context = LocalContext.current
 
     var mostrarPasswordCorreo by remember { mutableStateOf(false) }
     var mostrarPasswordPlataforma by remember { mutableStateOf(false) }
-    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+    var mostrarDialogoEliminarCuenta by remember { mutableStateOf(false) }
     var mostrarDialogoEditarCuenta by remember { mutableStateOf(false) }
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
+    var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
 
     fun copiarTexto(label: String, texto: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -73,8 +77,8 @@ fun CuentaDetalleScreen(
                         IconButton(onClick = { mostrarDialogoEditarCuenta = true }) {
                             Icon(Icons.Default.Edit, contentDescription = "Editar Cuenta")
                         }
-                        IconButton(onClick = { mostrarDialogoEliminar = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Eliminar Cuenta", tint = DangerRed)
+                        IconButton(onClick = { mostrarDialogoEliminarCuenta = true }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Eliminar Cuenta y Ventas", tint = DangerRed)
                         }
                     }
                 }
@@ -98,7 +102,7 @@ fun CuentaDetalleScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Cargando detalles...")
+                Text("Cuenta no encontrada.")
             }
         } else {
             val cuenta = cuentaConVentas.cuenta
@@ -126,7 +130,7 @@ fun CuentaDetalleScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    "🔴 Cuenta Inhabilitada: No está disponible para nuevas ventas.",
+                                    "🔴 Cuenta Inhabilitada: No disponible para registrar nuevas ventas.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = DangerRed
@@ -187,7 +191,7 @@ fun CuentaDetalleScreen(
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                            // Contraseña Plataforma (Usada para el acceso del cliente)
+                            // Contraseña Plataforma
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -243,6 +247,17 @@ fun CuentaDetalleScreen(
                                         Icon(Icons.Default.ContentCopy, contentDescription = "Copiar", modifier = Modifier.size(18.dp))
                                     }
                                 }
+                            }
+
+                            // Fechas de vigencia de la cuenta maestra con proveedor
+                            if (cuenta.fechaCreacion.isNotBlank() || cuenta.fechaFin.isNotBlank()) {
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                                Text("Vigencia Cuenta Maestra (Proveedor):", style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    "${DateUtils.formatearFechaLegible(cuenta.fechaCreacion)} al ${if (cuenta.fechaFin.isNotBlank()) DateUtils.formatearFechaLegible(cuenta.fechaFin) else "Indefinida"}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
                             }
                         }
                     }
@@ -302,7 +317,7 @@ fun CuentaDetalleScreen(
                 // Lista de Perfiles Vendidos de esta cuenta
                 item {
                     Text(
-                        "Perfiles Vendidos (${cuentaConVentas.ventas.size})",
+                        "Ventas Registradas (${cuentaConVentas.ventas.size})",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -322,7 +337,7 @@ fun CuentaDetalleScreen(
                             venta = venta,
                             cuenta = cuenta,
                             onEditar = { ventaAEditar = venta },
-                            onEliminar = { viewModel.eliminarVenta(venta) },
+                            onEliminar = { ventaAEliminar = venta },
                             onCopiarMensaje = {
                                 val mensaje = MensajeEntregaUtils.generarMensaje(
                                     tipoCuenta = cuenta.tipoCuenta,
@@ -366,25 +381,57 @@ fun CuentaDetalleScreen(
         )
     }
 
-    // Diálogo de confirmación de eliminación
-    if (mostrarDialogoEliminar && cuentaConVentas != null) {
+    // Diálogo de confirmación para eliminar VENTA
+    ventaAEliminar?.let { venta ->
         AlertDialog(
-            onDismissRequest = { mostrarDialogoEliminar = false },
-            title = { Text("¿Eliminar Cuenta?") },
-            text = { Text("Se eliminará esta cuenta maestra y todas las ventas de perfiles asociadas a ella. Esta acción no se puede deshacer.") },
+            onDismissRequest = { ventaAEliminar = null },
+            title = { Text("¿Eliminar Venta?") },
+            text = { Text("Se eliminará la venta registrada para el cliente ${venta.numeroCelularCliente}. Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
-                        viewModel.eliminarCuenta(cuentaConVentas.cuenta)
-                        mostrarDialogoEliminar = false
-                        onNavigateBack()
-                    }
+                        viewModel.eliminarVenta(venta) {
+                            Toast.makeText(context, "Venta eliminada", Toast.LENGTH_SHORT).show()
+                            ventaAEliminar = null
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
                 ) {
-                    Text("Eliminar", color = DangerRed)
+                    Text("Eliminar")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarDialogoEliminar = false }) {
+                TextButton(onClick = { ventaAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo de confirmación para eliminar CUENTA CON TODAS SUS VENTAS VINCULADAS
+    if (mostrarDialogoEliminarCuenta && cuentaConVentas != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoEliminarCuenta = false },
+            title = { Text("¿Eliminar Cuenta y sus Ventas?") },
+            text = {
+                Text("Se eliminará esta cuenta maestra y TODAS las ${cuentaConVentas.ventas.size} ventas de perfiles vinculadas a ella de forma permanente.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.eliminarCuenta(cuentaConVentas.cuenta) {
+                            Toast.makeText(context, "Cuenta y ventas vinculadas eliminadas", Toast.LENGTH_SHORT).show()
+                            mostrarDialogoEliminarCuenta = false
+                            onNavigateBack()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
+                ) {
+                    Text("Eliminar Todo")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoEliminarCuenta = false }) {
                     Text("Cancelar")
                 }
             }
@@ -454,14 +501,16 @@ fun VentaItemCard(
                         Icon(Icons.Default.Edit, contentDescription = "Editar Venta", modifier = Modifier.size(18.dp))
                     }
                     IconButton(onClick = onEliminar) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = DangerRed, modifier = Modifier.size(18.dp))
                     }
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${venta.cantidadPerfiles} perfil/es • ${DateUtils.formatearMoneda(venta.precioVentaPorPerfil * venta.cantidadPerfiles)}",
-                style = MaterialTheme.typography.bodyMedium
+                text = DateUtils.formatearMoneda(venta.precioVentaPorPerfil),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AccentGreen
             )
             Text(
                 text = "Desde ${DateUtils.formatearFechaLegible(venta.fechaInicio)} hasta ${DateUtils.formatearFechaLegible(venta.fechaFin)} (${venta.duracionDias} días)",

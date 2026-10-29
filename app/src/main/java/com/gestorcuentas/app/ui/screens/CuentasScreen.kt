@@ -196,7 +196,7 @@ fun CuentaItemCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Ventas: ${DateUtils.formatearMoneda(cuentaConVentas.totalIngresos)} (${cuentaConVentas.perfilesVendidosTotales} perfiles)",
+                    text = "Ventas: ${DateUtils.formatearMoneda(cuentaConVentas.totalIngresos)} (${cuentaConVentas.ventas.size} ventas)",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary

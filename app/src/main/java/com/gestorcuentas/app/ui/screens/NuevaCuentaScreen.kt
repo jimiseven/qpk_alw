@@ -35,6 +35,7 @@ fun NuevaCuentaScreen(
     var contrasenaPlataforma by remember { mutableStateOf("") }
     var costoCompraTexto by remember { mutableStateOf("") }
     var fechaCreacion by remember { mutableStateOf(DateUtils.obtenerFechaHoy()) }
+    var fechaFin by remember { mutableStateOf(DateUtils.obtenerFechaFutura(30)) }
 
     val tipoCuentaFinal = if (opcionSeleccionada == "Otros") otroServicioTexto.trim() else opcionSeleccionada
 
@@ -139,14 +140,28 @@ fun NuevaCuentaScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            OutlinedTextField(
-                value = fechaCreacion,
-                onValueChange = { fechaCreacion = it },
-                label = { Text("Fecha de Adquisición (YYYY-MM-DD)") },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                OutlinedTextField(
+                    value = fechaCreacion,
+                    onValueChange = { fechaCreacion = it },
+                    label = { Text("Fecha Inicio") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                OutlinedTextField(
+                    value = fechaFin,
+                    onValueChange = { fechaFin = it },
+                    label = { Text("Fecha Fin") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -160,6 +175,7 @@ fun NuevaCuentaScreen(
                             tipoCuenta = tipoCuentaFinal,
                             costoCompra = costoCompra,
                             fechaCreacion = fechaCreacion,
+                            fechaFin = fechaFin,
                             onSuccess = {
                                 Toast.makeText(context, "Cuenta agregada al inventario", Toast.LENGTH_SHORT).show()
                                 onNavigateBack()
