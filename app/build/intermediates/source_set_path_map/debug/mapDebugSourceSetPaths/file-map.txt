@@ -1,0 +1,58 @@
+com.gestorcuentas.app-resValues-0 G:\0 imports\apk\qpk_alw\app\build\generated\res\resValues\debug
+com.gestorcuentas.app-packageDebugResources-1 G:\0 imports\apk\qpk_alw\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.gestorcuentas.app-packageDebugResources-2 G:\0 imports\apk\qpk_alw\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.gestorcuentas.app-debug-3 G:\0 imports\apk\qpk_alw\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.gestorcuentas.app-debug-4 G:\0 imports\apk\qpk_alw\app\src\debug\res
+com.gestorcuentas.app-main-5 G:\0 imports\apk\qpk_alw\app\src\main\res
+com.gestorcuentas.app-material-release-6 G:\Android\.gradle\caches\8.9\transforms\01bac804fbb977f6cd022cd7d31ef548\transformed\material-release\res
+com.gestorcuentas.app-runtime-release-7 G:\Android\.gradle\caches\8.9\transforms\1456a70fdfce3b255c0dd125bdd67daf\transformed\runtime-release\res
+com.gestorcuentas.app-navigation-common-2.7.7-8 G:\Android\.gradle\caches\8.9\transforms\1b485ae88ccc8fb2e8ea75e79656288e\transformed\navigation-common-2.7.7\res
+com.gestorcuentas.app-foundation-layout-release-9 G:\Android\.gradle\caches\8.9\transforms\208974e2b56685f979c7dac43062c1cd\transformed\foundation-layout-release\res
+com.gestorcuentas.app-ui-tooling-data-release-10 G:\Android\.gradle\caches\8.9\transforms\273c6a381b05efdd46ce2b1e2906babd\transformed\ui-tooling-data-release\res
+com.gestorcuentas.app-foundation-release-11 G:\Android\.gradle\caches\8.9\transforms\321af5e50f5658969774db6c8a92cc74\transformed\foundation-release\res
+com.gestorcuentas.app-room-runtime-2.6.1-12 G:\Android\.gradle\caches\8.9\transforms\32773eced0c7ffb23bab6a94e704222f\transformed\room-runtime-2.6.1\res
+com.gestorcuentas.app-lifecycle-viewmodel-ktx-2.8.0-13 G:\Android\.gradle\caches\8.9\transforms\32d9cd35413036c97c8b323005e3d0d5\transformed\lifecycle-viewmodel-ktx-2.8.0\res
+com.gestorcuentas.app-activity-compose-1.9.0-14 G:\Android\.gradle\caches\8.9\transforms\358bef3986da586a87ca6fe6b6cda03e\transformed\activity-compose-1.9.0\res
+com.gestorcuentas.app-animation-core-release-15 G:\Android\.gradle\caches\8.9\transforms\361d72483b50be2538572f91750ba0ff\transformed\animation-core-release\res
+com.gestorcuentas.app-navigation-common-ktx-2.7.7-16 G:\Android\.gradle\caches\8.9\transforms\3a22be1efaeadb024a86e8e608fc2f00\transformed\navigation-common-ktx-2.7.7\res
+com.gestorcuentas.app-activity-1.9.0-17 G:\Android\.gradle\caches\8.9\transforms\4381b6bedb5c207259f0be523a589b66\transformed\activity-1.9.0\res
+com.gestorcuentas.app-runtime-saveable-release-18 G:\Android\.gradle\caches\8.9\transforms\4aa565e0be2e65e1c83d43138f218621\transformed\runtime-saveable-release\res
+com.gestorcuentas.app-sqlite-2.4.0-19 G:\Android\.gradle\caches\8.9\transforms\4e28a81ad954408b857b0ae32273cc30\transformed\sqlite-2.4.0\res
+com.gestorcuentas.app-emoji2-1.3.0-20 G:\Android\.gradle\caches\8.9\transforms\59248ee82611ee7a0a4b42e298ef31e0\transformed\emoji2-1.3.0\res
+com.gestorcuentas.app-lifecycle-viewmodel-savedstate-2.8.0-21 G:\Android\.gradle\caches\8.9\transforms\59ce2cca6d9e8ec78e2ecee79127757f\transformed\lifecycle-viewmodel-savedstate-2.8.0\res
+com.gestorcuentas.app-lifecycle-runtime-compose-release-22 G:\Android\.gradle\caches\8.9\transforms\5c6ea20b9cab7757506ad01e2777f9ad\transformed\lifecycle-runtime-compose-release\res
+com.gestorcuentas.app-lifecycle-viewmodel-release-23 G:\Android\.gradle\caches\8.9\transforms\5f2f49a1c9ca271e85b79923ac380274\transformed\lifecycle-viewmodel-release\res
+com.gestorcuentas.app-lifecycle-livedata-core-2.8.0-24 G:\Android\.gradle\caches\8.9\transforms\5f46e47a00d3d9521d130c3345567264\transformed\lifecycle-livedata-core-2.8.0\res
+com.gestorcuentas.app-sqlite-framework-2.4.0-25 G:\Android\.gradle\caches\8.9\transforms\68ff8ba212216dfeb6e64ac7d35f140b\transformed\sqlite-framework-2.4.0\res
+com.gestorcuentas.app-ui-release-26 G:\Android\.gradle\caches\8.9\transforms\6c73ec72865c97eeae31fbfe91a59ce5\transformed\ui-release\res
+com.gestorcuentas.app-profileinstaller-1.3.1-27 G:\Android\.gradle\caches\8.9\transforms\7a0eacfb3c2aaae3fd410927f89907e1\transformed\profileinstaller-1.3.1\res
+com.gestorcuentas.app-core-ktx-1.13.1-28 G:\Android\.gradle\caches\8.9\transforms\7e5cdcc587c20a70b4c7122ae38d618e\transformed\core-ktx-1.13.1\res
+com.gestorcuentas.app-lifecycle-process-2.8.0-29 G:\Android\.gradle\caches\8.9\transforms\7f9d2a70169f4f920cd4089a8b4c758e\transformed\lifecycle-process-2.8.0\res
+com.gestorcuentas.app-navigation-runtime-ktx-2.7.7-30 G:\Android\.gradle\caches\8.9\transforms\85f57ef6ccdf3589c205426795ddea86\transformed\navigation-runtime-ktx-2.7.7\res
+com.gestorcuentas.app-ui-util-release-31 G:\Android\.gradle\caches\8.9\transforms\8a8da389584367902af4a462c972543a\transformed\ui-util-release\res
+com.gestorcuentas.app-ui-tooling-release-32 G:\Android\.gradle\caches\8.9\transforms\8e19a783d53ff386dd8df03fddc1c292\transformed\ui-tooling-release\res
+com.gestorcuentas.app-navigation-runtime-2.7.7-33 G:\Android\.gradle\caches\8.9\transforms\8f5254d444d470777d639a37395fab60\transformed\navigation-runtime-2.7.7\res
+com.gestorcuentas.app-ui-geometry-release-34 G:\Android\.gradle\caches\8.9\transforms\909bb42ab07a43fe919fa7dc8593d751\transformed\ui-geometry-release\res
+com.gestorcuentas.app-lifecycle-runtime-release-35 G:\Android\.gradle\caches\8.9\transforms\9a944ef26d16b631d0605e5329d71416\transformed\lifecycle-runtime-release\res
+com.gestorcuentas.app-activity-ktx-1.9.0-36 G:\Android\.gradle\caches\8.9\transforms\a5a304cefc8c601f5264e4e0fdd45a53\transformed\activity-ktx-1.9.0\res
+com.gestorcuentas.app-material-ripple-release-37 G:\Android\.gradle\caches\8.9\transforms\a9b2230b574e1e3a6f87790f1bb924a3\transformed\material-ripple-release\res
+com.gestorcuentas.app-ui-test-manifest-1.6.8-38 G:\Android\.gradle\caches\8.9\transforms\ac7408d44db6da7b8d3d08fcecc2715c\transformed\ui-test-manifest-1.6.8\res
+com.gestorcuentas.app-ui-text-release-39 G:\Android\.gradle\caches\8.9\transforms\afbed07e903f4690df88a44bc45d8673\transformed\ui-text-release\res
+com.gestorcuentas.app-ui-graphics-release-40 G:\Android\.gradle\caches\8.9\transforms\b5a9f069bf14fcf303f1fd9d5e4447d0\transformed\ui-graphics-release\res
+com.gestorcuentas.app-core-1.13.1-41 G:\Android\.gradle\caches\8.9\transforms\b881d42975e4d3baa7700b4b461922c8\transformed\core-1.13.1\res
+com.gestorcuentas.app-annotation-experimental-1.4.0-42 G:\Android\.gradle\caches\8.9\transforms\b9093c96ba8174e948b29e556b64b148\transformed\annotation-experimental-1.4.0\res
+com.gestorcuentas.app-material-icons-extended-release-43 G:\Android\.gradle\caches\8.9\transforms\b96818c7b697eeed97ce3dcf27f2560a\transformed\material-icons-extended-release\res
+com.gestorcuentas.app-customview-poolingcontainer-1.0.0-44 G:\Android\.gradle\caches\8.9\transforms\baff228ac7d1320721b179baf813680e\transformed\customview-poolingcontainer-1.0.0\res
+com.gestorcuentas.app-material3-release-45 G:\Android\.gradle\caches\8.9\transforms\c0bd0a20d10afbc70bc7353d12271922\transformed\material3-release\res
+com.gestorcuentas.app-navigation-compose-2.7.7-46 G:\Android\.gradle\caches\8.9\transforms\c9022e98ef9f792d340c99ce7df34f76\transformed\navigation-compose-2.7.7\res
+com.gestorcuentas.app-startup-runtime-1.1.1-47 G:\Android\.gradle\caches\8.9\transforms\cab8bcab619de5323a805b29d5e624da\transformed\startup-runtime-1.1.1\res
+com.gestorcuentas.app-savedstate-ktx-1.2.1-48 G:\Android\.gradle\caches\8.9\transforms\cfc0c10d7a365dd1973a5d3724a2507f\transformed\savedstate-ktx-1.2.1\res
+com.gestorcuentas.app-lifecycle-viewmodel-compose-release-49 G:\Android\.gradle\caches\8.9\transforms\d7c856f6f846e779dd1fd5087c135ed4\transformed\lifecycle-viewmodel-compose-release\res
+com.gestorcuentas.app-core-runtime-2.2.0-50 G:\Android\.gradle\caches\8.9\transforms\db2049f4c2a00e802ac3e48ac4d97acb\transformed\core-runtime-2.2.0\res
+com.gestorcuentas.app-savedstate-1.2.1-51 G:\Android\.gradle\caches\8.9\transforms\dcb2bdfae850d6a1d51a4434a1fd994a\transformed\savedstate-1.2.1\res
+com.gestorcuentas.app-material-icons-core-release-52 G:\Android\.gradle\caches\8.9\transforms\f2ae1d5160bc10f5ce8372b7403a7566\transformed\material-icons-core-release\res
+com.gestorcuentas.app-animation-release-53 G:\Android\.gradle\caches\8.9\transforms\f51ab1fbad20edcb9a8fa4a5375cd3ca\transformed\animation-release\res
+com.gestorcuentas.app-lifecycle-runtime-ktx-release-54 G:\Android\.gradle\caches\8.9\transforms\f54b6b82140e93d13e0fc747d6d3b826\transformed\lifecycle-runtime-ktx-release\res
+com.gestorcuentas.app-ui-unit-release-55 G:\Android\.gradle\caches\8.9\transforms\f56379d36ae97a76a3948397e78fef71\transformed\ui-unit-release\res
+com.gestorcuentas.app-ui-tooling-preview-release-56 G:\Android\.gradle\caches\8.9\transforms\f92fe58b6715e3a6759fa84629d04a10\transformed\ui-tooling-preview-release\res
+com.gestorcuentas.app-room-ktx-2.6.1-57 G:\Android\.gradle\caches\8.9\transforms\fde1b1548850c8fcd89feea381822cf8\transformed\room-ktx-2.6.1\res
