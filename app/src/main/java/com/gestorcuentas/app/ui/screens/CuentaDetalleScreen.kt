@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -22,11 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gestorcuentas.app.data.entity.Cuenta
 import com.gestorcuentas.app.data.entity.Venta
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.ui.theme.WarningAmber
 import com.gestorcuentas.app.utils.DateUtils
+import com.gestorcuentas.app.utils.MensajeEntregaUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,6 +47,8 @@ fun CuentaDetalleScreen(
     var mostrarPasswordCorreo by remember { mutableStateOf(false) }
     var mostrarPasswordPlataforma by remember { mutableStateOf(false) }
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+    var mostrarDialogoEditarCuenta by remember { mutableStateOf(false) }
+    var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
 
     fun copiarTexto(label: String, texto: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -51,6 +56,8 @@ fun CuentaDetalleScreen(
         clipboard.setPrimaryClip(clip)
         Toast.makeText(context, "$label copiado al portapapeles", Toast.LENGTH_SHORT).show()
     }
+
+    val estaInhabilitada = cuentaConVentas?.cuenta?.estado == "inhabilitada"
 
     Scaffold(
         topBar = {
@@ -63,6 +70,9 @@ fun CuentaDetalleScreen(
                 },
                 actions = {
                     if (cuentaConVentas != null) {
+                        IconButton(onClick = { mostrarDialogoEditarCuenta = true }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Editar Cuenta")
+                        }
                         IconButton(onClick = { mostrarDialogoEliminar = true }) {
                             Icon(Icons.Default.Delete, contentDescription = "Eliminar Cuenta", tint = DangerRed)
                         }
@@ -71,7 +81,7 @@ fun CuentaDetalleScreen(
             )
         },
         floatingActionButton = {
-            if (cuentaConVentas != null) {
+            if (cuentaConVentas != null && !estaInhabilitada) {
                 ExtendedFloatingActionButton(
                     onClick = { onNavigateToNuevaVenta(cuentaConVentas.cuenta.id) },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
@@ -100,8 +110,32 @@ fun CuentaDetalleScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+                // Alerta si está inhabilitada
+                if (estaInhabilitada) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = DangerRed.copy(alpha = 0.15f))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "🔴 Cuenta Inhabilitada: No está disponible para nuevas ventas.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = DangerRed
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Card de Credenciales
                 item {
                     Card(
@@ -110,12 +144,31 @@ fun CuentaDetalleScreen(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                "Credenciales de Acceso",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "Credenciales de Acceso",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = if (estaInhabilitada) DangerRed.copy(alpha = 0.15f) else AccentGreen.copy(alpha = 0.15f)
+                                ) {
+                                    Text(
+                                        text = if (estaInhabilitada) "INHABILITADA" else "ACTIVA",
+                                        color = if (estaInhabilitada) DangerRed else AccentGreen,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
 
                             // Correo
                             Row(
@@ -134,7 +187,7 @@ fun CuentaDetalleScreen(
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                            // Contraseña Plataforma
+                            // Contraseña Plataforma (Usada para el acceso del cliente)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -268,9 +321,10 @@ fun CuentaDetalleScreen(
                         VentaItemCard(
                             venta = venta,
                             cuenta = cuenta,
+                            onEditar = { ventaAEditar = venta },
                             onEliminar = { viewModel.eliminarVenta(venta) },
                             onCopiarMensaje = {
-                                val mensaje = com.gestorcuentas.app.utils.MensajeEntregaUtils.generarMensaje(
+                                val mensaje = MensajeEntregaUtils.generarMensaje(
                                     tipoCuenta = cuenta.tipoCuenta,
                                     duracionDias = venta.duracionDias,
                                     correo = cuenta.correo,
@@ -292,6 +346,24 @@ fun CuentaDetalleScreen(
                 }
             }
         }
+    }
+
+    // Diálogo de Edición de Cuenta
+    if (mostrarDialogoEditarCuenta && cuentaConVentas != null) {
+        EditarCuentaDialog(
+            cuenta = cuentaConVentas.cuenta,
+            viewModel = viewModel,
+            onDismiss = { mostrarDialogoEditarCuenta = false }
+        )
+    }
+
+    // Diálogo de Edición de Venta
+    ventaAEditar?.let { venta ->
+        EditarVentaDialog(
+            venta = venta,
+            viewModel = viewModel,
+            onDismiss = { ventaAEditar = null }
+        )
     }
 
     // Diálogo de confirmación de eliminación
@@ -323,7 +395,8 @@ fun CuentaDetalleScreen(
 @Composable
 fun VentaItemCard(
     venta: Venta,
-    cuenta: com.gestorcuentas.app.data.entity.Cuenta,
+    cuenta: Cuenta,
+    onEditar: () -> Unit,
     onEliminar: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
@@ -376,6 +449,9 @@ fun VentaItemCard(
                 Row {
                     IconButton(onClick = onCopiarMensaje) {
                         Icon(Icons.Default.ContentCopy, contentDescription = "Copiar Mensaje", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                    }
+                    IconButton(onClick = onEditar) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar Venta", modifier = Modifier.size(18.dp))
                     }
                     IconButton(onClick = onEliminar) {
                         Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))

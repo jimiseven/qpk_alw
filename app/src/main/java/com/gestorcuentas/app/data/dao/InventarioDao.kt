@@ -42,6 +42,32 @@ interface InventarioDao {
     @Query("SELECT * FROM cuentas WHERE estado = 'activa' ORDER BY tipo_cuenta ASC")
     fun getCuentasActivas(): Flow<List<Cuenta>>
 
+    @Query("SELECT * FROM cuentas")
+    suspend fun getAllCuentasSnapshot(): List<Cuenta>
+
+    @Query("SELECT * FROM ventas")
+    suspend fun getAllVentasSnapshot(): List<Venta>
+
+    @Query("DELETE FROM ventas")
+    suspend fun deleteAllVentas()
+
+    @Query("DELETE FROM cuentas")
+    suspend fun deleteAllCuentas()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCuentas(cuentas: List<Cuenta>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertVentas(ventas: List<Venta>)
+
+    @Transaction
+    suspend fun restaurarBaseDeDatos(cuentas: List<Cuenta>, ventas: List<Venta>) {
+        deleteAllVentas()
+        deleteAllCuentas()
+        insertCuentas(cuentas)
+        insertVentas(ventas)
+    }
+
     // ==========================================
     // OPERACIONES CRUD PARA VENTA
     // ==========================================

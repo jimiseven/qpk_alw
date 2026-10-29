@@ -12,19 +12,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.gestorcuentas.app.data.entity.Cuenta
+import com.gestorcuentas.app.data.entity.CuentaConVentas
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.utils.MensajeEntregaUtils
@@ -37,18 +34,19 @@ fun NuevaVentaScreen(
     viewModel: InventarioViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val cuentasActivas by viewModel.cuentasActivas.collectAsState()
+    // Lista de cuentas activas junto con la cantidad de ventas que tiene cada una
+    val cuentasActivasConVentas by viewModel.cuentasActivasConVentas.collectAsState()
     val context = LocalContext.current
 
-    var selectedCuenta by remember {
-        mutableStateOf(cuentasActivas.find { it.id == initialCuentaId })
+    var selectedCuentaItem by remember {
+        mutableStateOf(cuentasActivasConVentas.find { it.cuenta.id == initialCuentaId })
     }
 
-    LaunchedEffect(cuentasActivas, initialCuentaId) {
-        if (selectedCuenta == null && initialCuentaId != null) {
-            selectedCuenta = cuentasActivas.find { it.id == initialCuentaId }
-        } else if (selectedCuenta == null && cuentasActivas.isNotEmpty()) {
-            selectedCuenta = cuentasActivas.first()
+    LaunchedEffect(cuentasActivasConVentas, initialCuentaId) {
+        if (selectedCuentaItem == null && initialCuentaId != null) {
+            selectedCuentaItem = cuentasActivasConVentas.find { it.cuenta.id == initialCuentaId }
+        } else if (selectedCuentaItem == null && cuentasActivasConVentas.isNotEmpty()) {
+            selectedCuentaItem = cuentasActivasConVentas.first()
         }
     }
 
@@ -60,10 +58,6 @@ fun NuevaVentaScreen(
 
     var expandedDropdown by remember { mutableStateOf(false) }
 
-    // Estado del diálogo con el mensaje de entrega generado
-    var mensajeEntregaGenerado by remember { mutableStateOf<String?>(null) }
-    var mostrarDialogoMensaje by remember { mutableStateOf(false) }
-
     // Cálculos en tiempo real
     val duracionDias = duracionDiasTexto.toIntOrNull() ?: 0
     val cantidadPerfiles = cantidadPerfilesTexto.toIntOrNull() ?: 0
@@ -73,6 +67,7 @@ fun NuevaVentaScreen(
         if (duracionDias > 0) DateUtils.calcularFechaFin(fechaInicio, duracionDias) else fechaInicio
     }
 
+    val selectedCuenta = selectedCuentaItem?.cuenta
     val formularioValido = selectedCuenta != null &&
             numeroCelular.isNotBlank() &&
             cantidadPerfiles > 0 &&
@@ -101,16 +96,16 @@ fun NuevaVentaScreen(
         ) {
             Spacer(modifier = Modifier.height(2.dp))
 
-            // 1. Selector de Cuenta Maestra
+            // 1. Selector de Cuenta Maestra con NÚMERO DE VENTAS
             Text("1. Seleccionar Cuenta del Inventario", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
-            if (cuentasActivas.isEmpty()) {
+            if (cuentasActivasConVentas.isEmpty()) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
                 ) {
                     Text(
-                        "No tienes cuentas registradas en el inventario. Registra una cuenta antes de vender.",
+                        "No tienes cuentas activas disponibles. Registra una cuenta o habilita una inhabilitada antes de vender.",
                         modifier = Modifier.padding(12.dp),
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -121,7 +116,9 @@ fun NuevaVentaScreen(
                     onExpandedChange = { expandedDropdown = !expandedDropdown }
                 ) {
                     OutlinedTextField(
-                        value = selectedCuenta?.let { "${it.tipoCuenta.uppercase()} - ${it.correo}" } ?: "Seleccione una cuenta...",
+                        value = selectedCuentaItem?.let { item ->
+                            "${item.cuenta.tipoCuenta} - ${item.cuenta.correo} • ${item.ventas.size} ventas"
+                        } ?: "Seleccione una cuenta...",
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown) },
@@ -134,16 +131,23 @@ fun NuevaVentaScreen(
                         expanded = expandedDropdown,
                         onDismissRequest = { expandedDropdown = false }
                     ) {
-                        cuentasActivas.forEach { cuenta ->
+                        cuentasActivasConVentas.forEach { item ->
                             DropdownMenuItem(
                                 text = {
                                     Column {
-                                        Text(cuenta.tipoCuenta.uppercase(), fontWeight = FontWeight.Bold)
-                                        Text(cuenta.correo, style = MaterialTheme.typography.bodySmall)
+                                        Text(
+                                            "${item.cuenta.tipoCuenta} • ${item.ventas.size} ventas registradas",
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            "${item.cuenta.correo} (${item.perfilesVendidosTotales} perfiles vendidos)",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
                                     }
                                 },
                                 onClick = {
-                                    selectedCuenta = cuenta
+                                    selectedCuentaItem = item
                                     expandedDropdown = false
                                 }
                             )
@@ -273,7 +277,7 @@ fun NuevaVentaScreen(
                 }
             }
 
-            // Botón de Guardar
+            // Botón de Guardar: Registra directamente y copia al portapapeles
             Button(
                 onClick = {
                     val cuenta = selectedCuenta
@@ -286,7 +290,7 @@ fun NuevaVentaScreen(
                             duracionDias = duracionDias,
                             fechaInicio = fechaInicio,
                             onSuccess = {
-                                // Generar mensaje formateado para el cliente
+                                // Generar mensaje usando explícitamente contrasena_plataforma
                                 val mensaje = MensajeEntregaUtils.generarMensaje(
                                     tipoCuenta = cuenta.tipoCuenta,
                                     duracionDias = duracionDias,
@@ -295,8 +299,19 @@ fun NuevaVentaScreen(
                                     fechaInicio = fechaInicio,
                                     fechaFin = fechaFinCalculada
                                 )
-                                mensajeEntregaGenerado = mensaje
-                                mostrarDialogoMensaje = true
+                                // Copiar inmediatamente al portapapeles
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("Datos Cuenta Cliente", mensaje)
+                                clipboard.setPrimaryClip(clip)
+
+                                Toast.makeText(
+                                    context,
+                                    "✅ Venta registrada y datos copiados al portapapeles",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                // Navegar de inmediato a la pantalla anterior
+                                onNavigateBack()
                             }
                         )
                     }
@@ -312,76 +327,5 @@ fun NuevaVentaScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
-    }
-
-    // ==========================================
-    // DIÁLOGO CON EL MENSAJE GENERADO
-    // ==========================================
-    if (mostrarDialogoMensaje && mensajeEntregaGenerado != null) {
-        AlertDialog(
-            onDismissRequest = {
-                mostrarDialogoMensaje = false
-                onNavigateBack()
-            },
-            title = {
-                Text("¡Venta Registrada!", fontWeight = FontWeight.Bold)
-            },
-            text = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 380.dp)
-                ) {
-                    Text(
-                        "Mensaje generado para el cliente:",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f, fill = false)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            text = mensajeEntregaGenerado!!,
-                            modifier = Modifier.padding(10.dp),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 12.sp,
-                                lineHeight = 16.sp
-                            )
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("Datos Cuenta Cliente", mensajeEntregaGenerado)
-                        clipboard.setPrimaryClip(clip)
-                        Toast.makeText(context, "¡Mensaje copiado al portapapeles!", Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Copiar Mensaje")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        mostrarDialogoMensaje = false
-                        onNavigateBack()
-                    }
-                ) {
-                    Text("Cerrar")
-                }
-            }
-        )
     }
 }

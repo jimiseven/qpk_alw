@@ -45,6 +45,13 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     val cuentasActivas: StateFlow<List<Cuenta>> = repository.cuentasActivas
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    // Cuentas activas junto a sus ventas registradas (para listas con contador de ventas)
+    val cuentasActivasConVentas: StateFlow<List<CuentaConVentas>> = cuentasConVentas
+        .combine(repository.cuentasActivas) { todasConVentas, _ ->
+            todasConVentas.filter { it.cuenta.estado.equals("activa", ignoreCase = true) }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     // Ventas por vencer en los próximos 7 días
     val ventasPorVencer: StateFlow<List<VentaConCuenta>> = repository.getVentasPorVencer(7)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -132,6 +139,13 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
         }
     }
 
+    fun actualizarCuenta(cuenta: Cuenta, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.updateCuenta(cuenta)
+            onSuccess()
+        }
+    }
+
     fun obtenerCuentaConVentas(cuentaId: Int): StateFlow<CuentaConVentas?> {
         return repository.getCuentaConVentas(cuentaId)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -173,6 +187,65 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     fun eliminarVenta(venta: Venta) {
         viewModelScope.launch {
             repository.deleteVenta(venta)
+        }
+    }
+
+    /**
+     * Actualiza una venta existente y recalcula automáticamente la fecha_fin.
+     */
+    fun actualizarVenta(
+        ventaId: Int,
+        cuentaId: Int,
+        numeroCelularCliente: String,
+        cantidadPerfiles: Int,
+        precioVentaPorPerfil: Double,
+        duracionDias: Int,
+        fechaInicio: String,
+        onSuccess: () -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            val fechaFinCalculada = DateUtils.calcularFechaFin(fechaInicio, duracionDias)
+            val ventaActualizada = Venta(
+                id = ventaId,
+                cuentaId = cuentaId,
+                numeroCelularCliente = numeroCelularCliente.trim(),
+                cantidadPerfiles = cantidadPerfiles,
+                precioVentaPorPerfil = precioVentaPorPerfil,
+                duracionDias = duracionDias,
+                fechaInicio = fechaInicio,
+                fechaFin = fechaFinCalculada
+            )
+            repository.updateVenta(ventaActualizada)
+            onSuccess()
+        }
+    }
+
+    // ==========================================
+    // COPIA DE SEGURIDAD (BACKUP) Y RESTAURACIÓN
+    // ==========================================
+
+    fun exportarBackup(onResult: (String) -> Unit) {
+        viewModelScope.launch {
+            val cuentas = repository.getAllCuentasSnapshot()
+            val ventas = repository.getAllVentasSnapshot()
+            val json = com.gestorcuentas.app.utils.BackupUtils.exportarAJson(cuentas, ventas)
+            onResult(json)
+        }
+    }
+
+    fun restaurarBackup(
+        jsonString: String,
+        onSuccess: (cuentasRestauradas: Int, ventasRestauradas: Int) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val (cuentas, ventas) = com.gestorcuentas.app.utils.BackupUtils.parsearBackup(jsonString)
+                repository.restaurarBaseDeDatos(cuentas, ventas)
+                onSuccess(cuentas.size, ventas.size)
+            } catch (e: Exception) {
+                onError("Error al importar el archivo: ${e.localizedMessage ?: "Formato inválido"}")
+            }
         }
     }
 }

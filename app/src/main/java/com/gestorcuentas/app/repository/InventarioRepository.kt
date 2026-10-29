@@ -62,4 +62,11 @@ class InventarioRepository(private val dao: InventarioDao) {
     suspend fun insertVenta(venta: Venta): Long = dao.insertVenta(venta)
     suspend fun updateVenta(venta: Venta) = dao.updateVenta(venta)
     suspend fun deleteVenta(venta: Venta) = dao.deleteVenta(venta)
+
+    // Copia de seguridad y Restauración
+    suspend fun getAllCuentasSnapshot(): List<Cuenta> = dao.getAllCuentasSnapshot()
+    suspend fun getAllVentasSnapshot(): List<Venta> = dao.getAllVentasSnapshot()
+    suspend fun restaurarBaseDeDatos(cuentas: List<Cuenta>, ventas: List<Venta>) {
+        dao.restaurarBaseDeDatos(cuentas, ventas)
+    }
 }

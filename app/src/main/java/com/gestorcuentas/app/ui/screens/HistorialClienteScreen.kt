@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.gestorcuentas.app.data.entity.Venta
 import com.gestorcuentas.app.data.entity.VentaConCuenta
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.DangerRed
@@ -36,6 +38,8 @@ fun HistorialClienteScreen(
     val busquedaCelular by viewModel.busquedaCelular.collectAsState()
     val historial by viewModel.historialCliente.collectAsState()
     val context = LocalContext.current
+
+    var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
 
     val totalRecaudadoCliente = remember(historial) {
         historial.sumOf { it.venta.cantidadPerfiles * it.venta.precioVentaPorPerfil }
@@ -117,6 +121,9 @@ fun HistorialClienteScreen(
                     items(historial, key = { it.venta.id }) { item ->
                         HistorialVentaCard(
                             item = item,
+                            onEditarVenta = {
+                                ventaAEditar = item.venta
+                            },
                             onCopiarMensaje = {
                                 val cuenta = item.cuenta
                                 val venta = item.venta
@@ -143,11 +150,21 @@ fun HistorialClienteScreen(
             }
         }
     }
+
+    // Diálogo para editar la venta seleccionada
+    ventaAEditar?.let { venta ->
+        EditarVentaDialog(
+            venta = venta,
+            viewModel = viewModel,
+            onDismiss = { ventaAEditar = null }
+        )
+    }
 }
 
 @Composable
 fun HistorialVentaCard(
     item: VentaConCuenta,
+    onEditarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
@@ -221,19 +238,30 @@ fun HistorialVentaCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Botón explícito para copiar el mensaje al portapapeles
-            OutlinedButton(
-                onClick = onCopiarMensaje,
+            // Botones de acción: Editar y Copiar Mensaje
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    Icons.Default.ContentCopy,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Copiar Mensaje para Cliente", style = MaterialTheme.typography.labelLarge)
+                OutlinedButton(
+                    onClick = onEditarVenta,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Editar", style = MaterialTheme.typography.labelMedium)
+                }
+
+                Button(
+                    onClick = onCopiarMensaje,
+                    modifier = Modifier.weight(2f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Copiar Mensaje", style = MaterialTheme.typography.labelMedium)
+                }
             }
         }
     }

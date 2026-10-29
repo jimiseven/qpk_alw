@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
@@ -61,7 +63,9 @@ fun MainAppContent(viewModel: InventarioViewModel) {
     Scaffold(
         bottomBar = {
             if (shouldShowBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    tonalElevation = 6.dp
+                ) {
                     bottomNavItems.forEach { screen ->
                         val isSelected = currentRoute == screen.route
                         NavigationBarItem(
@@ -70,7 +74,14 @@ fun MainAppContent(viewModel: InventarioViewModel) {
                                     Icon(it, contentDescription = screen.title)
                                 }
                             },
-                            label = { Text(screen.title) },
+                            label = {
+                                Text(
+                                    text = screen.title,
+                                    maxLines = 1,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            },
+                            alwaysShowLabel = true,
                             selected = isSelected,
                             onClick = {
                                 if (currentRoute != screen.route) {

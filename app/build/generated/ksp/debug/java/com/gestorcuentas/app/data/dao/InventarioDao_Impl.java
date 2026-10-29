@@ -1,6 +1,7 @@
 package com.gestorcuentas.app.data.dao;
 
 import android.database.Cursor;
+import android.os.CancellationSignal;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.LongSparseArray;
@@ -8,7 +9,9 @@ import androidx.room.CoroutinesRoom;
 import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
+import androidx.room.RoomDatabaseKt;
 import androidx.room.RoomSQLiteQuery;
+import androidx.room.SharedSQLiteStatement;
 import androidx.room.util.CursorUtil;
 import androidx.room.util.DBUtil;
 import androidx.room.util.RelationUtil;
@@ -51,6 +54,10 @@ public final class InventarioDao_Impl implements InventarioDao {
   private final EntityDeletionOrUpdateAdapter<Cuenta> __updateAdapterOfCuenta;
 
   private final EntityDeletionOrUpdateAdapter<Venta> __updateAdapterOfVenta;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAllVentas;
+
+  private final SharedSQLiteStatement __preparedStmtOfDeleteAllCuentas;
 
   public InventarioDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
@@ -162,6 +169,22 @@ public final class InventarioDao_Impl implements InventarioDao {
         statement.bindLong(9, entity.getId());
       }
     };
+    this.__preparedStmtOfDeleteAllVentas = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM ventas";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfDeleteAllCuentas = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "DELETE FROM cuentas";
+        return _query;
+      }
+    };
   }
 
   @Override
@@ -175,6 +198,44 @@ public final class InventarioDao_Impl implements InventarioDao {
           final Long _result = __insertionAdapterOfCuenta.insertAndReturnId(cuenta);
           __db.setTransactionSuccessful();
           return _result;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object insertCuentas(final List<Cuenta> cuentas,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __insertionAdapterOfCuenta.insert(cuentas);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object insertVentas(final List<Venta> ventas,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __insertionAdapterOfVenta.insert(ventas);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
         } finally {
           __db.endTransaction();
         }
@@ -267,6 +328,58 @@ public final class InventarioDao_Impl implements InventarioDao {
           return Unit.INSTANCE;
         } finally {
           __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object restaurarBaseDeDatos(final List<Cuenta> cuentas, final List<Venta> ventas,
+      final Continuation<? super Unit> $completion) {
+    return RoomDatabaseKt.withTransaction(__db, (__cont) -> InventarioDao.DefaultImpls.restaurarBaseDeDatos(InventarioDao_Impl.this, cuentas, ventas, __cont), $completion);
+  }
+
+  @Override
+  public Object deleteAllVentas(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAllVentas.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAllVentas.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteAllCuentas(final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAllCuentas.acquire();
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfDeleteAllCuentas.release(_stmt);
         }
       }
     }, $completion);
@@ -431,6 +544,106 @@ public final class InventarioDao_Impl implements InventarioDao {
         _statement.release();
       }
     });
+  }
+
+  @Override
+  public Object getAllCuentasSnapshot(final Continuation<? super List<Cuenta>> $completion) {
+    final String _sql = "SELECT * FROM cuentas";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<Cuenta>>() {
+      @Override
+      @NonNull
+      public List<Cuenta> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfCorreo = CursorUtil.getColumnIndexOrThrow(_cursor, "correo");
+          final int _cursorIndexOfContrasenaCorreo = CursorUtil.getColumnIndexOrThrow(_cursor, "contrasena_correo");
+          final int _cursorIndexOfContrasenaPlataforma = CursorUtil.getColumnIndexOrThrow(_cursor, "contrasena_plataforma");
+          final int _cursorIndexOfTipoCuenta = CursorUtil.getColumnIndexOrThrow(_cursor, "tipo_cuenta");
+          final int _cursorIndexOfCostoCompra = CursorUtil.getColumnIndexOrThrow(_cursor, "costo_compra");
+          final int _cursorIndexOfFechaCreacion = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_creacion");
+          final int _cursorIndexOfEstado = CursorUtil.getColumnIndexOrThrow(_cursor, "estado");
+          final List<Cuenta> _result = new ArrayList<Cuenta>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final Cuenta _item;
+            final int _tmpId;
+            _tmpId = _cursor.getInt(_cursorIndexOfId);
+            final String _tmpCorreo;
+            _tmpCorreo = _cursor.getString(_cursorIndexOfCorreo);
+            final String _tmpContrasenaCorreo;
+            _tmpContrasenaCorreo = _cursor.getString(_cursorIndexOfContrasenaCorreo);
+            final String _tmpContrasenaPlataforma;
+            _tmpContrasenaPlataforma = _cursor.getString(_cursorIndexOfContrasenaPlataforma);
+            final String _tmpTipoCuenta;
+            _tmpTipoCuenta = _cursor.getString(_cursorIndexOfTipoCuenta);
+            final double _tmpCostoCompra;
+            _tmpCostoCompra = _cursor.getDouble(_cursorIndexOfCostoCompra);
+            final String _tmpFechaCreacion;
+            _tmpFechaCreacion = _cursor.getString(_cursorIndexOfFechaCreacion);
+            final String _tmpEstado;
+            _tmpEstado = _cursor.getString(_cursorIndexOfEstado);
+            _item = new Cuenta(_tmpId,_tmpCorreo,_tmpContrasenaCorreo,_tmpContrasenaPlataforma,_tmpTipoCuenta,_tmpCostoCompra,_tmpFechaCreacion,_tmpEstado);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getAllVentasSnapshot(final Continuation<? super List<Venta>> $completion) {
+    final String _sql = "SELECT * FROM ventas";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<Venta>>() {
+      @Override
+      @NonNull
+      public List<Venta> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfCuentaId = CursorUtil.getColumnIndexOrThrow(_cursor, "cuenta_id");
+          final int _cursorIndexOfNumeroCelularCliente = CursorUtil.getColumnIndexOrThrow(_cursor, "numero_celular_cliente");
+          final int _cursorIndexOfCantidadPerfiles = CursorUtil.getColumnIndexOrThrow(_cursor, "cantidad_perfiles");
+          final int _cursorIndexOfPrecioVentaPorPerfil = CursorUtil.getColumnIndexOrThrow(_cursor, "precio_venta_por_perfil");
+          final int _cursorIndexOfDuracionDias = CursorUtil.getColumnIndexOrThrow(_cursor, "duracion_dias");
+          final int _cursorIndexOfFechaInicio = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_inicio");
+          final int _cursorIndexOfFechaFin = CursorUtil.getColumnIndexOrThrow(_cursor, "fecha_fin");
+          final List<Venta> _result = new ArrayList<Venta>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final Venta _item;
+            final int _tmpId;
+            _tmpId = _cursor.getInt(_cursorIndexOfId);
+            final int _tmpCuentaId;
+            _tmpCuentaId = _cursor.getInt(_cursorIndexOfCuentaId);
+            final String _tmpNumeroCelularCliente;
+            _tmpNumeroCelularCliente = _cursor.getString(_cursorIndexOfNumeroCelularCliente);
+            final int _tmpCantidadPerfiles;
+            _tmpCantidadPerfiles = _cursor.getInt(_cursorIndexOfCantidadPerfiles);
+            final double _tmpPrecioVentaPorPerfil;
+            _tmpPrecioVentaPorPerfil = _cursor.getDouble(_cursorIndexOfPrecioVentaPorPerfil);
+            final int _tmpDuracionDias;
+            _tmpDuracionDias = _cursor.getInt(_cursorIndexOfDuracionDias);
+            final String _tmpFechaInicio;
+            _tmpFechaInicio = _cursor.getString(_cursorIndexOfFechaInicio);
+            final String _tmpFechaFin;
+            _tmpFechaFin = _cursor.getString(_cursorIndexOfFechaFin);
+            _item = new Venta(_tmpId,_tmpCuentaId,_tmpNumeroCelularCliente,_tmpCantidadPerfiles,_tmpPrecioVentaPorPerfil,_tmpDuracionDias,_tmpFechaInicio,_tmpFechaFin);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
   }
 
   @Override

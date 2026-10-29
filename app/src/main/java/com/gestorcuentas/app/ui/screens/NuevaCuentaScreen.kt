@@ -26,17 +26,20 @@ fun NuevaCuentaScreen(
 ) {
     val context = LocalContext.current
 
-    var tipoCuenta by remember { mutableStateOf("ChatGPT") }
+    val opcionesServicio = listOf("Chat GPT", "Gemini", "Otros")
+    var opcionSeleccionada by remember { mutableStateOf("Chat GPT") }
+    var otroServicioTexto by remember { mutableStateOf("") }
+
     var correo by remember { mutableStateOf("") }
     var contrasenaCorreo by remember { mutableStateOf("") }
     var contrasenaPlataforma by remember { mutableStateOf("") }
     var costoCompraTexto by remember { mutableStateOf("") }
     var fechaCreacion by remember { mutableStateOf(DateUtils.obtenerFechaHoy()) }
 
-    val serviciosComunes = listOf("ChatGPT", "Netflix", "Gemini", "Disney+", "Spotify", "Amazon Prime", "YouTube Premium")
+    val tipoCuentaFinal = if (opcionSeleccionada == "Otros") otroServicioTexto.trim() else opcionSeleccionada
 
     val costoCompra = costoCompraTexto.toDoubleOrNull() ?: 0.0
-    val formularioValido = tipoCuenta.isNotBlank() &&
+    val formularioValido = tipoCuentaFinal.isNotBlank() &&
             correo.isNotBlank() &&
             contrasenaPlataforma.isNotBlank() &&
             costoCompraTexto.isNotBlank() &&
@@ -64,31 +67,33 @@ fun NuevaCuentaScreen(
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text("Tipo de Servicio / Plataforma", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text("Tipo de Servicio", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
-            // Chips de servicios sugeridos
+            // Selector de los 3 tipos requeridos: Chat GPT, Gemini, Otros
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                serviciosComunes.take(4).forEach { servicio ->
+                opcionesServicio.forEach { opcion ->
                     FilterChip(
-                        selected = tipoCuenta.equals(servicio, ignoreCase = true),
-                        onClick = { tipoCuenta = servicio },
-                        label = { Text(servicio) }
+                        selected = opcionSeleccionada == opcion,
+                        onClick = { opcionSeleccionada = opcion },
+                        label = { Text(opcion, fontWeight = FontWeight.SemiBold) }
                     )
                 }
             }
 
-            OutlinedTextField(
-                value = tipoCuenta,
-                onValueChange = { tipoCuenta = it },
-                label = { Text("Nombre del Servicio") },
-                placeholder = { Text("Ej: ChatGPT, Netflix...") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
+            if (opcionSeleccionada == "Otros") {
+                OutlinedTextField(
+                    value = otroServicioTexto,
+                    onValueChange = { otroServicioTexto = it },
+                    label = { Text("Especificar Servicio") },
+                    placeholder = { Text("Ej: Netflix, Canva, Spotify...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
 
             Text("Credenciales de la Cuenta", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
@@ -152,7 +157,7 @@ fun NuevaCuentaScreen(
                             correo = correo,
                             contrasenaCorreo = contrasenaCorreo,
                             contrasenaPlataforma = contrasenaPlataforma,
-                            tipoCuenta = tipoCuenta,
+                            tipoCuenta = tipoCuentaFinal,
                             costoCompra = costoCompra,
                             fechaCreacion = fechaCreacion,
                             onSuccess = {

@@ -3,7 +3,10 @@ package com.gestorcuentas.app.ui.screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,8 +15,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gestorcuentas.app.data.entity.CuentaConVentas
+import com.gestorcuentas.app.data.entity.Venta
 import com.gestorcuentas.app.data.entity.VentaConCuenta
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.DangerRed
@@ -52,6 +61,40 @@ fun DashboardScreen(
     // Estado de la Card seleccionada: Por defecto "Cuentas Activas"
     var selectedTab by remember { mutableStateOf(DashboardTab.CUENTAS_ACTIVAS) }
 
+    // Estado para edición de venta
+    var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
+
+    // Menú de Backup
+    var menuBackupExpandido by remember { mutableStateOf(false) }
+    var uriImportarPendiente by remember { mutableStateOf<Uri?>(null) }
+
+    // Launcher para Exportar Backup (Crear Documento JSON)
+    val exportarBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            viewModel.exportarBackup { jsonString ->
+                try {
+                    context.contentResolver.openOutputStream(uri)?.use { output ->
+                        output.write(jsonString.toByteArray(Charsets.UTF_8))
+                    }
+                    Toast.makeText(context, "✅ Copia de seguridad guardada exitosamente", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error al guardar archivo: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    // Launcher para Importar Backup (Abrir Documento JSON)
+    val importarBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            uriImportarPendiente = uri
+        }
+    }
+
     // Filtrar cuentas activas
     val cuentasActivas = remember(cuentasConVentas) {
         cuentasConVentas.filter { it.cuenta.estado.equals("activa", ignoreCase = true) }
@@ -70,6 +113,34 @@ fun DashboardScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
+                    // Botón de Backup / Restaurar
+                    Box {
+                        IconButton(onClick = { menuBackupExpandido = true }) {
+                            Icon(Icons.Default.Backup, contentDescription = "Copia de Seguridad")
+                        }
+                        DropdownMenu(
+                            expanded = menuBackupExpandido,
+                            onDismissRequest = { menuBackupExpandido = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Exportar Backup (Guardar)") },
+                                leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) },
+                                onClick = {
+                                    menuBackupExpandido = false
+                                    exportarBackupLauncher.launch("backup_cuentas_${DateUtils.obtenerFechaHoy()}.json")
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Importar Backup (Restaurar)") },
+                                leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
+                                onClick = {
+                                    menuBackupExpandido = false
+                                    importarBackupLauncher.launch(arrayOf("application/json", "*/*"))
+                                }
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onNavigateToNuevaCuenta) {
                         Icon(Icons.Default.Add, contentDescription = "Nueva Cuenta")
                     }
@@ -266,7 +337,7 @@ fun DashboardScreen(
                         }
                     }
                 } else {
-                    // Vista B: Todas las Ventas con sus DÍAS DISPONIBLES y botón para copiar mensaje
+                    // Vista B: Todas las Ventas con sus DÍAS DISPONIBLES, editar y copiar mensaje
                     if (allVentasConCuenta.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
@@ -284,6 +355,9 @@ fun DashboardScreen(
                             items(allVentasConCuenta, key = { it.venta.id }) { item ->
                                 VentaConDiasItem(
                                     item = item,
+                                    onEditarVenta = {
+                                        ventaAEditar = item.venta
+                                    },
                                     onCopiarMensaje = {
                                         val cuenta = item.cuenta
                                         val venta = item.venta
@@ -311,6 +385,59 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+
+    // Diálogo para Editar Venta
+    ventaAEditar?.let { venta ->
+        EditarVentaDialog(
+            venta = venta,
+            viewModel = viewModel,
+            onDismiss = { ventaAEditar = null }
+        )
+    }
+
+    // Diálogo de Confirmación para Importar Backup
+    uriImportarPendiente?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { uriImportarPendiente = null },
+            title = { Text("¿Restaurar Copia de Seguridad?") },
+            text = { Text("Se importarán las cuentas y ventas del archivo seleccionado. Los datos actuales se reemplazarán por los del respaldo.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        try {
+                            val jsonString = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                            if (jsonString != null) {
+                                viewModel.restaurarBackup(
+                                    jsonString = jsonString,
+                                    onSuccess = { cuentasRest, ventasRest ->
+                                        Toast.makeText(context, "✅ Base de datos restaurada: $cuentasRest cuentas y $ventasRest ventas", Toast.LENGTH_LONG).show()
+                                        uriImportarPendiente = null
+                                    },
+                                    onError = { errorMsg ->
+                                        Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+                                        uriImportarPendiente = null
+                                    }
+                                )
+                            } else {
+                                Toast.makeText(context, "El archivo está vacío", Toast.LENGTH_SHORT).show()
+                                uriImportarPendiente = null
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            uriImportarPendiente = null
+                        }
+                    }
+                ) {
+                    Text("Restaurar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { uriImportarPendiente = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -392,11 +519,12 @@ fun CuentaActivaItem(
 }
 
 /**
- * Item de la lista de Todas las Ventas con DÍAS DISPONIBLES y botón para copiar mensaje
+ * Item de la lista de Todas las Ventas con DÍAS DISPONIBLES, botón editar y botón para copiar mensaje
  */
 @Composable
 fun VentaConDiasItem(
     item: VentaConCuenta,
+    onEditarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
@@ -467,17 +595,31 @@ fun VentaConDiasItem(
                     )
                 }
 
-                // Botón Copiar Mensaje Cliente
-                FilledTonalIconButton(
-                    onClick = onCopiarMensaje,
-                    modifier = Modifier.size(38.dp)
-                ) {
-                    Icon(
-                        Icons.Default.ContentCopy,
-                        contentDescription = "Copiar Mensaje",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
+                Row {
+                    // Botón Editar Venta
+                    IconButton(
+                        onClick = onEditarVenta,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Editar Venta",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    // Botón Copiar Mensaje Cliente
+                    FilledTonalIconButton(
+                        onClick = onCopiarMensaje,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = "Copiar Mensaje",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }
