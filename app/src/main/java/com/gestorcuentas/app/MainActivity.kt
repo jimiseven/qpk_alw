@@ -78,19 +78,16 @@ fun MainAppContent(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Ítems de la barra inferior de navegación
+    // Navegación Ergonómica: 3 pestañas principales en la Zona del Pulgar (Thumb Zone)
     val bottomNavItems = listOf(
         Screen.Dashboard,
         Screen.Cuentas,
-        Screen.NuevaVenta,
         Screen.HistorialCliente
     )
 
-    // Mostrar barra inferior en pantallas principales
     val shouldShowBottomBar = currentRoute in listOf(
         Screen.Dashboard.route,
         Screen.Cuentas.route,
-        Screen.NuevaVenta.route,
         Screen.HistorialCliente.route
     )
 
@@ -98,7 +95,7 @@ fun MainAppContent(
         bottomBar = {
             if (shouldShowBottomBar) {
                 NavigationBar(
-                    tonalElevation = 4.dp
+                    tonalElevation = 6.dp
                 ) {
                     bottomNavItems.forEach { screen ->
                         val isSelected = currentRoute == screen.route
@@ -139,18 +136,12 @@ fun MainAppContent(
             startDestination = Screen.Dashboard.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // 1. Dashboard
+            // 1. Dashboard (Inicio)
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
                     viewModel = viewModel,
                     onCuentaClick = { cuentaId ->
                         navController.navigate(Screen.CuentaDetalle.createRoute(cuentaId))
-                    },
-                    onNavigateToNuevaVenta = {
-                        navController.navigate(Screen.NuevaVenta.createRoute())
-                    },
-                    onNavigateToNuevaCuenta = {
-                        navController.navigate(Screen.NuevaCuenta.route)
                     },
                     onOpenConfiguracion = onOpenConfiguracion
                 )
@@ -162,9 +153,6 @@ fun MainAppContent(
                     viewModel = viewModel,
                     onCuentaClick = { cuentaId ->
                         navController.navigate(Screen.CuentaDetalle.createRoute(cuentaId))
-                    },
-                    onNavigateToNuevaCuenta = {
-                        navController.navigate(Screen.NuevaCuenta.route)
                     }
                 )
             }
@@ -180,45 +168,11 @@ fun MainAppContent(
                 CuentaDetalleScreen(
                     cuentaId = cuentaId,
                     viewModel = viewModel,
-                    onNavigateBack = { navController.popBackStack() },
-                    onNavigateToNuevaVenta = { cId ->
-                        navController.navigate(Screen.NuevaVenta.createRoute(cId))
-                    }
-                )
-            }
-
-            // 4. Nueva Venta
-            composable(
-                route = Screen.NuevaVenta.route,
-                arguments = listOf(
-                    navArgument("cuentaId") {
-                        type = NavType.IntType
-                        defaultValue = -1
-                    }
-                )
-            ) { backStackEntry ->
-                val cuentaIdArg = backStackEntry.arguments?.getInt("cuentaId")
-                val cuentaId = if (cuentaIdArg != null && cuentaIdArg != -1) cuentaIdArg else null
-                NuevaVentaScreen(
-                    initialCuentaId = cuentaId,
-                    viewModel = viewModel,
-                    onNavigateBack = {
-                        if (!navController.popBackStack()) {
-                            navController.navigate(Screen.Dashboard.route)
-                        }
-                    }
-                )
-            }
-
-            // 5. Nueva Cuenta
-            composable(Screen.NuevaCuenta.route) {
-                NuevaCuentaScreen(
-                    viewModel = viewModel,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            // 6. Historial de Clientes
+            // 4. Historial de Clientes
             composable(Screen.HistorialCliente.route) {
                 HistorialClienteScreen(viewModel = viewModel)
             }

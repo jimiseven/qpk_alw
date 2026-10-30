@@ -32,10 +32,11 @@ import com.gestorcuentas.app.viewmodel.InventarioViewModel
 fun CuentasScreen(
     viewModel: InventarioViewModel,
     onCuentaClick: (Int) -> Unit,
-    onNavigateToNuevaCuenta: () -> Unit
+    onNavigateToNuevaCuenta: () -> Unit = {}
 ) {
     val cuentasConVentas by viewModel.cuentasConVentas.collectAsState()
     var filtroTexto by remember { mutableStateOf("") }
+    var mostrarSheetNuevaCuenta by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     // Búsqueda inteligente: tolera números de WhatsApp (+591 76992490 -> 76992490), correo o servicio
@@ -54,6 +55,7 @@ fun CuentasScreen(
     }
 
     Scaffold(
+        // TopAppBar Minimalista: Solo título informativo
         topBar = {
             TopAppBar(
                 title = { Text("Inventario de Cuentas", fontWeight = FontWeight.Bold) },
@@ -62,14 +64,15 @@ fun CuentasScreen(
                 )
             )
         },
+        // Floating Action Button en la esquina inferior derecha (Thumb Zone)
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToNuevaCuenta,
+            ExtendedFloatingActionButton(
+                onClick = { mostrarSheetNuevaCuenta = true },
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text("Nueva Cuenta", fontWeight = FontWeight.Bold) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar Cuenta")
-            }
+            )
         }
     ) { padding ->
         Column(
@@ -78,7 +81,7 @@ fun CuentasScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Buscador por tipo de cuenta, correo o celular de cliente con botón borrar y pegar
+            // Buscador con botón borrar y pegar
             OutlinedTextField(
                 value = filtroTexto,
                 onValueChange = { filtroTexto = it },
@@ -113,11 +116,11 @@ fun CuentasScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = 60.dp),
+                        .padding(bottom = 80.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (filtroTexto.isEmpty()) "No hay cuentas registradas en el inventario.\nToca el botón + para registrar la primera."
+                        text = if (filtroTexto.isEmpty()) "No hay cuentas registradas en el inventario.\nToca '+ Nueva Cuenta' para registrar la primera."
                                else "No se encontraron cuentas con '$filtroTexto'.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -138,6 +141,14 @@ fun CuentasScreen(
                 }
             }
         }
+    }
+
+    // ModalBottomSheet en la Zona del Pulgar para Nueva Cuenta
+    if (mostrarSheetNuevaCuenta) {
+        NuevaCuentaBottomSheet(
+            viewModel = viewModel,
+            onDismiss = { mostrarSheetNuevaCuenta = false }
+        )
     }
 }
 

@@ -14,16 +14,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.gestorcuentas.app.data.entity.Venta
-import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditarVentaDialog(
     venta: Venta,
     viewModel: InventarioViewModel,
     onDismiss: () -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
 
     var numeroCelular by remember { mutableStateOf(venta.numeroCelularCliente) }
@@ -35,7 +36,6 @@ fun EditarVentaDialog(
     val duracionDias = duracionDiasTexto.toIntOrNull() ?: 0
     val precioVenta = precioVentaTexto.toDoubleOrNull() ?: 0.0
 
-    // Si cambia los días o fecha de inicio, sugerir actualización de fecha fin
     LaunchedEffect(duracionDias, fechaInicio) {
         if (duracionDias > 0) {
             fechaFin = DateUtils.calcularFechaFin(fechaInicio, duracionDias)
@@ -48,83 +48,85 @@ fun EditarVentaDialog(
             fechaInicio.isNotBlank() &&
             fechaFin.isNotBlank()
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("Editar Venta de Perfil", fontWeight = FontWeight.Bold) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+        sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Text(
+                text = "Editar Venta de Perfil",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            OutlinedTextField(
+                value = numeroCelular,
+                onValueChange = { numeroCelular = it },
+                label = { Text("Número de Celular") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp)
+            )
+
+            OutlinedTextField(
+                value = precioVentaTexto,
+                onValueChange = { precioVentaTexto = it },
+                label = { Text("Precio de Venta ($)") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp)
+            )
+
+            OutlinedTextField(
+                value = duracionDiasTexto,
+                onValueChange = { duracionDiasTexto = it },
+                label = { Text("Duración en Días") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp)
+            )
+
+            Text("Fechas de Vigencia", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 OutlinedTextField(
-                    value = numeroCelular,
-                    onValueChange = { numeroCelular = it },
-                    label = { Text("Número de Celular") },
+                    value = fechaInicio,
+                    onValueChange = { fechaInicio = it },
+                    label = { Text("Fecha Inicio") },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp)
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(14.dp)
                 )
 
                 OutlinedTextField(
-                    value = precioVentaTexto,
-                    onValueChange = { precioVentaTexto = it },
-                    label = { Text("Precio de Venta ($)") },
+                    value = fechaFin,
+                    onValueChange = { fechaFin = it },
+                    label = { Text("Fecha Fin") },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp)
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(14.dp)
                 )
-
-                OutlinedTextField(
-                    value = duracionDiasTexto,
-                    onValueChange = { duracionDiasTexto = it },
-                    label = { Text("Duración en Días") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp)
-                )
-
-                Text("Fechas de Vigencia", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = fechaInicio,
-                        onValueChange = { fechaInicio = it },
-                        label = { Text("Fecha Inicio") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = fechaFin,
-                        onValueChange = { fechaFin = it },
-                        label = { Text("Fecha Fin") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Column(modifier = Modifier.padding(10.dp)) {
-                        Text("Vigencia calculada: $fechaInicio al $fechaFin", style = MaterialTheme.typography.bodySmall)
-                        Text("Total a cobrar: ${DateUtils.formatearMoneda(precioVenta)}", style = MaterialTheme.typography.bodySmall, color = AccentGreen, fontWeight = FontWeight.Bold)
-                    }
-                }
             }
-        },
-        confirmButton = {
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Botón de Confirmación en la Zona del Pulgar
             Button(
                 onClick = {
                     if (formularioValido) {
@@ -132,26 +134,26 @@ fun EditarVentaDialog(
                             ventaId = venta.id,
                             cuentaId = venta.cuentaId,
                             numeroCelularCliente = numeroCelular,
-                            cantidadPerfiles = 1, // Siempre 1 perfil
+                            cantidadPerfiles = venta.cantidadPerfiles,
                             precioVentaPorPerfil = precioVenta,
                             duracionDias = duracionDias,
                             fechaInicio = fechaInicio,
+                            fechaFin = fechaFin,
                             onSuccess = {
-                                Toast.makeText(context, "Venta actualizada correctamente", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "✅ Venta actualizada correctamente", Toast.LENGTH_SHORT).show()
                                 onDismiss()
                             }
                         )
                     }
                 },
-                enabled = formularioValido
+                enabled = formularioValido,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Guardar Cambios")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text("Guardar Cambios", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
         }
-    )
+    }
 }

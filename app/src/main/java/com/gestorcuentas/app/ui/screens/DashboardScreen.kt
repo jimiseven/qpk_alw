@@ -3,7 +3,6 @@ package com.gestorcuentas.app.ui.screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,8 +23,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -59,8 +56,8 @@ enum class DashboardTab {
 fun DashboardScreen(
     viewModel: InventarioViewModel,
     onCuentaClick: (Int) -> Unit = {},
-    onNavigateToNuevaVenta: () -> Unit,
-    onNavigateToNuevaCuenta: () -> Unit,
+    onNavigateToNuevaVenta: () -> Unit = {},
+    onNavigateToNuevaCuenta: () -> Unit = {},
     onOpenConfiguracion: () -> Unit = {}
 ) {
     val resumen by viewModel.resumenFinanciero.collectAsState()
@@ -79,16 +76,17 @@ fun DashboardScreen(
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
 
-    // Diálogo de Estadísticas
-    var mostrarEstadisticas by remember { mutableStateOf(false) }
+    // BottomSheets en la Zona del Pulgar (Thumb Zone)
+    var mostrarSheetNuevaVenta by remember { mutableStateOf(false) }
+    var mostrarSheetNuevaCuenta by remember { mutableStateOf(false) }
+    var mostrarSheetEstadisticas by remember { mutableStateOf(false) }
+    var mostrarSheetCopiaSeguridad by remember { mutableStateOf(false) }
 
-    // Menú de Backup
-    var menuBackupExpandido by remember { mutableStateOf(false) }
     var jsonImportarPendiente by remember { mutableStateOf<String?>(null) }
     var resumenImportarCuentas by remember { mutableStateOf(0) }
     var resumenImportarVentas by remember { mutableStateOf(0) }
 
-    // Launcher para Exportar Backup (Crear Documento JSON con truncado y sincronización forzada)
+    // Launcher para Exportar Backup (Crear Documento JSON)
     val exportarBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -125,7 +123,6 @@ fun DashboardScreen(
                     Toast.makeText(context, "El archivo no contiene texto legible", Toast.LENGTH_LONG).show()
                     return@rememberLauncherForActivityResult
                 }
-                // Pre-validar JSON y contar elementos antes de mostrar confirmación
                 val (cuentas, ventas) = com.gestorcuentas.app.utils.BackupUtils.parsearBackup(text)
                 resumenImportarCuentas = cuentas.size
                 resumenImportarVentas = ventas.size
@@ -155,6 +152,7 @@ fun DashboardScreen(
     }
 
     Scaffold(
+        // TopAppBar Minimalista: Solo Identidad Visual + Ajustes de bajo uso
         topBar = {
             TopAppBar(
                 title = {
@@ -177,51 +175,20 @@ fun DashboardScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
-                    // Botón Configuración (Tema Oscuro/Claro & PIN/Huella)
                     IconButton(onClick = onOpenConfiguracion) {
                         Icon(Icons.Default.Settings, contentDescription = "Configuración y Seguridad")
                     }
-
-                    // Botón de Estadísticas (al lado del icono de Backup)
-                    IconButton(onClick = { mostrarEstadisticas = true }) {
-                        Icon(Icons.Default.BarChart, contentDescription = "Estadísticas del Negocio")
-                    }
-
-                    // Botón de Backup / Restaurar
-                    Box {
-                        IconButton(onClick = { menuBackupExpandido = true }) {
-                            Icon(Icons.Default.Backup, contentDescription = "Copia de Seguridad")
-                        }
-                        DropdownMenu(
-                            expanded = menuBackupExpandido,
-                            onDismissRequest = { menuBackupExpandido = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Exportar Backup (Guardar)") },
-                                leadingIcon = { Icon(Icons.Default.FileUpload, contentDescription = null) },
-                                onClick = {
-                                    menuBackupExpandido = false
-                                    exportarBackupLauncher.launch("backup_cuentas_${DateUtils.obtenerFechaHoy()}.json")
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Importar Backup (Restaurar)") },
-                                leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
-                                onClick = {
-                                    menuBackupExpandido = false
-                                    importarBackupLauncher.launch(arrayOf("application/json", "*/*"))
-                                }
-                            )
-                        }
-                    }
-
-                    IconButton(onClick = onNavigateToNuevaCuenta) {
-                        Icon(Icons.Default.Add, contentDescription = "Nueva Cuenta")
-                    }
-                    IconButton(onClick = onNavigateToNuevaVenta) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Nueva Venta")
-                    }
                 }
+            )
+        },
+        // Floating Action Button en la esquina inferior derecha (Thumb Zone)
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { mostrarSheetNuevaVenta = true },
+                icon = { Icon(Icons.Default.ShoppingCart, contentDescription = null) },
+                text = { Text("Nueva Venta", fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             )
         }
     ) { padding ->
@@ -232,7 +199,7 @@ fun DashboardScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // ==========================================
-            // 1. BANNER FINANCIERO COMPACTO UNIFICADO (FIJO)
+            // 1. BANNER FINANCIERO COMPACTO
             // ==========================================
             Card(
                 modifier = Modifier
@@ -271,16 +238,44 @@ fun DashboardScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // ==========================================
+            // 2. ACCIONES SECUNDARIAS ERGONÓMICAS (THUMB ZONE)
+            // ==========================================
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SuggestionChip(
+                    onClick = { mostrarSheetEstadisticas = true },
+                    label = { Text("Estadísticas", style = MaterialTheme.typography.labelSmall) },
+                    icon = { Icon(Icons.Default.BarChart, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    modifier = Modifier.weight(1f)
+                )
+                SuggestionChip(
+                    onClick = { mostrarSheetCopiaSeguridad = true },
+                    label = { Text("Backup", style = MaterialTheme.typography.labelSmall) },
+                    icon = { Icon(Icons.Default.Backup, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    modifier = Modifier.weight(1f)
+                )
+                SuggestionChip(
+                    onClick = { mostrarSheetNuevaCuenta = true },
+                    label = { Text("+ Cuenta", style = MaterialTheme.typography.labelSmall) },
+                    icon = { Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             // ==========================================
-            // 2. SELECTOR DE VISTA TIPO CARDS (FIJO)
+            // 3. SELECTOR DE VISTA TIPO CARDS (FIJO)
             // ==========================================
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // CARD 1: Cuentas Activas (Seleccionada por defecto)
                 val isCuentasSelected = selectedTab == DashboardTab.CUENTAS_ACTIVAS
                 Card(
                     modifier = Modifier
@@ -334,7 +329,6 @@ fun DashboardScreen(
                     }
                 }
 
-                // CARD 2: Ventas
                 val isVentasSelected = selectedTab == DashboardTab.TODAS_LAS_VENTAS
                 Card(
                     modifier = Modifier
@@ -392,7 +386,7 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             // ==========================================
-            // 3. LISTADO DINÁMICO (CON SCROLL FLUIDO)
+            // 4. LISTADO DINÁMICO (ZONA MEDIA / BAJA)
             // ==========================================
             Box(
                 modifier = Modifier
@@ -400,11 +394,10 @@ fun DashboardScreen(
                     .weight(1f)
             ) {
                 if (selectedTab == DashboardTab.CUENTAS_ACTIVAS) {
-                    // Vista A: Cuentas Activas con cuántas ventas por cuenta
                     if (cuentasActivas.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
-                                "No hay cuentas activas registradas.\nToca el botón + para agregar una.",
+                                "No hay cuentas activas registradas.\nToca '+ Cuenta' para registrar una.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -413,7 +406,7 @@ fun DashboardScreen(
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
-                            contentPadding = PaddingValues(bottom = 12.dp)
+                            contentPadding = PaddingValues(bottom = 80.dp)
                         ) {
                             items(cuentasActivas, key = { it.cuenta.id }) { item ->
                                 CuentaActivaItem(
@@ -424,9 +417,7 @@ fun DashboardScreen(
                         }
                     }
                 } else {
-                    // Vista B: Todas las Ventas con buscador con botón borrar
                     Column(modifier = Modifier.fillMaxSize()) {
-                        // Buscador de Ventas por Celular o Servicio con Botón Borrar y Pegar
                         OutlinedTextField(
                             value = busquedaVentas,
                             onValueChange = { busquedaVentas = it },
@@ -469,7 +460,7 @@ fun DashboardScreen(
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                                contentPadding = PaddingValues(bottom = 12.dp)
+                                contentPadding = PaddingValues(bottom = 80.dp)
                             ) {
                                 items(ventasFiltradas, key = { it.venta.id }) { item ->
                                     VentaConDiasItem(
@@ -507,15 +498,48 @@ fun DashboardScreen(
         }
     }
 
-    // Diálogo para Visualizar Estadísticas del Negocio (Por Mes o Rango de Fechas)
-    if (mostrarEstadisticas) {
-        EstadisticasDialog(
+    // ==========================================
+    // 5. MODAL BOTTOM SHEETS ERGONÓMICOS
+    // ==========================================
+
+    // Sheet Nueva Venta
+    if (mostrarSheetNuevaVenta) {
+        NuevaVentaBottomSheet(
             viewModel = viewModel,
-            onDismiss = { mostrarEstadisticas = false }
+            onDismiss = { mostrarSheetNuevaVenta = false }
         )
     }
 
-    // Diálogo para Editar Venta
+    // Sheet Nueva Cuenta
+    if (mostrarSheetNuevaCuenta) {
+        NuevaCuentaBottomSheet(
+            viewModel = viewModel,
+            onDismiss = { mostrarSheetNuevaCuenta = false }
+        )
+    }
+
+    // Sheet Estadísticas
+    if (mostrarSheetEstadisticas) {
+        EstadisticasDialog(
+            viewModel = viewModel,
+            onDismiss = { mostrarSheetEstadisticas = false }
+        )
+    }
+
+    // Sheet Copia de Seguridad
+    if (mostrarSheetCopiaSeguridad) {
+        CopiaSeguridadBottomSheet(
+            onExportar = {
+                exportarBackupLauncher.launch("backup_cuentas_${DateUtils.obtenerFechaHoy()}.json")
+            },
+            onImportar = {
+                importarBackupLauncher.launch(arrayOf("application/json", "*/*"))
+            },
+            onDismiss = { mostrarSheetCopiaSeguridad = false }
+        )
+    }
+
+    // Sheet Editar Venta
     ventaAEditar?.let { venta ->
         EditarVentaDialog(
             venta = venta,
@@ -524,7 +548,7 @@ fun DashboardScreen(
         )
     }
 
-    // Diálogo de Confirmación para Eliminar Venta
+    // Confirmación Eliminar Venta
     ventaAEliminar?.let { venta ->
         AlertDialog(
             onDismissRequest = { ventaAEliminar = null },
@@ -553,7 +577,7 @@ fun DashboardScreen(
         )
     }
 
-    // Diálogo de Confirmación para Importar Backup con detalle de elementos
+    // Confirmación Restaurar Backup
     jsonImportarPendiente?.let { jsonString ->
         AlertDialog(
             onDismissRequest = { jsonImportarPendiente = null },
@@ -630,7 +654,6 @@ fun CuentaActivaItem(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // Badge de Ventas de esta cuenta
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
@@ -719,7 +742,6 @@ fun VentaConDiasItem(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // Badge de Días Disponibles
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = badgeColor.copy(alpha = 0.15f)
@@ -756,7 +778,6 @@ fun VentaConDiasItem(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    // Botón Copiar Mensaje Cliente
                     FilledTonalIconButton(
                         onClick = onCopiarMensaje,
                         modifier = Modifier.size(36.dp)
@@ -769,7 +790,6 @@ fun VentaConDiasItem(
                         )
                     }
 
-                    // Botón Editar Venta
                     IconButton(
                         onClick = onEditarVenta,
                         modifier = Modifier.size(36.dp)
@@ -781,7 +801,6 @@ fun VentaConDiasItem(
                         )
                     }
 
-                    // Botón Eliminar Venta
                     IconButton(
                         onClick = onEliminarVenta,
                         modifier = Modifier.size(36.dp)

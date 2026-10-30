@@ -39,9 +39,8 @@ fun CuentaDetalleScreen(
     cuentaId: Int,
     viewModel: InventarioViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToNuevaVenta: (Int) -> Unit
+    onNavigateToNuevaVenta: (Int) -> Unit = {}
 ) {
-    // Obtenemos directamente de la lista reactiva de ViewModel sin crear flujos nuevos (EVITA EL PARPADEO)
     val todasLasCuentas by viewModel.cuentasConVentas.collectAsState()
     val cuentaConVentas = remember(todasLasCuentas, cuentaId) {
         todasLasCuentas.find { it.cuenta.id == cuentaId }
@@ -53,6 +52,7 @@ fun CuentaDetalleScreen(
     var mostrarPasswordPlataforma by remember { mutableStateOf(false) }
     var mostrarDialogoEliminarCuenta by remember { mutableStateOf(false) }
     var mostrarDialogoEditarCuenta by remember { mutableStateOf(false) }
+    var mostrarSheetNuevaVenta by remember { mutableStateOf(false) }
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
 
@@ -66,34 +66,67 @@ fun CuentaDetalleScreen(
     val estaInhabilitada = cuentaConVentas?.cuenta?.estado == "inhabilitada"
 
     Scaffold(
+        // TopAppBar Minimalista: Solo navegación de regreso y contexto visual
         topBar = {
             TopAppBar(
-                title = { Text(cuentaConVentas?.cuenta?.tipoCuenta?.uppercase() ?: "Detalle Cuenta", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        cuentaConVentas?.cuenta?.tipoCuenta?.uppercase() ?: "Detalle Cuenta",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
                     }
-                },
-                actions = {
-                    if (cuentaConVentas != null) {
-                        IconButton(onClick = { mostrarDialogoEditarCuenta = true }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Editar Cuenta")
-                        }
-                        IconButton(onClick = { mostrarDialogoEliminarCuenta = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Eliminar Cuenta y Ventas", tint = DangerRed)
-                        }
-                    }
                 }
             )
         },
-        floatingActionButton = {
-            if (cuentaConVentas != null && !estaInhabilitada) {
-                ExtendedFloatingActionButton(
-                    onClick = { onNavigateToNuevaVenta(cuentaConVentas.cuenta.id) },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Vender Perfil", fontWeight = FontWeight.Bold) },
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+        // Barra Inferior de Acciones Ergonómicas (Thumb Zone)
+        bottomBar = {
+            if (cuentaConVentas != null) {
+                Surface(
+                    tonalElevation = 6.dp,
+                    shadowElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedButton(
+                            onClick = { mostrarDialogoEditarCuenta = true },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Editar", fontWeight = FontWeight.SemiBold)
+                        }
+
+                        IconButton(
+                            onClick = { mostrarDialogoEliminarCuenta = true },
+                            modifier = Modifier.size(44.dp)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = "Eliminar Cuenta", tint = DangerRed)
+                        }
+
+                        if (!estaInhabilitada) {
+                            Button(
+                                onClick = { mostrarSheetNuevaVenta = true },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1.3f)
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Vender", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
             }
         }
     ) { padding ->
@@ -120,7 +153,6 @@ fun CuentaDetalleScreen(
             ) {
                 item { Spacer(modifier = Modifier.height(2.dp)) }
 
-                // Alerta si está inhabilitada
                 if (estaInhabilitada) {
                     item {
                         Card(
@@ -257,7 +289,6 @@ fun CuentaDetalleScreen(
                                 }
                             }
 
-                            // Fechas de vigencia de la cuenta maestra con proveedor
                             if (cuenta.fechaCreacion.isNotBlank() || cuenta.fechaFin.isNotBlank()) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                                 Text("Vigencia Cuenta Maestra (Proveedor):", style = MaterialTheme.typography.labelSmall)
@@ -271,7 +302,7 @@ fun CuentaDetalleScreen(
                     }
                 }
 
-                // Card Unificada de Rentabilidad de esta Cuenta
+                // Card Unificada de Rentabilidad
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -324,7 +355,7 @@ fun CuentaDetalleScreen(
                     }
                 }
 
-                // Lista de Perfiles Vendidos de esta cuenta
+                // Lista de Perfiles Vendidos
                 item {
                     Text(
                         "Ventas Registradas (${cuentaConVentas.ventas.size})",
@@ -368,13 +399,13 @@ fun CuentaDetalleScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(70.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
         }
     }
 
-    // Diálogo de Edición de Cuenta
+    // ModalBottomSheet para Editar Cuenta
     if (mostrarDialogoEditarCuenta && cuentaConVentas != null) {
         EditarCuentaDialog(
             cuenta = cuentaConVentas.cuenta,
@@ -383,7 +414,16 @@ fun CuentaDetalleScreen(
         )
     }
 
-    // Diálogo de Edición de Venta
+    // ModalBottomSheet para Registrar Nueva Venta sobre esta Cuenta
+    if (mostrarSheetNuevaVenta && cuentaConVentas != null) {
+        NuevaVentaBottomSheet(
+            initialCuentaId = cuentaConVentas.cuenta.id,
+            viewModel = viewModel,
+            onDismiss = { mostrarSheetNuevaVenta = false }
+        )
+    }
+
+    // ModalBottomSheet para Editar Venta
     ventaAEditar?.let { venta ->
         EditarVentaDialog(
             venta = venta,
@@ -392,7 +432,7 @@ fun CuentaDetalleScreen(
         )
     }
 
-    // Diálogo de confirmación para eliminar VENTA
+    // Confirmación Eliminar Venta
     ventaAEliminar?.let { venta ->
         AlertDialog(
             onDismissRequest = { ventaAEliminar = null },
@@ -421,7 +461,7 @@ fun CuentaDetalleScreen(
         )
     }
 
-    // Diálogo de confirmación para eliminar CUENTA CON TODAS SUS VENTAS VINCULADAS
+    // Confirmación Eliminar Cuenta
     if (mostrarDialogoEliminarCuenta && cuentaConVentas != null) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoEliminarCuenta = false },

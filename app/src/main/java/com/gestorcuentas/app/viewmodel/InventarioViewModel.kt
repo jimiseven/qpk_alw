@@ -195,20 +195,21 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     }
 
     /**
-     * Actualiza una venta existente y recalcula automáticamente la fecha_fin.
+     * Actualiza una venta existente y recalcula o actualiza la fecha_fin.
      */
     fun actualizarVenta(
         ventaId: Int,
         cuentaId: Int,
         numeroCelularCliente: String,
-        cantidadPerfiles: Int,
+        cantidadPerfiles: Int = 1,
         precioVentaPorPerfil: Double,
         duracionDias: Int,
         fechaInicio: String,
+        fechaFin: String? = null,
         onSuccess: () -> Unit = {}
     ) {
         viewModelScope.launch {
-            val fechaFinCalculada = DateUtils.calcularFechaFin(fechaInicio, duracionDias)
+            val fechaFinFinal = if (!fechaFin.isNullOrBlank()) fechaFin.trim() else DateUtils.calcularFechaFin(fechaInicio, duracionDias)
             val ventaActualizada = Venta(
                 id = ventaId,
                 cuentaId = cuentaId,
@@ -216,8 +217,8 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
                 cantidadPerfiles = cantidadPerfiles,
                 precioVentaPorPerfil = precioVentaPorPerfil,
                 duracionDias = duracionDias,
-                fechaInicio = fechaInicio,
-                fechaFin = fechaFinCalculada
+                fechaInicio = fechaInicio.trim(),
+                fechaFin = fechaFinFinal
             )
             repository.updateVenta(ventaActualizada)
             onSuccess()
