@@ -1,5 +1,6 @@
 package com.gestorcuentas.app.data.entity
 
+import androidx.compose.runtime.Immutable
 import androidx.room.Embedded
 import androidx.room.Relation
 
@@ -7,6 +8,7 @@ import androidx.room.Relation
  * Representa una cuenta maestra junto a todas las ventas de perfiles asociadas.
  * Facilita el cálculo automático de rentabilidad (Ingresos vs Costo).
  */
+@Immutable
 data class CuentaConVentas(
     @Embedded val cuenta: Cuenta,
     @Relation(
@@ -36,6 +38,7 @@ data class CuentaConVentas(
  * Representa una venta junto a los datos de la cuenta maestra asignada.
  * Ideal para el Dashboard y listados de vencimiento.
  */
+@Immutable
 data class VentaConCuenta(
     @Embedded val venta: Venta,
     @Relation(

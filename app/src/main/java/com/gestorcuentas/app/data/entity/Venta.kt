@@ -1,5 +1,6 @@
 package com.gestorcuentas.app.data.entity
 
+import androidx.compose.runtime.Immutable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -10,6 +11,7 @@ import androidx.room.PrimaryKey
  * Entidad que representa la venta de perfiles o accesos a un cliente.
  * Se vincula a una Cuenta maestra mediante ForeignKey (con borrado en cascada).
  */
+@Immutable
 @Entity(
     tableName = "ventas",
     foreignKeys = [
@@ -22,7 +24,8 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index(value = ["cuenta_id"]),
-        Index(value = ["numero_celular_cliente"])
+        Index(value = ["numero_celular_cliente"]),
+        Index(value = ["fecha_fin"]) // Índice para ordenamiento y consultas por fecha sin full scan
     ]
 )
 data class Venta(

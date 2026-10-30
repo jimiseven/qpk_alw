@@ -1,14 +1,22 @@
 package com.gestorcuentas.app.data.entity
 
+import androidx.compose.runtime.Immutable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * Entidad que representa una Cuenta Maestra adquirida a un proveedor.
  * Contiene credenciales, tipo de servicio, costo de compra y estado actual.
  */
-@Entity(tableName = "cuentas")
+@Immutable
+@Entity(
+    tableName = "cuentas",
+    indices = [
+        Index(value = ["estado"]) // Índice para filtros instantáneos de inventario activo
+    ]
+)
 data class Cuenta(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

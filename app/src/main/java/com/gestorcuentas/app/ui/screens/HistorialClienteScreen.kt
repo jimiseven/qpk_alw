@@ -43,6 +43,7 @@ fun HistorialClienteScreen(
     val busquedaCelular by viewModel.busquedaCelular.collectAsState()
     val allVentasConCuenta by viewModel.allVentasConCuenta.collectAsState()
     val context = LocalContext.current
+    val hoy = remember { java.time.LocalDate.now() }
 
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
@@ -159,6 +160,7 @@ fun HistorialClienteScreen(
                     items(historialFiltrado, key = { it.venta.id }) { item ->
                         HistorialVentaCard(
                             item = item,
+                            hoy = hoy,
                             onEditarVenta = { ventaAEditar = item.venta },
                             onEliminarVenta = { ventaAEliminar = item.venta },
                             onCopiarMensaje = {
@@ -233,19 +235,24 @@ fun HistorialClienteScreen(
 @Composable
 fun HistorialVentaCard(
     item: VentaConCuenta,
+    hoy: java.time.LocalDate = remember { java.time.LocalDate.now() },
     onEditarVenta: () -> Unit,
     onEliminarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
     val cuenta = item.cuenta
-    val dias = DateUtils.calcularDiasRestantes(venta.fechaFin)
+    val dias = remember(venta.fechaFin, hoy) {
+        DateUtils.calcularDiasRestantes(venta.fechaFin, hoy)
+    }
 
-    val (badgeColor, badgeText) = when {
-        dias < 0 -> DangerRed to "Vencida hace ${-dias}d"
-        dias == 0L -> WarningAmber to "¡Vence Hoy!"
-        dias in 1..3 -> WarningAmber to "$dias días disponibles"
-        else -> AccentGreen to "$dias días disponibles"
+    val (badgeColor, badgeText) = remember(dias) {
+        when {
+            dias < 0 -> DangerRed to "Vencida hace ${-dias}d"
+            dias == 0L -> WarningAmber to "¡Vence Hoy!"
+            dias in 1..3 -> WarningAmber to "$dias días disponibles"
+            else -> AccentGreen to "$dias días disponibles"
+        }
     }
 
     Card(

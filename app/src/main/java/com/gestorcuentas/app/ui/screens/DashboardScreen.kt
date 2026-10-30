@@ -67,6 +67,7 @@ fun DashboardScreen(
     val cuentasConVentas by viewModel.cuentasConVentas.collectAsState()
     val allVentasConCuenta by viewModel.allVentasConCuenta.collectAsState()
     val context = LocalContext.current
+    val hoy = remember { java.time.LocalDate.now() }
 
     // Estado de la Card seleccionada: Por defecto "Cuentas Activas"
     var selectedTab by remember { mutableStateOf(DashboardTab.CUENTAS_ACTIVAS) }
@@ -473,6 +474,7 @@ fun DashboardScreen(
                                 items(ventasFiltradas, key = { it.venta.id }) { item ->
                                     VentaConDiasItem(
                                         item = item,
+                                        hoy = hoy,
                                         onEditarVenta = { ventaAEditar = item.venta },
                                         onEliminarVenta = { ventaAEliminar = item.venta },
                                         onCopiarMensaje = {
@@ -673,19 +675,24 @@ fun CuentaActivaItem(
 @Composable
 fun VentaConDiasItem(
     item: VentaConCuenta,
+    hoy: java.time.LocalDate = remember { java.time.LocalDate.now() },
     onEditarVenta: () -> Unit,
     onEliminarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
     val cuenta = item.cuenta
-    val diasRestantes = DateUtils.calcularDiasRestantes(venta.fechaFin)
+    val diasRestantes = remember(venta.fechaFin, hoy) {
+        DateUtils.calcularDiasRestantes(venta.fechaFin, hoy)
+    }
 
-    val (badgeColor, badgeText) = when {
-        diasRestantes < 0 -> DangerRed to "Vencida hace ${-diasRestantes}d"
-        diasRestantes == 0L -> WarningAmber to "¡Vence Hoy! (0 días)"
-        diasRestantes in 1..3 -> WarningAmber to "$diasRestantes días disponibles"
-        else -> AccentGreen to "$diasRestantes días disponibles"
+    val (badgeColor, badgeText) = remember(diasRestantes) {
+        when {
+            diasRestantes < 0 -> DangerRed to "Vencida hace ${-diasRestantes}d"
+            diasRestantes == 0L -> WarningAmber to "¡Vence Hoy! (0 días)"
+            diasRestantes in 1..3 -> WarningAmber to "$diasRestantes días disponibles"
+            else -> AccentGreen to "$diasRestantes días disponibles"
+        }
     }
 
     Card(

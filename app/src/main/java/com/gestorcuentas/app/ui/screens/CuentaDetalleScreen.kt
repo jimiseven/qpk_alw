@@ -47,6 +47,7 @@ fun CuentaDetalleScreen(
         todasLasCuentas.find { it.cuenta.id == cuentaId }
     }
     val context = LocalContext.current
+    val hoy = remember { java.time.LocalDate.now() }
 
     var mostrarPasswordCorreo by remember { mutableStateOf(false) }
     var mostrarPasswordPlataforma by remember { mutableStateOf(false) }
@@ -345,6 +346,7 @@ fun CuentaDetalleScreen(
                         VentaItemCard(
                             venta = venta,
                             cuenta = cuenta,
+                            hoy = hoy,
                             onEditar = { ventaAEditar = venta },
                             onEliminar = { ventaAEliminar = venta },
                             onCopiarMensaje = {
@@ -459,18 +461,22 @@ fun CuentaDetalleScreen(
 fun VentaItemCard(
     venta: Venta,
     cuenta: Cuenta,
+    hoy: java.time.LocalDate = remember { java.time.LocalDate.now() },
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
-    val estado = DateUtils.obtenerEstadoVencimiento(venta.fechaFin)
-    val diasRestantes = DateUtils.calcularDiasRestantes(venta.fechaFin)
+    val diasRestantes = remember(venta.fechaFin, hoy) {
+        DateUtils.calcularDiasRestantes(venta.fechaFin, hoy)
+    }
 
-    val (colorBadge, textoBadge) = when (estado) {
-        DateUtils.EstadoVencimiento.VENCIDA -> DangerRed to "Vencida (${-diasRestantes}d)"
-        DateUtils.EstadoVencimiento.VENCE_HOY -> WarningAmber to "Vence Hoy"
-        DateUtils.EstadoVencimiento.POR_VENCER -> WarningAmber to "Vence en ${diasRestantes}d"
-        DateUtils.EstadoVencimiento.ACTIVA -> AccentGreen to "Activa (${diasRestantes}d)"
+    val (colorBadge, textoBadge) = remember(diasRestantes) {
+        when {
+            diasRestantes < 0 -> DangerRed to "Vencida (${-diasRestantes}d)"
+            diasRestantes == 0L -> WarningAmber to "Vence Hoy"
+            diasRestantes in 1..3 -> WarningAmber to "Vence en ${diasRestantes}d"
+            else -> AccentGreen to "Activa (${diasRestantes}d)"
+        }
     }
 
     Card(

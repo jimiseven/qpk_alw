@@ -55,14 +55,11 @@ object DateUtils {
     }
 
     /**
-     * Retorna la diferencia de días entre la fecha de hoy y la fecha_fin.
-     * Número negativo significa que ya venció.
-     * 0 significa que vence hoy.
-     * Número positivo indica días restantes.
+     * Retorna la diferencia de días entre la fecha de referencia y la fecha_fin.
+     * Permite pasar un `hoy` precalculado para evitar llamar a `LocalDate.now()` en cada frame de scroll.
      */
-    fun calcularDiasRestantes(fechaFin: String): Long {
+    fun calcularDiasRestantes(fechaFin: String, hoy: LocalDate = LocalDate.now()): Long {
         return try {
-            val hoy = LocalDate.now()
             val fin = LocalDate.parse(fechaFin, FORMATTER)
             ChronoUnit.DAYS.between(hoy, fin)
         } catch (e: Exception) {
@@ -87,8 +84,8 @@ object DateUtils {
         ACTIVA
     }
 
-    fun obtenerEstadoVencimiento(fechaFin: String): EstadoVencimiento {
-        val dias = calcularDiasRestantes(fechaFin)
+    fun obtenerEstadoVencimiento(fechaFin: String, hoy: LocalDate = LocalDate.now()): EstadoVencimiento {
+        val dias = calcularDiasRestantes(fechaFin, hoy)
         return when {
             dias < 0 -> EstadoVencimiento.VENCIDA
             dias == 0L -> EstadoVencimiento.VENCE_HOY

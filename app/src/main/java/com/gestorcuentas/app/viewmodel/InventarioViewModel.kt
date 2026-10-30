@@ -1,5 +1,6 @@
 package com.gestorcuentas.app.viewmodel
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,9 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,6 +23,7 @@ import kotlinx.coroutines.withContext
 /**
  * Resumen de indicadores financieros y de operación.
  */
+@Immutable
 data class ResumenFinanciero(
     val totalIngresos: Double = 0.0,
     val totalCostos: Double = 0.0,
@@ -61,26 +60,36 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     val allVentasConCuenta: StateFlow<List<VentaConCuenta>> = repository.allVentasConCuenta
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Resumen financiero consolidado (Ingresos vs Costos y Utilidad)
-    val resumenFinanciero: StateFlow<ResumenFinanciero> = combine(
-        repository.allCuentas,
-        repository.allVentas
-    ) { cuentas, ventas ->
-        val totalIngresos = ventas.sumOf { it.cantidadPerfiles * it.precioVentaPorPerfil }
-        val totalCostos = cuentas.sumOf { it.costoCompra }
-        val gananciaNeta = totalIngresos - totalCostos
-        val activas = cuentas.count { it.estado.equals("activa", ignoreCase = true) }
-        val hoy = DateUtils.obtenerFechaHoy()
-        val ventasVigentes = ventas.count { it.fechaFin >= hoy }
+    // Resumen financiero derivado eficientemente en memoria (sin consultas duplicadas a SQLite)
+    val resumenFinanciero: StateFlow<ResumenFinanciero> = cuentasConVentas
+        .map { cuentas ->
+            var totalIngresos = 0.0
+            var totalCostos = 0.0
+            var activas = 0
+            var ventasVigentes = 0
+            val hoy = DateUtils.obtenerFechaHoy()
 
-        ResumenFinanciero(
-            totalIngresos = totalIngresos,
-            totalCostos = totalCostos,
-            gananciaNeta = gananciaNeta,
-            totalCuentasActivas = activas,
-            totalVentasActivas = ventasVigentes
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ResumenFinanciero())
+            for (c in cuentas) {
+                totalCostos += c.cuenta.costoCompra
+                if (c.cuenta.estado.equals("activa", ignoreCase = true)) {
+                    activas++
+                }
+                for (v in c.ventas) {
+                    totalIngresos += v.precioVentaPorPerfil
+                    if (v.fechaFin >= hoy) {
+                        ventasVigentes++
+                    }
+                }
+            }
+            ResumenFinanciero(
+                totalIngresos = totalIngresos,
+                totalCostos = totalCostos,
+                gananciaNeta = totalIngresos - totalCostos,
+                totalCuentasActivas = activas,
+                totalVentasActivas = ventasVigentes
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ResumenFinanciero())
 
     // Estado para búsqueda de historial por celular
     private val _busquedaCelular = MutableStateFlow("")
