@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.gestorcuentas.app.ui.components.CampoFechaPicker
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.utils.MensajeEntregaUtils
@@ -231,14 +232,11 @@ fun NuevaVentaBottomSheet(
                     shape = RoundedCornerShape(14.dp)
                 )
 
-                OutlinedTextField(
-                    value = fechaInicio,
-                    onValueChange = { fechaInicio = it },
-                    label = { Text("Fecha Inicio") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
-                    shape = RoundedCornerShape(14.dp)
+                CampoFechaPicker(
+                    label = "Fecha Inicio",
+                    fechaIso = fechaInicio,
+                    onFechaChange = { fechaInicio = it },
+                    modifier = Modifier.weight(1f)
                 )
             }
 

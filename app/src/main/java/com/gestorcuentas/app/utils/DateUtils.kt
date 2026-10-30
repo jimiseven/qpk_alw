@@ -1,6 +1,8 @@
 package com.gestorcuentas.app.utils
 
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
@@ -38,6 +40,34 @@ object DateUtils {
         } catch (e: Exception) {
             // Fallback en caso de error de formato
             obtenerFechaHoy()
+        }
+    }
+
+    /**
+     * Convierte milisegundos UTC (de DatePicker) a fecha ISO (YYYY-MM-DD).
+     */
+    fun millisToFechaIso(millis: Long): String {
+        return try {
+            Instant.ofEpochMilli(millis)
+                .atZone(ZoneId.of("UTC"))
+                .toLocalDate()
+                .format(FORMATTER)
+        } catch (e: Exception) {
+            obtenerFechaHoy()
+        }
+    }
+
+    /**
+     * Convierte una fecha ISO (YYYY-MM-DD) a milisegundos UTC (para inicializar DatePicker).
+     */
+    fun fechaIsoToMillis(fechaIso: String): Long {
+        return try {
+            LocalDate.parse(fechaIso, FORMATTER)
+                .atStartOfDay(ZoneId.of("UTC"))
+                .toInstant()
+                .toEpochMilli()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
         }
     }
 

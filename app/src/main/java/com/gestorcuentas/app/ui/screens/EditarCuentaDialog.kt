@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.gestorcuentas.app.data.entity.Cuenta
+import com.gestorcuentas.app.ui.components.CampoFechaPicker
 import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
@@ -147,22 +148,18 @@ fun EditarCuentaDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                OutlinedTextField(
-                    value = fechaInicio,
-                    onValueChange = { fechaInicio = it },
-                    label = { Text("Fecha Inicio") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp)
+                CampoFechaPicker(
+                    label = "Fecha Inicio",
+                    fechaIso = fechaInicio,
+                    onFechaChange = { fechaInicio = it },
+                    modifier = Modifier.weight(1f)
                 )
 
-                OutlinedTextField(
-                    value = fechaFin,
-                    onValueChange = { fechaFin = it },
-                    label = { Text("Fecha Fin") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp)
+                CampoFechaPicker(
+                    label = "Fecha Fin",
+                    fechaIso = fechaFin,
+                    onFechaChange = { fechaFin = it },
+                    modifier = Modifier.weight(1f)
                 )
             }
 

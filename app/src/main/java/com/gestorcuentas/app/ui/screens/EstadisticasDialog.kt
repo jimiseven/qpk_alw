@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gestorcuentas.app.ui.components.CampoFechaPicker
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.utils.DateUtils
@@ -151,19 +152,17 @@ fun EstadisticasDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = fechaDesde,
-                        onValueChange = { fechaDesde = it },
-                        label = { Text("Desde") },
-                        singleLine = true,
+                    CampoFechaPicker(
+                        label = "Desde",
+                        fechaIso = fechaDesde,
+                        onFechaChange = { fechaDesde = it },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     )
-                    OutlinedTextField(
-                        value = fechaHasta,
-                        onValueChange = { fechaHasta = it },
-                        label = { Text("Hasta") },
-                        singleLine = true,
+                    CampoFechaPicker(
+                        label = "Hasta",
+                        fechaIso = fechaHasta,
+                        onFechaChange = { fechaHasta = it },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     )
