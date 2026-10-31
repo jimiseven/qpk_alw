@@ -161,8 +161,8 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_cat_logo),
-                            contentDescription = "Logo Gatito",
+                            painter = painterResource(id = R.drawable.ic_mr_robot),
+                            contentDescription = "Logo Mr Robot",
                             modifier = Modifier.size(36.dp)
                         )
                         Text(
@@ -239,7 +239,7 @@ fun DashboardScreen(
             }
 
             // ==========================================
-            // 2. ACCIONES SECUNDARIAS ERGONÓMICAS (THUMB ZONE)
+            // 2. ACCIONES SECUNDARIAS ERGONÓMICAS Y SIMÉTRICAS
             // ==========================================
             Row(
                 modifier = Modifier
@@ -247,24 +247,101 @@ fun DashboardScreen(
                     .padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SuggestionChip(
+                // Botón Estadísticas
+                Surface(
                     onClick = { mostrarSheetEstadisticas = true },
-                    label = { Text("Estadísticas", style = MaterialTheme.typography.labelSmall) },
-                    icon = { Icon(Icons.Default.BarChart, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                    modifier = Modifier.weight(1f)
-                )
-                SuggestionChip(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.BarChart,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Estadísticas",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                // Botón Backup
+                Surface(
                     onClick = { mostrarSheetCopiaSeguridad = true },
-                    label = { Text("Backup", style = MaterialTheme.typography.labelSmall) },
-                    icon = { Icon(Icons.Default.Backup, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                    modifier = Modifier.weight(1f)
-                )
-                SuggestionChip(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Backup,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Backup",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                // Botón + Cuenta
+                Surface(
                     onClick = { mostrarSheetNuevaCuenta = true },
-                    label = { Text("+ Cuenta", style = MaterialTheme.typography.labelSmall) },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                    modifier = Modifier.weight(1f)
-                )
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "+ Cuenta",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -473,6 +550,7 @@ fun DashboardScreen(
                                             val venta = item.venta
                                             if (cuenta != null) {
                                                 val mensaje = MensajeEntregaUtils.generarMensaje(
+                                                    context = context,
                                                     tipoCuenta = cuenta.tipoCuenta,
                                                     duracionDias = venta.duracionDias,
                                                     correo = cuenta.correo,

@@ -33,4 +33,9 @@ class AppPreferences(context: Context) {
     var securityPin: String
         get() = prefs.getString("security_pin", "") ?: ""
         set(value) = prefs.edit().putString("security_pin", value).apply()
+
+    var mensajePlantilla: String
+        get() = prefs.getString("mensaje_plantilla", MensajeEntregaUtils.PLANTILLA_PREDETERMINADA)
+            ?: MensajeEntregaUtils.PLANTILLA_PREDETERMINADA
+        set(value) = prefs.edit().putString("mensaje_plantilla", value).apply()
 }

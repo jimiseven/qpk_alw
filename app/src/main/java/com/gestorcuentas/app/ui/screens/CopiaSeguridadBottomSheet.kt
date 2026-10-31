@@ -75,7 +75,7 @@ fun CopiaSeguridadBottomSheet(
                         },
                         modifier = Modifier.size(46.dp)
                     ) {
-                        Icon(Icons.Default.FileUpload, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.FileUpload, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                     }
 
                     Column {
@@ -111,7 +111,7 @@ fun CopiaSeguridadBottomSheet(
                         },
                         modifier = Modifier.size(46.dp)
                     ) {
-                        Icon(Icons.Default.FileDownload, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                        Icon(Icons.Default.FileDownload, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                     }
 
                     Column {

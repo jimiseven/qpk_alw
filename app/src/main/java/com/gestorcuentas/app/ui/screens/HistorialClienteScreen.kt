@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,18 +23,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.gestorcuentas.app.R
 import com.gestorcuentas.app.data.entity.Venta
 import com.gestorcuentas.app.data.entity.VentaConCuenta
 import com.gestorcuentas.app.ui.theme.AccentGreen
+import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.ui.theme.WarningAmber
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.utils.MensajeEntregaUtils
 import com.gestorcuentas.app.utils.PhoneUtils
 import com.gestorcuentas.app.viewmodel.InventarioViewModel
+
+enum class FiltroHistorial {
+    TODOS,
+    ACTIVAS,
+    VENCIDAS
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +57,7 @@ fun HistorialClienteScreen(
 
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
+    var filtroEstado by remember { mutableStateOf(FiltroHistorial.TODOS) }
 
     // Búsqueda inteligente con normalización y tolerancia de prefijos internacionales WhatsApp (+591, etc.)
     val historialFiltrado = remember(allVentasConCuenta, busquedaCelular) {
@@ -59,14 +70,48 @@ fun HistorialClienteScreen(
         }
     }
 
-    val totalRecaudadoCliente = remember(historialFiltrado) {
-        historialFiltrado.sumOf { it.venta.precioVentaPorPerfil }
+    val conteoActivas = remember(historialFiltrado, hoy) {
+        historialFiltrado.count { DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) >= 0 }
+    }
+    val conteoVencidas = remember(historialFiltrado, hoy) {
+        historialFiltrado.count { DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) < 0 }
+    }
+
+    val listaFinal = remember(historialFiltrado, filtroEstado, hoy) {
+        when (filtroEstado) {
+            FiltroHistorial.TODOS -> historialFiltrado
+            FiltroHistorial.ACTIVAS -> historialFiltrado.filter {
+                DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) >= 0
+            }
+            FiltroHistorial.VENCIDAS -> historialFiltrado.filter {
+                DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) < 0
+            }
+        }
+    }
+
+    val totalRecaudadoCliente = remember(listaFinal) {
+        listaFinal.sumOf { it.venta.precioVentaPorPerfil }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Área de Clientes", fontWeight = FontWeight.Bold) },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_mr_robot),
+                            contentDescription = "Logo Mr Robot",
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text(
+                            "Historial de Clientes",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -106,11 +151,60 @@ fun HistorialClienteScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp),
+                    .padding(top = 4.dp, bottom = 6.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 shape = RoundedCornerShape(14.dp)
             )
+
+            // Filtros de Estado en la Zona del Pulgar: Todos / Activas / Vencidas
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = filtroEstado == FiltroHistorial.TODOS,
+                    onClick = { filtroEstado = FiltroHistorial.TODOS },
+                    label = {
+                        Text(
+                            "Todos (${historialFiltrado.size})",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (filtroEstado == FiltroHistorial.TODOS) FontWeight.Bold else FontWeight.Medium
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                FilterChip(
+                    selected = filtroEstado == FiltroHistorial.ACTIVAS,
+                    onClick = { filtroEstado = FiltroHistorial.ACTIVAS },
+                    label = {
+                        Text(
+                            "Activas ($conteoActivas)",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (filtroEstado == FiltroHistorial.ACTIVAS) FontWeight.Bold else FontWeight.Medium,
+                            color = if (filtroEstado == FiltroHistorial.ACTIVAS) MaterialTheme.colorScheme.onPrimaryContainer else AccentGreen
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                FilterChip(
+                    selected = filtroEstado == FiltroHistorial.VENCIDAS,
+                    onClick = { filtroEstado = FiltroHistorial.VENCIDAS },
+                    label = {
+                        Text(
+                            "Vencidas ($conteoVencidas)",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (filtroEstado == FiltroHistorial.VENCIDAS) FontWeight.Bold else FontWeight.Medium,
+                            color = if (filtroEstado == FiltroHistorial.VENCIDAS) MaterialTheme.colorScheme.onPrimaryContainer else DangerRed
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
             if (busquedaCelular.isNotBlank()) {
                 Card(
@@ -129,7 +223,7 @@ fun HistorialClienteScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Ventas: ${historialFiltrado.size}", fontWeight = FontWeight.Medium)
+                        Text("Ventas: ${listaFinal.size}", fontWeight = FontWeight.Medium)
                         Text(
                             "Total: ${DateUtils.formatearMoneda(totalRecaudadoCliente)}",
                             fontWeight = FontWeight.Bold,
@@ -139,14 +233,21 @@ fun HistorialClienteScreen(
                 }
             }
 
-            if (historialFiltrado.isEmpty()) {
+            if (listaFinal.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (busquedaCelular.isBlank()) "No hay ventas registradas aún."
-                               else "No se encontraron ventas para el celular '$busquedaCelular'.",
+                        text = if (busquedaCelular.isBlank()) {
+                            when (filtroEstado) {
+                                FiltroHistorial.TODOS -> "No hay ventas registradas aún."
+                                FiltroHistorial.ACTIVAS -> "No hay ventas activas en este momento."
+                                FiltroHistorial.VENCIDAS -> "No hay ventas vencidas."
+                            }
+                        } else {
+                            "No se encontraron ventas con los filtros actuales para '$busquedaCelular'."
+                        },
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -157,7 +258,7 @@ fun HistorialClienteScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
-                    items(historialFiltrado, key = { it.venta.id }) { item ->
+                    items(listaFinal, key = { it.venta.id }) { item ->
                         HistorialVentaCard(
                             item = item,
                             hoy = hoy,
@@ -168,6 +269,7 @@ fun HistorialClienteScreen(
                                 val venta = item.venta
                                 if (cuenta != null) {
                                     val mensaje = MensajeEntregaUtils.generarMensaje(
+                                        context = context,
                                         tipoCuenta = cuenta.tipoCuenta,
                                         duracionDias = venta.duracionDias,
                                         correo = cuenta.correo,
@@ -329,7 +431,7 @@ fun HistorialVentaCard(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Copiar Mensaje", style = MaterialTheme.typography.labelMedium)
                 }
@@ -339,7 +441,7 @@ fun HistorialVentaCard(
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
-                    Icon(Icons.Default.Edit, contentDescription = "Editar", modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Edit, contentDescription = "Editar", modifier = Modifier.size(18.dp))
                 }
 
                 IconButton(

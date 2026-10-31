@@ -50,14 +50,21 @@ Marking color:abc_tint_btn_checkable:2131034131 reachable: referenced from G:\0 
 Marking drawable:abc_seekbar_thumb_material:2131165242 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking color:abc_tint_seek_thumb:2131034134 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking color:abc_tint_spinner:2131034135 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking id:pooling_container_listener_holder_tag:2131230839 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking id:tag_unhandled_key_event_manager:2131230884 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking id:tag_unhandled_key_listeners:2131230885 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:view_tree_saved_state_registry_owner:2131230903 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:view_tree_lifecycle_owner:2131230901 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:view_tree_view_model_store_owner:2131230904 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking id:view_tree_on_back_pressed_dispatcher_owner:2131230902 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:default_popup_window_title:2131492903 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_today_description:2131492933 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:compose_view_saveable_id_tag:2131230792 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:default_popup_window_title:2131492903 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking id:view_tree_on_back_pressed_dispatcher_owner:2131230902 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:is_pooling_container_tag:2131230820 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_year_picker_pane_title:2131492934 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_dropdown_menu_expanded:2131492945 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_dropdown_menu_collapsed:2131492944 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_navigate_to_year_description:2131492922 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_bottom_sheet_pane_title:2131492911 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:m3c_dialog:2131492943 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:actionModeStyle:2130903069 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:actionBarPopupTheme:2130903043 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
@@ -81,30 +88,12 @@ Marking drawable:abc_dialog_material_background:2131165203 reachable: referenced
 Marking layout:abc_popup_menu_item_layout:2131427347 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking dimen:abc_config_prefDialogWidth:2131099671 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking layout:abc_popup_menu_header_item_layout:2131427346 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking drawable:ic_cat_logo:2131165277 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_switch_to_next_month:2131492929 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_switch_to_previous_month:2131492930 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_switch_to_calendar_mode:2131492926 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_switch_to_input_mode:2131492928 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking drawable:ic_mr_robot:2131165278 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:autoCompleteTextViewStyle:2130903087 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_no_selection_description:2131492923 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_no_input_description:2131492918 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_headline:2131492920 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_headline:2131492912 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_headline_description:2131492921 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_headline_description:2131492913 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_title:2131492932 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_title:2131492919 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:topPanel:2131230896 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:buttonPanel:2131230786 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:contentPanel:2131230795 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:customPanel:2131230797 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:default_error_message:2131492902 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking id:tag_unhandled_key_listeners:2131230885 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_invalid_for_pattern:2131492914 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_invalid_year_range:2131492916 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_invalid_not_allowed:2131492915 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_input_label:2131492917 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:listMenuViewStyle:2130903215 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:abc_prepend_shortcut_label:2131492881 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:abc_menu_meta_shortcut_label:2131492877 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
@@ -124,31 +113,28 @@ Marking id:content:2131230794 reachable: referenced from G:\0 imports\apk\qpk_al
 Marking layout:abc_list_menu_item_radio:2131427345 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking layout:abc_list_menu_item_checkbox:2131427342 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking layout:abc_list_menu_item_icon:2131427343 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking id:pooling_container_listener_holder_tag:2131230839 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking id:tag_unhandled_key_event_manager:2131230884 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:tag_on_apply_window_listener:2131230878 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:tag_window_insets_animation_callback:2131230886 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_scroll_to_earlier_years:2131492924 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_scroll_to_later_years:2131492925 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_year_picker_pane_title:2131492934 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:androidx_compose_ui_view_composition_context:2131230781 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:hide_in_inspector_tag:2131230811 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:actionBarSize:2130903044 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:action_bar_activity_content:2131230760 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:action_bar_container:2131230761 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:action_bar:2131230759 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_today_description:2131492933 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:m3c_bottom_sheet_drag_handle_description:2131492909 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:nestedScrollViewStyle:2130903235 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:tab:2131492973 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:switch_role:2131492972 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_bottom_sheet_collapse_description:2131492907 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_bottom_sheet_dismiss_description:2131492908 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_bottom_sheet_expand_description:2131492910 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_dropdown_menu_expanded:2131492945 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_dropdown_menu_collapsed:2131492944 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_date_picker_navigate_to_year_description:2131492922 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_no_selection_description:2131492923 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_no_input_description:2131492918 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_headline:2131492920 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_headline:2131492912 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_headline_description:2131492921 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_headline_description:2131492913 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_title:2131492932 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_title:2131492919 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking style:DialogWindowTheme:2131558561 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
-Marking string:m3c_bottom_sheet_pane_title:2131492911 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:wrapped_composition_tag:2131230908 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:toolbarNavigationButtonStyle:2130903329 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:spacer:2131230865 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
@@ -157,6 +143,8 @@ Marking string:androidx_startup:2131492891 reachable: referenced from G:\0 impor
 Marking id:consume_window_insets_tag:2131230793 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:tag_accessibility_pane_title:2131230877 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking layout:abc_cascading_menu_item_layout:2131427339 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_scroll_to_earlier_years:2131492924 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_scroll_to_later_years:2131492925 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:split_action_bar:2131230867 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:action_context_bar:2131230767 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking layout:abc_action_menu_item_layout:2131427330 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
@@ -207,18 +195,30 @@ Marking string:selected:2131492970 reachable: referenced from G:\0 imports\apk\q
 Marking string:not_selected:2131492964 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:template_percent:2131492974 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking string:in_progress:2131492905 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_bottom_sheet_collapse_description:2131492907 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_bottom_sheet_dismiss_description:2131492908 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_bottom_sheet_expand_description:2131492910 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking dimen:abc_cascading_menus_min_smallest_width:2131099670 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_invalid_for_pattern:2131492914 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_invalid_year_range:2131492916 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_invalid_not_allowed:2131492915 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_input_label:2131492917 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_switch_to_next_month:2131492929 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_switch_to_previous_month:2131492930 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_switch_to_calendar_mode:2131492926 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:m3c_date_picker_switch_to_input_mode:2131492928 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:accessibility_action_clickable_span:2131230726 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:tag_accessibility_clickable_spans:2131230875 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking attr:actionOverflowButtonStyle:2130903072 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 Marking id:report_drawn:2131230843 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
+Marking string:default_error_message:2131492902 reachable: referenced from G:\0 imports\apk\qpk_alw\app\build\intermediates\dex\release\minifyReleaseWithR8\classes.dex
 android.content.res.Resources#getIdentifier present: true
 Web content present: false
 Referenced Strings:
 TransactionDispatcher
 ​
-java.lang.Integer
 SERVICIO
+java.lang.Integer
 Octubre
 android.graphics.drawable.ColorStateL...
 TAKEN
@@ -242,8 +242,8 @@ ACTION_PRESS_AND_HOLD
 kotlinx.coroutines.DefaultExecutor
 left
 6
-notnull
 7
+notnull
 8
 9
 telefonoGuardado
@@ -253,8 +253,8 @@ removeItemAt
 setNextSelectedPositionInt
 role
 S_RESUMING_BY_RCV
-Selection
 emoji2.text.DefaultEmojiConfig
+Selection
 H
 Prefix
 L
@@ -273,8 +273,8 @@ completedExpandBuffersAndPauseFlag$vo...
 b
 c
 ACTION_CLEAR_ACCESSIBILITY_FOCUS
-Infinity
 d
+Infinity
 Compose:unobserve
 truncated
 kotlin.String
@@ -345,8 +345,8 @@ StateDescription
 toggleableState
 EmojiSupportMatch.Default
 byte
-TextSubstitution
 $this$Button
+TextSubstitution
 Square
 Modulate
 onBackInvoked
@@ -373,6 +373,7 @@ New
 workerCtl$volatile
 $cuentaConVentas
 android.widget.CheckBox
+$listaFinal
 translateY
 translateX
 $onDismiss
@@ -465,8 +466,8 @@ Hint
 $dbRef
 SelectionStart
 Compose:Composer.dispose
-Compose
 Container
+Compose
 java.lang.Short
 Search
 positionSelector
@@ -510,8 +511,8 @@ pair
 Paragraph
 endY
 endX
-fechaCreacion
 short
+fechaCreacion
 Sentences
 startY
 startX
@@ -534,8 +535,8 @@ customActions
 PreEnter
 onOpenConfiguracion
 CustomActions
-strokeLineJoin
 RANGO_FECHAS
+strokeLineJoin
 $callback
 BUFFERED
 .apk
@@ -604,6 +605,7 @@ findViewByAccessibilityIdTraversal
 $enteredPin$delegate
 Idle
 HardLight
+$mostrarEditorPlantilla$delegate
 kotlin.String.Companion
 padding
 LocalDensity
@@ -643,9 +645,9 @@ route
 ON_PAUSE
 groupAnchor
 TraceCompat
-contrasenaCorreo
-Recomposer:animation
 DatePickerDisplayModeAnimation
+Recomposer:animation
+contrasenaCorreo
 getEmojiConsistencySet
 Wrap
 DROP_LATEST
@@ -827,6 +829,7 @@ Unknown
 java.lang.Long
 TRACE_TAG_APP
 AutoMirrored.Filled.Backspace
+$filtroEstado$delegate
 imeAnimationSource
 Butt
 input_method
@@ -865,15 +868,16 @@ $cuentasFiltradas
 DESC
 FontFamily.Default
 androidx.profileinstaller.action.INST...
-nativeCanvas
 backup_cuentas_
+nativeCanvas
 ON_START
 KEY_COMPONENT_ACTIVITY_LAUNCHED_KEYS
 51
-getAccessibilityViewId
 52
+getAccessibilityViewId
 54
 kotlinx.coroutines.io.parallelism
+$textoEnEdicion$delegate
 57
 58
 ResourcesCompat
@@ -954,7 +958,6 @@ Done
 BLOB
 hostLifecycleState
 Characters
-$historialFiltrado
 float
 Cursor
 reference
@@ -972,15 +975,15 @@ StopInput
 Softlight
 $content
 DATA
-Content
 androidx.core.view.inputmethod.Editor...
+Content
 file_id
 INSERT
 $this$ExposedDropdownMenu
 replacement
 Filled.Edit
-$onBackInvoked
 AndroidOwner:measureAndLayout
+$onBackInvoked
 ime
 android.text.EmojiConsistency
 .font
@@ -1021,11 +1024,12 @@ String
 ExitTransition.None
 numeroCelularCliente
 CROSSED
-$this$LazyColumn
 Compose:sideeffects
+$this$LazyColumn
 androidx.view.accessibility.Accessibi...
 WordBreak.Unspecified
 getUncaughtExceptionPreHandler
+ACTIVAS
 VerbatimTts
 AndroidOwner:onTouch
 androidx.activity.result.contract.act...
@@ -1124,8 +1128,8 @@ Julio
 Cambiar
 dexopt/baseline.prof
 kotlinx.coroutines.internal.StackTrac...
-androidx.view.accessibility.Accessibi...
 Hidden
+androidx.view.accessibility.Accessibi...
 createSegment
 _isCompleted$volatile
 handle
@@ -1160,8 +1164,8 @@ Completing
 Style
 UPDATE
 ALIGN_LEFT
-head$volatile
 Focused
+head$volatile
 Text
 Lab
 anchor
@@ -1173,6 +1177,7 @@ kotlin.collections.Collection
 UTC
 _decision$volatile
 paneTitle
+mensaje_plantilla
 receivers$volatile
 scaleX
 scaleY
@@ -1186,6 +1191,7 @@ systemGestures
 uriPathSegments
 MagnifierPositionInRoot
 LocalAutofillTree
+VENCIDAS
 java.util.List
 $onUnlocked
 lastScheduledTask$volatile
@@ -1224,6 +1230,7 @@ android.widget.HorizontalScrollView
 emojiCompat
 NO_CLOSE_CAUSE
 androidx$room$IMultiInstanceInvalidat...
+newValue
 maxState
 $dispatcher
 costo_compra
@@ -1288,8 +1295,8 @@ LineThrough
 Copiar
 nov
 androidx.view.accessibility.Accessibi...
-Picker
 Claro
+Picker
 statement
 SUSPEND_NO_WAITER
 Dispatchers.Main
@@ -1416,6 +1423,7 @@ gradientRadius
 android.widget.ProgressBar
 TopMiddle
 Enero
+TODOS
 popUpTo
 $selectedTab$delegate
 androidx.lifecycle.LifecycleDispatche...
@@ -1431,9 +1439,9 @@ traceCounter
 kotlin.Unit
 kotlinx.coroutines.scheduler.resoluti...
 kotlin.jvm.internal.StringCompanionOb...
+tipoCuenta
 DpOffset.Unspecified
 ContentDescription
-tipoCuenta
 ACTION_CLICK
 $this$Card
 PageLeft
@@ -1452,8 +1460,8 @@ Strictness.Strict
 Agosto
 $viewModel
 Dp.Unspecified
-_reusableCancellableContinuation$vola...
 $exportarBackupLauncher
+_reusableCancellableContinuation$vola...
 DOUB
 ACTION_NEXT_AT_MOVEMENT_GRANULARITY
 android.support.PARENT_ACTIVITY
@@ -1473,8 +1481,8 @@ androidx.view.accessibility.Accessibi...
 Underline
 autoMirrored
 $resumenImportarVentas$delegate
-$mostrarSheetNuevaCuenta$delegate
 TODAS_LAS_VENTAS
+$mostrarSheetNuevaCuenta$delegate
 Failed
 Color
 NonDisposableHandle
@@ -1558,6 +1566,7 @@ NULL
 Dst
 ms
 $errorMessage$delegate
+Filled.Refresh
 entry
 focused
 $this$NavHost
@@ -1577,6 +1586,7 @@ COROUTINE_SUSPENDED
 config_viewMinRotaryEncoderFlingVelocity
 android.widget.Spinner
 resolvedCompositionContext
+$mensajePlantilla$delegate
 MenuItemImpl
 _LifecycleAdapter
 LineHeightStyle.Alignment.Top
@@ -2129,8 +2139,8 @@ Marking dimen:tooltip_precise_anchor_threshold:2131099764 used because it matche
 Marking dimen:tooltip_vertical_padding:2131099765 used because it matches string pool constant to
 Marking dimen:tooltip_y_offset_non_touch:2131099766 used because it matches string pool constant to
 Marking dimen:tooltip_y_offset_touch:2131099767 used because it matches string pool constant to
-Marking drawable:tooltip_frame_dark:2131165292 used because it matches string pool constant to
-Marking drawable:tooltip_frame_light:2131165293 used because it matches string pool constant to
+Marking drawable:tooltip_frame_dark:2131165293 used because it matches string pool constant to
+Marking drawable:tooltip_frame_light:2131165294 used because it matches string pool constant to
 Marking id:top:2131230895 used because it matches string pool constant to
 Marking id:topPanel:2131230896 used because it matches string pool constant to
 Marking string:tooltip_description:2131492975 used because it matches string pool constant to
@@ -2971,7 +2981,8 @@ Marking attr:dataPattern:2130903144 used because it matches string pool constant
 @drawable/ic_call_answer_video_low : reachable=false
 @drawable/ic_call_decline : reachable=false
 @drawable/ic_call_decline_low : reachable=false
-@drawable/ic_cat_logo : reachable=true
+@drawable/ic_cat_logo : reachable=false
+@drawable/ic_mr_robot : reachable=true
 @drawable/notification_action_background : reachable=false
     @color/androidx_core_ripple_material_light
     @dimen/compat_button_inset_horizontal_material
@@ -5129,9 +5140,9 @@ The root reachable resources are:
  drawable:abc_textfield_search_default_mtrl_alpha:2131165260
  drawable:abc_textfield_search_material:2131165261
  drawable:abc_vector_test:2131165262
- drawable:ic_cat_logo:2131165277
- drawable:tooltip_frame_dark:2131165292
- drawable:tooltip_frame_light:2131165293
+ drawable:ic_mr_robot:2131165278
+ drawable:tooltip_frame_dark:2131165293
+ drawable:tooltip_frame_light:2131165294
  id:accessibility_action_clickable_span:2131230726
  id:accessibility_custom_action_0:2131230727
  id:accessibility_custom_action_1:2131230728
@@ -5507,20 +5518,21 @@ Unused resources are:
  drawable:ic_call_answer_video_low:2131165274
  drawable:ic_call_decline:2131165275
  drawable:ic_call_decline_low:2131165276
- drawable:notification_action_background:2131165278
- drawable:notification_bg:2131165279
- drawable:notification_bg_low:2131165280
- drawable:notification_bg_low_normal:2131165281
- drawable:notification_bg_low_pressed:2131165282
- drawable:notification_bg_normal:2131165283
- drawable:notification_bg_normal_pressed:2131165284
- drawable:notification_icon_background:2131165285
- drawable:notification_oversize_large_icon_bg:2131165286
- drawable:notification_template_icon_bg:2131165287
- drawable:notification_template_icon_low_bg:2131165288
- drawable:notification_tile_bg:2131165289
- drawable:notify_panel_notification_icon_bg:2131165290
- drawable:test_level_drawable:2131165291
+ drawable:ic_cat_logo:2131165277
+ drawable:notification_action_background:2131165279
+ drawable:notification_bg:2131165280
+ drawable:notification_bg_low:2131165281
+ drawable:notification_bg_low_normal:2131165282
+ drawable:notification_bg_low_pressed:2131165283
+ drawable:notification_bg_normal:2131165284
+ drawable:notification_bg_normal_pressed:2131165285
+ drawable:notification_icon_background:2131165286
+ drawable:notification_oversize_large_icon_bg:2131165287
+ drawable:notification_template_icon_bg:2131165288
+ drawable:notification_template_icon_low_bg:2131165289
+ drawable:notification_tile_bg:2131165290
+ drawable:notify_panel_notification_icon_bg:2131165291
+ drawable:test_level_drawable:2131165292
  id:ALT:2131230720
  id:CTRL:2131230721
  id:FUNCTION:2131230722

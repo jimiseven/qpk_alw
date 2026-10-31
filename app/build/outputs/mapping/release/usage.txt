@@ -8630,7 +8630,6 @@ androidx.compose.material.icons.filled.RecyclingKt
 androidx.compose.material.icons.filled.RedeemKt
 androidx.compose.material.icons.filled.RedoKt
 androidx.compose.material.icons.filled.ReduceCapacityKt
-androidx.compose.material.icons.filled.RefreshKt
 androidx.compose.material.icons.filled.RememberMeKt
 androidx.compose.material.icons.filled.RemoveCircleKt
 androidx.compose.material.icons.filled.RemoveCircleOutlineKt
@@ -18142,28 +18141,16 @@ androidx.compose.material3.CheckboxKt$TriStateCheckbox$2
 androidx.compose.material3.CheckboxKt$WhenMappings
 androidx.compose.material3.CheckboxKt
 androidx.compose.material3.ChipBorder
-androidx.compose.material3.ChipColors:
-    public static final int $stable
-    public final androidx.compose.material3.ChipColors copy-FD3wquc(long,long,long,long,long,long,long,long)
-    public static synthetic androidx.compose.material3.ChipColors copy-FD3wquc$default(androidx.compose.material3.ChipColors,long,long,long,long,long,long,long,long,int,java.lang.Object)
-    public final long getContainerColor-0d7_KjU()
-    public final long getDisabledContainerColor-0d7_KjU()
-    public final long getDisabledLabelColor-0d7_KjU()
-    public final long getDisabledLeadingIconContentColor-0d7_KjU()
-    public final long getDisabledTrailingIconContentColor-0d7_KjU()
-    public final long getLabelColor-0d7_KjU()
-    public final long getLeadingIconContentColor-0d7_KjU()
-    public final long getTrailingIconContentColor-0d7_KjU()
-androidx.compose.material3.ChipElevation:
-    public static final int $stable
-    public final float getDisabledElevation-D9Ej5fM()
-    public final float getDraggedElevation-D9Ej5fM()
-    public final float getElevation-D9Ej5fM()
-    public final float getFocusedElevation-D9Ej5fM()
-    public final float getHoveredElevation-D9Ej5fM()
-    public final float getPressedElevation-D9Ej5fM()
+androidx.compose.material3.ChipColors
+androidx.compose.material3.ChipElevation$animateElevation$1$1$1
+androidx.compose.material3.ChipElevation$animateElevation$1$1
+androidx.compose.material3.ChipElevation$animateElevation$2$1
+androidx.compose.material3.ChipElevation
 androidx.compose.material3.ChipKt$AssistChip$2
 androidx.compose.material3.ChipKt$AssistChip$4
+androidx.compose.material3.ChipKt$Chip$1
+androidx.compose.material3.ChipKt$Chip$2
+androidx.compose.material3.ChipKt$Chip$3
 androidx.compose.material3.ChipKt$ElevatedAssistChip$2
 androidx.compose.material3.ChipKt$ElevatedAssistChip$4
 androidx.compose.material3.ChipKt$ElevatedFilterChip$2
@@ -18172,6 +18159,7 @@ androidx.compose.material3.ChipKt$ElevatedSuggestionChip$4
 androidx.compose.material3.ChipKt$InputChip$2$1$1
 androidx.compose.material3.ChipKt$InputChip$2
 androidx.compose.material3.ChipKt$InputChip$3
+androidx.compose.material3.ChipKt$SuggestionChip$2
 androidx.compose.material3.ChipKt$SuggestionChip$4
 androidx.compose.material3.ChipKt:
     private static final java.lang.String LabelLayoutId
@@ -18179,13 +18167,17 @@ androidx.compose.material3.ChipKt:
     private static final java.lang.String TrailingIconLayoutId
     public static final void AssistChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int,int)
     public static final synthetic void AssistChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.material3.ChipBorder,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int,int)
+    private static final void Chip-nkUnTEs(androidx.compose.ui.Modifier,kotlin.jvm.functions.Function0,boolean,kotlin.jvm.functions.Function2,androidx.compose.ui.text.TextStyle,long,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.foundation.BorderStroke,float,androidx.compose.foundation.layout.PaddingValues,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int)
     public static final void ElevatedAssistChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int,int)
     public static final synthetic void ElevatedAssistChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.material3.ChipBorder,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int,int)
     public static final void ElevatedFilterChip(boolean,kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.SelectableChipColors,androidx.compose.material3.SelectableChipElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int,int)
     public static final void ElevatedSuggestionChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int)
     public static final synthetic void ElevatedSuggestionChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.material3.ChipBorder,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int)
     public static final void InputChip(boolean,kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.SelectableChipColors,androidx.compose.material3.SelectableChipElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int,int)
+    public static final void SuggestionChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int)
     public static final synthetic void SuggestionChip(kotlin.jvm.functions.Function0,kotlin.jvm.functions.Function2,androidx.compose.ui.Modifier,boolean,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.material3.ChipBorder,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int)
+    public static final synthetic void access$Chip-nkUnTEs(androidx.compose.ui.Modifier,kotlin.jvm.functions.Function0,boolean,kotlin.jvm.functions.Function2,androidx.compose.ui.text.TextStyle,long,kotlin.jvm.functions.Function2,kotlin.jvm.functions.Function2,androidx.compose.ui.graphics.Shape,androidx.compose.material3.ChipColors,androidx.compose.material3.ChipElevation,androidx.compose.foundation.BorderStroke,float,androidx.compose.foundation.layout.PaddingValues,androidx.compose.foundation.interaction.MutableInteractionSource,androidx.compose.runtime.Composer,int,int)
+    public static final androidx.compose.material3.ChipColors getDefaultSuggestionChipColors(androidx.compose.material3.ColorScheme)
     private static final androidx.compose.foundation.layout.PaddingValues inputChipPadding(boolean,boolean,boolean)
     static synthetic androidx.compose.foundation.layout.PaddingValues inputChipPadding$default(boolean,boolean,boolean,int,java.lang.Object)
 androidx.compose.material3.ClockDialModifier
@@ -18220,6 +18212,7 @@ androidx.compose.material3.ColorScheme:
     private androidx.compose.material3.RichTooltipColors defaultRichTooltipColorsCached
     private androidx.compose.material3.SegmentedButtonColors defaultSegmentedButtonColorsCached
     private androidx.compose.material3.SliderColors defaultSliderColorsCached
+    private androidx.compose.material3.ChipColors defaultSuggestionChipColorsCached
     private androidx.compose.material3.TextFieldColors defaultTextFieldColorsCached
     private androidx.compose.material3.TimePickerColors defaultTimePickerColorsCached
     private void <init>(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)
@@ -18252,6 +18245,7 @@ androidx.compose.material3.ColorScheme:
     public final androidx.compose.material3.SegmentedButtonColors getDefaultSegmentedButtonColorsCached$material3_release()
     public static synthetic void getDefaultSegmentedButtonColorsCached$material3_release$annotations()
     public final androidx.compose.material3.SliderColors getDefaultSliderColorsCached$material3_release()
+    public final androidx.compose.material3.ChipColors getDefaultSuggestionChipColorsCached$material3_release()
     public final androidx.compose.material3.TextFieldColors getDefaultTextFieldColorsCached$material3_release()
     public final androidx.compose.material3.TimePickerColors getDefaultTimePickerColorsCached$material3_release()
     public static synthetic void getDefaultTimePickerColorsCached$material3_release$annotations()
@@ -18274,6 +18268,7 @@ androidx.compose.material3.ColorScheme:
     public final void setDefaultRichTooltipColorsCached$material3_release(androidx.compose.material3.RichTooltipColors)
     public final void setDefaultSegmentedButtonColorsCached$material3_release(androidx.compose.material3.SegmentedButtonColors)
     public final void setDefaultSliderColorsCached$material3_release(androidx.compose.material3.SliderColors)
+    public final void setDefaultSuggestionChipColorsCached$material3_release(androidx.compose.material3.ChipColors)
     public final void setDefaultTextFieldColorsCached$material3_release(androidx.compose.material3.TextFieldColors)
     public final void setDefaultTimePickerColorsCached$material3_release(androidx.compose.material3.TimePickerColors)
 androidx.compose.material3.ColorSchemeKt:
@@ -19173,15 +19168,7 @@ androidx.compose.material3.Strings:
     public final synthetic int unbox-impl()
 androidx.compose.material3.Strings_androidKt:
     public static final java.lang.String getString-iSCLEhQ(int,java.lang.Object[],androidx.compose.runtime.Composer,int)
-androidx.compose.material3.SuggestionChipDefaults:
-    public static final int $stable
-    public final androidx.compose.material3.ChipColors elevatedSuggestionChipColors(androidx.compose.runtime.Composer,int)
-    public final androidx.compose.material3.ChipColors elevatedSuggestionChipColors-5tl4gsc(long,long,long,long,long,long,androidx.compose.runtime.Composer,int,int)
-    public final androidx.compose.material3.ChipElevation elevatedSuggestionChipElevation-aqJV_2Y(float,float,float,float,float,float,androidx.compose.runtime.Composer,int,int)
-    public final androidx.compose.material3.ChipColors getDefaultElevatedSuggestionChipColors$material3_release(androidx.compose.material3.ColorScheme)
-    public final float getIconSize-D9Ej5fM()
-    public final androidx.compose.material3.ChipBorder suggestionChipBorder-d_3_b6Q(long,long,float,androidx.compose.runtime.Composer,int,int)
-    public final androidx.compose.material3.ChipColors suggestionChipColors-5tl4gsc(long,long,long,long,long,long,androidx.compose.runtime.Composer,int,int)
+androidx.compose.material3.SuggestionChipDefaults
 androidx.compose.material3.SurfaceKt$Surface$7
 androidx.compose.material3.SurfaceKt:
     public static final void Surface-d85dljk(boolean,kotlin.jvm.functions.Function1,androidx.compose.ui.Modifier,boolean,androidx.compose.ui.graphics.Shape,long,long,float,float,androidx.compose.foundation.BorderStroke,androidx.compose.foundation.interaction.MutableInteractionSource,kotlin.jvm.functions.Function2,androidx.compose.runtime.Composer,int,int,int)
@@ -20087,29 +20074,7 @@ androidx.compose.material3.tokens.SheetBottomTokens:
 androidx.compose.material3.tokens.SliderTokens
 androidx.compose.material3.tokens.SnackbarTokens
 androidx.compose.material3.tokens.StateTokens
-androidx.compose.material3.tokens.SuggestionChipTokens:
-    public static final int $stable
-    public static final float DisabledLabelTextOpacity
-    public static final float DisabledLeadingIconOpacity
-    public static final float ElevatedDisabledContainerOpacity
-    public static final float FlatDisabledOutlineOpacity
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getContainerSurfaceTintLayerColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getDraggedLabelTextColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getDraggedLeadingIconColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getElevatedContainerColor()
-    public final float getElevatedContainerElevation-D9Ej5fM()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getElevatedDisabledContainerColor()
-    public final float getElevatedDisabledContainerElevation-D9Ej5fM()
-    public final float getElevatedFocusContainerElevation-D9Ej5fM()
-    public final float getElevatedHoverContainerElevation-D9Ej5fM()
-    public final float getElevatedPressedContainerElevation-D9Ej5fM()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getFlatFocusOutlineColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getFocusLabelTextColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getFocusLeadingIconColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getHoverLabelTextColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getHoverLeadingIconColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getPressedLabelTextColor()
-    public final androidx.compose.material3.tokens.ColorSchemeKeyTokens getPressedLeadingIconColor()
+androidx.compose.material3.tokens.SuggestionChipTokens
 androidx.compose.material3.tokens.SwitchTokens:
     public static final int $stable
     public static final float DisabledSelectedHandleOpacity
@@ -32173,6 +32138,7 @@ androidx.viewpager.widget.ViewPager$SimpleOnPageChangeListener
 androidx.viewpager.widget.ViewPager$ViewPositionComparator
 androidx.viewpager.widget.ViewPager
 com.gestorcuentas.app.R$drawable:
+    public static int ic_cat_logo
     private void <init>()
 com.gestorcuentas.app.R$string
 com.gestorcuentas.app.R$style
@@ -32201,6 +32167,8 @@ com.gestorcuentas.app.ui.navigation.Screen:
     public static final int $stable
 com.gestorcuentas.app.ui.screens.DashboardTab:
     public static kotlin.enums.EnumEntries getEntries()
+com.gestorcuentas.app.ui.screens.FiltroHistorial:
+    public static kotlin.enums.EnumEntries getEntries()
 com.gestorcuentas.app.ui.screens.ModoEstadistica:
     public static kotlin.enums.EnumEntries getEntries()
 com.gestorcuentas.app.ui.theme.ColorKt:
@@ -32216,6 +32184,8 @@ com.gestorcuentas.app.utils.DateUtils:
     public static synthetic com.gestorcuentas.app.utils.DateUtils$EstadoVencimiento obtenerEstadoVencimiento$default(com.gestorcuentas.app.utils.DateUtils,java.lang.String,java.time.LocalDate,int,java.lang.Object)
 com.gestorcuentas.app.utils.MensajeEntregaUtils:
     public static final int $stable
+    public static final java.lang.String PLANTILLA_PREDETERMINADA
+    public final java.lang.String generarMensaje(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String,java.lang.String)
 com.gestorcuentas.app.utils.PhoneUtils:
     public static final int $stable
 com.gestorcuentas.app.viewmodel.InventarioViewModel$cambiarEstadoCuenta$1
@@ -44236,6 +44206,8 @@ androidx.compose.material.icons.filled.LockKt:
     static void <clinit>()
 androidx.compose.material.icons.filled.PeopleKt:
     static void <clinit>()
+androidx.compose.material.icons.filled.RefreshKt:
+    static void <clinit>()
 androidx.compose.material.icons.filled.SearchKt:
     static void <clinit>()
 androidx.compose.material.icons.filled.SecurityKt:
@@ -44648,30 +44620,6 @@ androidx.compose.material3.CardKt$Card$1:
     public final void invoke$2()
 androidx.compose.material3.CardKt$Card$2:
     public final void invoke$2()
-androidx.compose.material3.ChipColors:
-    static void <clinit>()
-    public static long containerColor-vNxB06k$material3_release()
-    public static long labelColor-vNxB06k$material3_release()
-    public static long leadingIconContentColor-vNxB06k$material3_release()
-    public static long trailingIconContentColor-vNxB06k$material3_release()
-androidx.compose.material3.ChipElevation$animateElevation$1$1$1:
-    public final java.lang.Object emit$1()
-androidx.compose.material3.ChipElevation$animateElevation$1$1:
-    public final java.lang.Object invoke$3()
-androidx.compose.material3.ChipElevation$animateElevation$2$1:
-    public final java.lang.Object invoke$3()
-androidx.compose.material3.ChipElevation:
-    static void <clinit>()
-    public static androidx.compose.runtime.State animateElevation()
-    public static androidx.compose.runtime.State shadowElevation$material3_release()
-    public static float tonalElevation-u2uoSUM$material3_release()
-androidx.compose.material3.ChipKt$Chip$1:
-    public final void invoke$11()
-androidx.compose.material3.ChipKt$Chip$2:
-    public final void invoke$2()
-androidx.compose.material3.ChipKt$Chip$3:
-    public final synthetic kotlin.jvm.functions.Function2 $trailingIcon
-    public final void invoke$2()
 androidx.compose.material3.ChipKt$ChipContent$1$1$1:
     public final void invoke$3()
 androidx.compose.material3.ChipKt$ChipContent$1:
@@ -44680,6 +44628,7 @@ androidx.compose.material3.ChipKt$ChipContent$2:
     public final synthetic kotlin.jvm.functions.Function2 $avatar
     public final void invoke$2()
 androidx.compose.material3.ChipKt$FilterChip$2:
+    public final synthetic int $$default
     public final void invoke$2()
 androidx.compose.material3.ChipKt$SelectableChip$1:
     public final void invoke$11()
@@ -44689,11 +44638,9 @@ androidx.compose.material3.ChipKt$SelectableChip$2:
 androidx.compose.material3.ChipKt$SelectableChip$3:
     public final synthetic kotlin.jvm.functions.Function2 $avatar
     public final void invoke$2()
-androidx.compose.material3.ChipKt$SuggestionChip$2:
-    public final synthetic int $$default
-    public final void invoke$2()
 androidx.compose.material3.ChipKt:
     public static final androidx.compose.foundation.layout.PaddingValues AssistChipPadding
+    public static final androidx.compose.foundation.layout.PaddingValues SuggestionChipPadding
     public static final synthetic float access$getHorizontalElementsPadding$p()
 androidx.compose.material3.ColorScheme:
     static void <clinit>()
@@ -44707,7 +44654,6 @@ androidx.compose.material3.ColorScheme:
     public static androidx.compose.material3.NavigationBarItemColors getDefaultNavigationBarItemColorsCached$material3_release()
     public static androidx.compose.material3.ButtonColors getDefaultOutlinedButtonColorsCached$material3_release()
     public static androidx.compose.material3.TextFieldColors getDefaultOutlinedTextFieldColorsCached$material3_release()
-    public static androidx.compose.material3.ChipColors getDefaultSuggestionChipColorsCached$material3_release()
     public static androidx.compose.material3.SwitchColors getDefaultSwitchColorsCached$material3_release()
     public static androidx.compose.material3.ButtonColors getDefaultTextButtonColorsCached$material3_release()
     public static androidx.compose.material3.TopAppBarColors getDefaultTopAppBarColorsCached$material3_release()
@@ -44755,7 +44701,6 @@ androidx.compose.material3.ColorScheme:
     public static void setDefaultNavigationBarItemColorsCached$material3_release()
     public static void setDefaultOutlinedButtonColorsCached$material3_release()
     public static void setDefaultOutlinedTextFieldColorsCached$material3_release()
-    public static void setDefaultSuggestionChipColorsCached$material3_release()
     public static void setDefaultSwitchColorsCached$material3_release()
     public static void setDefaultTextButtonColorsCached$material3_release()
     public static void setDefaultTopAppBarColorsCached$material3_release()
@@ -45712,14 +45657,6 @@ androidx.compose.material3.SnapFlingBehavior:
     public static java.lang.Object shortSnap()
 androidx.compose.material3.Strings$Companion
 androidx.compose.material3.Strings
-androidx.compose.material3.SuggestionChipDefaults:
-    public static final androidx.compose.material3.SuggestionChipDefaults INSTANCE
-    public static final float IconSize
-    public static float getHeight-D9Ej5fM()
-    public static androidx.compose.ui.graphics.Shape getShape()
-    public static androidx.compose.foundation.BorderStroke suggestionChipBorder-h1eT-Ww()
-    public static androidx.compose.material3.ChipColors suggestionChipColors()
-    public static androidx.compose.material3.ChipElevation suggestionChipElevation-aqJV_2Y()
 androidx.compose.material3.SurfaceKt$LocalAbsoluteTonalElevation$1:
     public static float invoke-D9Ej5fM()
 androidx.compose.material3.SurfaceKt$Surface$1$2:
@@ -46607,41 +46544,6 @@ androidx.compose.material3.tokens.SheetBottomTokens:
     public static float getDockedDragHandleHeight-D9Ej5fM()
     public static float getDockedDragHandleWidth-D9Ej5fM()
     public static float getDockedModalContainerElevation-D9Ej5fM()
-androidx.compose.material3.tokens.SuggestionChipTokens:
-    public static final int ContainerShape
-    public static final int ContainerSurfaceTintLayerColor
-    public static final int DisabledLabelTextColor
-    public static final int DraggedLabelTextColor
-    public static final int DraggedLeadingIconColor
-    public static final int ElevatedContainerColor
-    public static final float ElevatedContainerElevation
-    public static final int ElevatedDisabledContainerColor
-    public static final float ElevatedDisabledContainerElevation
-    public static final float ElevatedFocusContainerElevation
-    public static final float ElevatedHoverContainerElevation
-    public static final float ElevatedPressedContainerElevation
-    public static final int FlatFocusOutlineColor
-    public static final int FocusLabelTextColor
-    public static final int FocusLeadingIconColor
-    public static final int HoverLabelTextColor
-    public static final int HoverLeadingIconColor
-    public static final androidx.compose.material3.tokens.SuggestionChipTokens INSTANCE
-    public static final float LeadingIconSize
-    public static final int PressedLabelTextColor
-    public static final int PressedLeadingIconColor
-    public static float getContainerHeight-D9Ej5fM()
-    public static int getContainerShape()
-    public static int getDisabledLabelTextColor()
-    public static int getDisabledLeadingIconColor()
-    public static float getDraggedContainerElevation-D9Ej5fM()
-    public static float getFlatContainerElevation-D9Ej5fM()
-    public static int getFlatDisabledOutlineColor()
-    public static int getFlatOutlineColor()
-    public static float getFlatOutlineWidth-D9Ej5fM()
-    public static int getLabelTextColor()
-    public static int getLabelTextFont()
-    public static int getLeadingIconColor()
-    public static float getLeadingIconSize-D9Ej5fM()
 androidx.compose.material3.tokens.SwitchTokens:
     public static final int DisabledSelectedHandleColor
     public static final int DisabledSelectedIconColor
@@ -56325,6 +56227,12 @@ com.gestorcuentas.app.ui.navigation.Screen:
     public abstract java.lang.String getTitle()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-1$1:
     public final void invoke$30()
+com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-10$1:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-11$1:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-12$1:
+    public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-2$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-3$1:
@@ -56332,17 +56240,29 @@ com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDial
 com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-4$1:
     public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-5$1:
-    public final void invoke$2()
+    public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-6$1:
     public final void invoke$2()
+com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-7$1:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-8$1:
+    public final void invoke$30()
+com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt$lambda-9$1:
+    public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt:
     public static final com.gestorcuentas.app.ui.screens.ComposableSingletons$ConfiguracionSeguridadDialogKt INSTANCE
     public static kotlin.jvm.functions.Function3 getLambda-1$app_release()
+    public static kotlin.jvm.functions.Function2 getLambda-10$app_release()
+    public static kotlin.jvm.functions.Function2 getLambda-11$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-12$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-2$app_release()
     public static kotlin.jvm.functions.Function3 getLambda-3$app_release()
     public static kotlin.jvm.functions.Function3 getLambda-4$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-5$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-5$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-6$app_release()
+    public static kotlin.jvm.functions.Function2 getLambda-7$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-8$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-9$app_release()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$CopiaSeguridadBottomSheetKt$lambda-1$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$CopiaSeguridadBottomSheetKt$lambda-2$1:
@@ -56452,9 +56372,9 @@ com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-1
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-11$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-12$1:
-    public final void invoke$2()
+    public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-13$1:
-    public final void invoke$2()
+    public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-14$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-15$1:
@@ -56464,18 +56384,12 @@ com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-1
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-17$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-18$1:
-    public final void invoke$30()
+    public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-19$1:
-    public final void invoke$30()
+    public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-2$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-20$1:
-    public final void invoke$2()
-com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-21$1:
-    public final void invoke$2()
-com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-22$1:
-    public final void invoke$2()
-com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-23$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt$lambda-3$1:
     public final void invoke$2()
@@ -56496,19 +56410,16 @@ com.gestorcuentas.app.ui.screens.ComposableSingletons$DashboardScreenKt:
     public static kotlin.jvm.functions.Function2 getLambda-1$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-10$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-11$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-12$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-13$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-12$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-13$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-14$app_release()
     public static kotlin.jvm.functions.Function3 getLambda-15$app_release()
     public static kotlin.jvm.functions.Function3 getLambda-16$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-17$app_release()
-    public static kotlin.jvm.functions.Function3 getLambda-18$app_release()
-    public static kotlin.jvm.functions.Function3 getLambda-19$app_release()
+    public static kotlin.jvm.functions.Function2 getLambda-18$app_release()
+    public static kotlin.jvm.functions.Function2 getLambda-19$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-2$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-20$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-21$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-22$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-23$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-3$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-4$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-5$app_release()
@@ -56558,24 +56469,12 @@ com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt$lambd
 com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt$lambda-2$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt$lambda-3$1:
-    public final void invoke$2()
-com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt$lambda-4$1:
-    public final void invoke$2()
-com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt$lambda-5$1:
-    public final void invoke$2()
-com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt$lambda-6$1:
-    public final void invoke$2()
-com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt$lambda-7$1:
     public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt:
     public static final com.gestorcuentas.app.ui.screens.ComposableSingletons$EstadisticasDialogKt INSTANCE
     public static kotlin.jvm.functions.Function2 getLambda-1$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-2$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-3$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-4$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-5$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-6$app_release()
-    public static kotlin.jvm.functions.Function3 getLambda-7$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-3$app_release()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$HistorialClienteScreenKt$lambda-1$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ComposableSingletons$HistorialClienteScreenKt$lambda-10$1:
@@ -56680,6 +56579,8 @@ com.gestorcuentas.app.ui.screens.ComposableSingletons$NuevaVentaBottomSheetKt:
     public static kotlin.jvm.functions.Function2 getLambda-7$app_release()
     public static kotlin.jvm.functions.Function2 getLambda-8$app_release()
     public static kotlin.jvm.functions.Function3 getLambda-9$app_release()
+com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$10:
+    public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$1:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$2$1$1$1$2$1$2:
@@ -56690,6 +56591,8 @@ com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeg
     public final void invoke$30()
 com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$2$1$2:
     public final void invoke$81()
+com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$2$1$3:
+    public final void invoke$81()
 com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$2:
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$4:
@@ -56698,8 +56601,13 @@ com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeg
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$6:
     public final void invoke$2()
+com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$8:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt$ConfiguracionSeguridadDialog$9:
+    public final void invoke$2()
 com.gestorcuentas.app.ui.screens.ConfiguracionSeguridadDialogKt:
     public static final void ConfiguracionSeguridadDialog$lambda$11(androidx.compose.runtime.MutableState,boolean)
+    public static final void ConfiguracionSeguridadDialog$lambda$20(androidx.compose.runtime.MutableState,boolean)
     public static final boolean access$ConfiguracionSeguridadDialog$lambda$4(androidx.compose.runtime.MutableState)
 com.gestorcuentas.app.ui.screens.CopiaSeguridadBottomSheetKt$CopiaSeguridadBottomSheet$1$1$2:
     public final void invoke$81()
@@ -56899,6 +56807,10 @@ com.gestorcuentas.app.ui.screens.EditarVentaDialogKt$EditarVentaDialog$1$1:
     public final java.lang.Object invoke$3()
 com.gestorcuentas.app.ui.screens.EditarVentaDialogKt$EditarVentaDialog$2:
     public final void invoke$81()
+com.gestorcuentas.app.ui.screens.EstadisticasDialogKt$EstadisticasDialog$2$1$1$2:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.EstadisticasDialogKt$EstadisticasDialog$2$1$1$4:
+    public final void invoke$2()
 com.gestorcuentas.app.ui.screens.EstadisticasDialogKt$EstadisticasDialog$2$1$2:
     public final void invoke$81()
 com.gestorcuentas.app.ui.screens.EstadisticasDialogKt$EstadisticasDialog$2$1$4$1:
@@ -56911,25 +56823,34 @@ com.gestorcuentas.app.ui.screens.EstadisticasDialogKt$EstadisticasDialog$2$1$6$1
     public final void invoke$81()
 com.gestorcuentas.app.ui.screens.EstadisticasDialogKt$EstadisticasDialog$2:
     public final void invoke$81()
+com.gestorcuentas.app.ui.screens.FiltroHistorial:
+    public static final synthetic kotlin.enums.EnumEntries $ENTRIES
 com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$$InternalSyntheticLambda$8$69c2ed17beeace2b1655eff52dddbe0a27721b284b7ec9fc28fb6081462b8057$0:
     public final synthetic int f$6
 com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$2:
     public final void invoke$2()
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$3:
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$3$2:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$3$4:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$3$6:
+    public final void invoke$2()
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$4:
     public final void invoke$81()
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$5$2$1$1:
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$6$2$1$1:
     public final void invoke()
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$5$2$2$1:
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$6$2$2$1:
     public final void invoke()
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$5$2$3:
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$1$6$2$3:
     public final void invoke()
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$7$lambda$6$$inlined$items$default$1
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$7$lambda$6$$inlined$items$default$2:
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$WhenMappings
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$14$lambda$13$$inlined$items$default$1
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$14$lambda$13$$inlined$items$default$2:
     public final java.lang.Object invoke$11()
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$7$lambda$6$$inlined$items$default$3:
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$14$lambda$13$$inlined$items$default$3:
     public final synthetic kotlin.jvm.functions.Function1 $contentType
     public final java.lang.Object invoke$11()
-com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$7$lambda$6$$inlined$items$default$4:
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1$invoke$lambda$14$lambda$13$$inlined$items$default$4:
     public final void invoke$15()
 com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialClienteScreen$1:
     public final void invoke$80()
@@ -56943,6 +56864,7 @@ com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialVentaCard$3$1
     public final void invoke$2()
 com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$HistorialVentaCard$3:
     public final void invoke$81()
+com.gestorcuentas.app.ui.screens.HistorialClienteScreenKt$WhenMappings
 com.gestorcuentas.app.ui.screens.LockScreenKt$LockScreen$1:
     public int label
     public final java.lang.Object invoke$3()
@@ -56995,9 +56917,11 @@ com.gestorcuentas.app.ui.theme.ThemeKt$$InternalSyntheticLambda$1$83be1aa4d63082
 com.gestorcuentas.app.utils.AppPreferences:
     public static final int $stable
     static void <clinit>()
+    public final java.lang.String getMensajePlantilla()
     public final java.lang.String getSecurityPin()
     public final com.gestorcuentas.app.utils.AppThemeMode getThemeMode()
     public final boolean isSecurityEnabled()
+    public static void setMensajePlantilla()
     public final void setSecurityEnabled(boolean)
     public static void setSecurityPin()
     public static void setThemeMode()
@@ -57014,6 +56938,7 @@ com.gestorcuentas.app.utils.DateUtils:
 com.gestorcuentas.app.utils.MensajeEntregaUtils:
     public static final com.gestorcuentas.app.utils.MensajeEntregaUtils INSTANCE
     static void <clinit>()
+    public static java.lang.String aplicarVariables()
 com.gestorcuentas.app.utils.PhoneUtils:
     public static final com.gestorcuentas.app.utils.PhoneUtils INSTANCE
     static void <clinit>()

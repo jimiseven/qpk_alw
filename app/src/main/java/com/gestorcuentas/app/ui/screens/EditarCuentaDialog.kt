@@ -90,7 +90,15 @@ fun EditarCuentaDialog(
                     FilterChip(
                         selected = opcionSeleccionada == opcion,
                         onClick = { opcionSeleccionada = opcion },
-                        label = { Text(opcion, fontWeight = FontWeight.SemiBold) }
+                        label = {
+                            Text(
+                                opcion,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        },
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -172,13 +180,28 @@ fun EditarCuentaDialog(
                 FilterChip(
                     selected = estado == "activa",
                     onClick = { estado = "activa" },
-                    label = { Text("✅ Activa") }
+                    label = {
+                        Text(
+                            "✅ Activa",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
                 )
 
                 FilterChip(
                     selected = estado == "inhabilitada",
                     onClick = { estado = "inhabilitada" },
-                    label = { Text("🔴 Inhabilitada", color = if (estado == "inhabilitada") DangerRed else MaterialTheme.colorScheme.onSurface) }
+                    label = {
+                        Text(
+                            "🔴 Inhabilitada",
+                            color = if (estado == "inhabilitada") DangerRed else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
                 )
             }
 

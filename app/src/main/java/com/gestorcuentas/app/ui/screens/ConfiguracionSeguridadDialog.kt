@@ -4,11 +4,16 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,6 +43,8 @@ fun ConfiguracionSeguridadDialog(
     var pinValue by remember { mutableStateOf(preferences.securityPin) }
     var mostrarEditorPin by remember { mutableStateOf(false) }
     var nuevoPin by remember { mutableStateOf("") }
+    var mensajePlantilla by remember { mutableStateOf(preferences.mensajePlantilla) }
+    var mostrarEditorPlantilla by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -47,7 +54,7 @@ fun ConfiguracionSeguridadDialog(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_cat_logo),
+                    painter = painterResource(id = R.drawable.ic_mr_robot),
                     contentDescription = null,
                     modifier = Modifier.size(36.dp)
                 )
@@ -202,6 +209,55 @@ fun ConfiguracionSeguridadDialog(
                         }
                     }
                 }
+
+                // SECCIÓN 3: PLANTILLA DE MENSAJE (PORTAPAPELES)
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.ContentPaste,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Column {
+                                Text(
+                                    "Mensaje de Entrega",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    "Plantilla copiada al portapapeles",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                mensajePlantilla = preferences.mensajePlantilla
+                                mostrarEditorPlantilla = true
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Personalizar Mensaje y Reglas")
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
@@ -271,6 +327,96 @@ fun ConfiguracionSeguridadDialog(
             },
             dismissButton = {
                 TextButton(onClick = { mostrarEditorPin = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo para personalizar la plantilla del mensaje de entrega
+    if (mostrarEditorPlantilla) {
+        var textoEnEdicion by remember { mutableStateOf(mensajePlantilla) }
+
+        AlertDialog(
+            onDismissRequest = { mostrarEditorPlantilla = false },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(Icons.Default.ContentPaste, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Text("Editar Mensaje de Entrega", fontWeight = FontWeight.Bold)
+                }
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        "Personaliza el texto copiado al portapapeles. Puedes usar estas variables automáticas:",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "{servicio}  •  {dias}  •  {correo}\n{contrasena}  •  {fecha_inicio}  •  {fecha_fin}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+
+                    OutlinedTextField(
+                        value = textoEnEdicion,
+                        onValueChange = { textoEnEdicion = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 160.dp, max = 280.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        textStyle = MaterialTheme.typography.bodySmall
+                    )
+
+                    TextButton(
+                        onClick = {
+                            textoEnEdicion = com.gestorcuentas.app.utils.MensajeEntregaUtils.PLANTILLA_PREDETERMINADA
+                        },
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Restablecer Original", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val finalTexto = textoEnEdicion.trim()
+                        if (finalTexto.isNotBlank()) {
+                            mensajePlantilla = finalTexto
+                            preferences.mensajePlantilla = finalTexto
+                            mostrarEditorPlantilla = false
+                            Toast.makeText(context, "✅ Plantilla de mensaje actualizada", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "El mensaje no puede estar vacío", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Guardar Plantilla")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarEditorPlantilla = false }) {
                     Text("Cancelar")
                 }
             }

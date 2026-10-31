@@ -77,7 +77,15 @@ fun NuevaCuentaBottomSheet(
                     FilterChip(
                         selected = opcionSeleccionada == opcion,
                         onClick = { opcionSeleccionada = opcion },
-                        label = { Text(opcion, fontWeight = FontWeight.SemiBold) }
+                        label = {
+                            Text(
+                                opcion,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        },
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }

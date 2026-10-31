@@ -69,8 +69,8 @@ fun LockScreen(
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_cat_logo),
-                        contentDescription = "Logo Gatito",
+                        painter = painterResource(id = R.drawable.ic_mr_robot),
+                        contentDescription = "Logo Mr Robot",
                         modifier = Modifier
                             .size(92.dp)
                             .padding(8.dp)

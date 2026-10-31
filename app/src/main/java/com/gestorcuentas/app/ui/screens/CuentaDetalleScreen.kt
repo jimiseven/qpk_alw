@@ -102,7 +102,7 @@ fun CuentaDetalleScreen(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("Editar", fontWeight = FontWeight.SemiBold)
                         }
@@ -382,6 +382,7 @@ fun CuentaDetalleScreen(
                             onEliminar = { ventaAEliminar = venta },
                             onCopiarMensaje = {
                                 val mensaje = MensajeEntregaUtils.generarMensaje(
+                                    context = context,
                                     tipoCuenta = cuenta.tipoCuenta,
                                     duracionDias = venta.duracionDias,
                                     correo = cuenta.correo,

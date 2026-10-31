@@ -212,7 +212,14 @@ fun NuevaVentaBottomSheet(
                     FilterChip(
                         selected = duracionDiasTexto == dias.toString(),
                         onClick = { duracionDiasTexto = dias.toString() },
-                        label = { Text("${dias} días", fontWeight = FontWeight.SemiBold) },
+                        label = {
+                            Text(
+                                "${dias} días",
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -292,6 +299,7 @@ fun NuevaVentaBottomSheet(
                             fechaInicio = fechaInicio,
                             onSuccess = {
                                 val mensaje = MensajeEntregaUtils.generarMensaje(
+                                    context = context,
                                     tipoCuenta = cuenta.tipoCuenta,
                                     duracionDias = duracionDias,
                                     correo = cuenta.correo,

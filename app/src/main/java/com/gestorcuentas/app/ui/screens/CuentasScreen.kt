@@ -3,6 +3,7 @@ package com.gestorcuentas.app.ui.screens
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,8 +19,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.gestorcuentas.app.R
 import com.gestorcuentas.app.data.entity.CuentaConVentas
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.WarningAmber
@@ -55,10 +58,22 @@ fun CuentasScreen(
     }
 
     Scaffold(
-        // TopAppBar Minimalista: Solo título informativo
+        // TopAppBar Minimalista: Solo título informativo y logo
         topBar = {
             TopAppBar(
-                title = { Text("Inventario de Cuentas", fontWeight = FontWeight.Bold) },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_mr_robot),
+                            contentDescription = "Logo Mr Robot",
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text("Inventario de Cuentas", fontWeight = FontWeight.Bold)
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )

@@ -1,5 +1,6 @@
 package com.gestorcuentas.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -96,26 +97,72 @@ fun EstadisticasDialog(
                 fontWeight = FontWeight.Bold
             )
 
-            // Selector de Modo: Por Mes vs Rango de Fechas
+            // Selector de Modo Simétrico: Por Mes vs Rango de Fechas
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                FilterChip(
-                    selected = modo == ModoEstadistica.POR_MES,
+                val esMes = modo == ModoEstadistica.POR_MES
+                Surface(
                     onClick = { modo = ModoEstadistica.POR_MES },
-                    label = { Text("Por Mes") },
-                    leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                    modifier = Modifier.weight(1f)
-                )
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (esMes) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    border = if (esMes) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            tint = if (esMes) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Por Mes",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (esMes) FontWeight.Bold else FontWeight.Medium,
+                            color = if (esMes) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
-                FilterChip(
-                    selected = modo == ModoEstadistica.RANGO_FECHAS,
+                val esRango = modo == ModoEstadistica.RANGO_FECHAS
+                Surface(
                     onClick = { modo = ModoEstadistica.RANGO_FECHAS },
-                    label = { Text("Rango de Fechas") },
-                    leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                    modifier = Modifier.weight(1f)
-                )
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (esRango) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    border = if (esRango) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = null,
+                            tint = if (esRango) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Rango Fechas",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (esRango) FontWeight.Bold else FontWeight.Medium,
+                            color = if (esRango) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             if (modo == ModoEstadistica.POR_MES) {
