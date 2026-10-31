@@ -82,6 +82,9 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
+    // WorkManager (Tareas en segundo plano 100% offline y respetuosas con batería)
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     // Debugging UI
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

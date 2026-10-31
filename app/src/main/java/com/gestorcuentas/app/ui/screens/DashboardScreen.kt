@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BarChart
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -65,6 +67,13 @@ fun DashboardScreen(
     val allVentasConCuenta by viewModel.allVentasConCuenta.collectAsState()
     val context = LocalContext.current
     val hoy = remember { java.time.LocalDate.now() }
+
+    // Detección proactiva de ventas que vencen hoy (Alerta In-App)
+    val ventasVencenHoy = remember(allVentasConCuenta, hoy) {
+        allVentasConCuenta.filter {
+            DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) == 0L
+        }
+    }
 
     // Estado de la Card seleccionada: Por defecto "Cuentas Activas"
     var selectedTab by remember { mutableStateOf(DashboardTab.CUENTAS_ACTIVAS) }
@@ -198,6 +207,55 @@ fun DashboardScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
+            // ==========================================
+            // ALERTA IN-APP: CUENTAS QUE VENCEN HOY
+            // ==========================================
+            if (ventasVencenHoy.isNotEmpty()) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .clickable { selectedTab = DashboardTab.TODAS_LAS_VENTAS },
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.5.dp, WarningAmber),
+                    colors = CardDefaults.cardColors(containerColor = WarningAmber.copy(alpha = 0.12f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.WarningAmber,
+                            contentDescription = null,
+                            tint = WarningAmber,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "¡${ventasVencenHoy.size} ${if (ventasVencenHoy.size == 1) "perfil vence" else "perfiles vencen"} hoy!",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Toca aquí para ver los clientes y enviar mensaje de renovación.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = WarningAmber,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
             // ==========================================
             // 1. BANNER FINANCIERO COMPACTO
             // ==========================================
@@ -612,6 +670,16 @@ fun DashboardScreen(
             },
             onImportar = {
                 importarBackupLauncher.launch(arrayOf("application/json", "*/*"))
+            },
+            onRestaurarTexto = { text ->
+                try {
+                    val (cuentas, ventas) = com.gestorcuentas.app.utils.BackupUtils.parsearBackup(text)
+                    resumenImportarCuentas = cuentas.size
+                    resumenImportarVentas = ventas.size
+                    jsonImportarPendiente = text
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error en el archivo de respaldo: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
             },
             onDismiss = { mostrarSheetCopiaSeguridad = false }
         )

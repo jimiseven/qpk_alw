@@ -12,7 +12,10 @@ import kotlinx.coroutines.flow.Flow
  * Repositorio que desacopla la fuente de datos Room de los ViewModels.
  * Proporciona una API limpia y reactiva para toda la app.
  */
-class InventarioRepository(private val dao: InventarioDao) {
+class InventarioRepository(
+    private val dao: InventarioDao,
+    private val database: com.gestorcuentas.app.data.db.AppDatabase? = null
+) {
 
     // Streams reactivos de Cuentas
     val allCuentas: Flow<List<Cuenta>> = dao.getAllCuentas()
@@ -69,5 +72,18 @@ class InventarioRepository(private val dao: InventarioDao) {
     suspend fun getAllVentasSnapshot(): List<Venta> = dao.getAllVentasSnapshot()
     suspend fun restaurarBaseDeDatos(cuentas: List<Cuenta>, ventas: List<Venta>) {
         dao.restaurarBaseDeDatos(cuentas, ventas)
+    }
+
+    // Mantenimiento y Verificación de Integridad SQLite
+    fun optimizeDatabase() {
+        database?.optimizeDatabase()
+    }
+
+    fun verifyIntegrity(): Boolean {
+        return database?.verifyIntegrity() ?: true
+    }
+
+    fun vacuumDatabase() {
+        database?.vacuumDatabase()
     }
 }

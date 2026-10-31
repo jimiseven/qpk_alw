@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,6 +39,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         preferences = AppPreferences(this)
         isUnlockedState.value = !preferences.isSecurityEnabled
+
+        // Verificación pasiva de rescate para respaldo automático diario
+        lifecycleScope.launch(Dispatchers.IO) {
+            val app = application as? CuentasApp
+            if (app != null) {
+                com.gestorcuentas.app.utils.AutoBackupManager.verificarRespaldoPasivo(this@MainActivity, app.repository)
+            }
+        }
 
         setContent {
             var themeMode by remember { mutableStateOf(preferences.themeMode) }

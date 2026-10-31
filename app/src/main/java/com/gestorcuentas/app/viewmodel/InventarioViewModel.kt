@@ -247,8 +247,20 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                // Verificación de integridad SQLite previa (D)
+                if (!repository.verifyIntegrity()) {
+                    withContext(Dispatchers.Main) {
+                        onError("La base de datos actual presenta errores de integridad física.")
+                    }
+                    return@launch
+                }
+
                 val (cuentas, ventas) = com.gestorcuentas.app.utils.BackupUtils.parsearBackup(jsonString)
                 repository.restaurarBaseDeDatos(cuentas, ventas)
+
+                // Mantenimiento y optimización automática post-restauración (A)
+                repository.optimizeDatabase()
+
                 withContext(Dispatchers.Main) {
                     onSuccess(cuentas.size, ventas.size)
                 }
@@ -256,6 +268,18 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
                 withContext(Dispatchers.Main) {
                     onError("Error al importar el archivo: ${e.localizedMessage ?: "Formato inválido"}")
                 }
+            }
+        }
+    }
+
+    /**
+     * Mantenimiento preventivo de SQLite (PRAGMA optimize).
+     */
+    fun ejecutarMantenimientoDatabase(onComplete: () -> Unit = {}) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.optimizeDatabase()
+            withContext(Dispatchers.Main) {
+                onComplete()
             }
         }
     }

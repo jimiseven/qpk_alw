@@ -16,3 +16,7 @@
 # 4. Corrutinas de Kotlin
 -dontwarn kotlinx.coroutines.**
 -keepattributes *Annotation*, InnerClasses, EnclosingMethod
+
+# 5. WorkManager y Workers
+-keep class * extends androidx.work.ListenableWorker { *; }
+-keep class * extends androidx.work.Worker { *; }

@@ -1,4 +1,0 @@
-#Sat Oct 31 11:08:26 BOT 2026
-base.0=G\:\\0 imports\\apk\\qpk_alw\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
-path.0=classes.dex
-renamed.0=classes.dex

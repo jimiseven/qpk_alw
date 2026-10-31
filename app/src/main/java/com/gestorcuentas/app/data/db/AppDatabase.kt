@@ -24,6 +24,47 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun inventarioDao(): InventarioDao
 
+    /**
+     * Mantenimiento de optimización de SQLite (analiza estadísticas de índices y desfragmenta).
+     */
+    fun optimizeDatabase() {
+        try {
+            openHelper.writableDatabase.execSQL("PRAGMA optimize")
+        } catch (e: Exception) {
+            // Ignorar en caso de bloqueo concurrente temporal
+        }
+    }
+
+    /**
+     * Desfragmenta y compacta la base de datos eliminando espacio no utilizado en disco.
+     */
+    fun vacuumDatabase() {
+        try {
+            openHelper.writableDatabase.execSQL("VACUUM")
+        } catch (e: Exception) {
+            // Ignorar si hay transacción concurrente
+        }
+    }
+
+    /**
+     * Verifica la integridad física del archivo SQLite de Room.
+     * Retorna true si SQLite responde "ok".
+     */
+    fun verifyIntegrity(): Boolean {
+        return try {
+            val cursor = openHelper.writableDatabase.query("PRAGMA integrity_check")
+            var isValid = false
+            if (cursor.moveToFirst()) {
+                val result = cursor.getString(0)
+                isValid = result.equals("ok", ignoreCase = true)
+            }
+            cursor.close()
+            isValid
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null

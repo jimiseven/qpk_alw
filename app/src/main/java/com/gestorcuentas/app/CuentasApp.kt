@@ -9,5 +9,11 @@ import com.gestorcuentas.app.repository.InventarioRepository
  */
 class CuentasApp : Application() {
     val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
-    val repository: InventarioRepository by lazy { InventarioRepository(database.inventarioDao()) }
+    val repository: InventarioRepository by lazy { InventarioRepository(database.inventarioDao(), database) }
+
+    override fun onCreate() {
+        super.onCreate()
+        // Programar el respaldo automático diario a las 21:00 con WorkManager
+        com.gestorcuentas.app.utils.AutoBackupManager.programarWorkManager(this)
+    }
 }
