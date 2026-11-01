@@ -23,6 +23,20 @@ use crate::storage::StorageManager;
 use crate::backup::BackupManager;
 use crate::ui::INDEX_HTML;
 
+fn json_response(json: String) -> Response<Cow<'static, [u8]>> {
+    Response::builder()
+        .header("Content-Type", "application/json; charset=utf-8")
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        .header("Access-Control-Allow-Headers", "*")
+        .body(Cow::Owned(json.into_bytes()))
+        .unwrap()
+}
+
+fn ok_response() -> Response<Cow<'static, [u8]>> {
+    json_response("{\"success\":true}".to_string())
+}
+
 fn main() {
     let storage = StorageManager::new();
     let initial_state = storage.load_state();
@@ -40,7 +54,16 @@ fn main() {
 
     let _webview = WebViewBuilder::new()
         .with_custom_protocol("gestor".into(), move |_webview_id, request: Request<Vec<u8>>| {
-            let path = request.uri().path();
+            if request.method() == "OPTIONS" {
+                return Response::builder()
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                    .header("Access-Control-Allow-Headers", "*")
+                    .body(Cow::Borrowed(b"".as_ref()))
+                    .unwrap();
+            }
+
+            let path = request.uri().path().trim_end_matches('/');
             let body_bytes = request.body();
             let body_str = String::from_utf8_lossy(body_bytes);
 
@@ -49,11 +72,7 @@ fn main() {
             match path {
                 "/api/state" => {
                     let json = serde_json::to_string(&*current_state).unwrap_or_else(|_| "{}".to_string());
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .header("Access-Control-Allow-Origin", "*")
-                        .body(Cow::Owned(json.into_bytes()))
-                        .unwrap()
+                    json_response(json)
                 }
 
                 "/api/add_cuenta" => {
@@ -62,10 +81,7 @@ fn main() {
                         current_state.cuentas.push(cuenta);
                         let _ = storage.save_state(&current_state);
                     }
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Borrowed(b"{\"success\":true}".as_ref()))
-                        .unwrap()
+                    ok_response()
                 }
 
                 "/api/update_cuenta" => {
@@ -75,10 +91,7 @@ fn main() {
                             let _ = storage.save_state(&current_state);
                         }
                     }
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Borrowed(b"{\"success\":true}".as_ref()))
-                        .unwrap()
+                    ok_response()
                 }
 
                 "/api/delete_cuenta" => {
@@ -86,14 +99,10 @@ fn main() {
                     struct DelReq { id: i64 }
                     if let Ok(req) = serde_json::from_str::<DelReq>(&body_str) {
                         current_state.cuentas.retain(|c| c.id != req.id);
-                        // Borrado en cascada de ventas asociadas
                         current_state.ventas.retain(|v| v.cuenta_id != req.id);
                         let _ = storage.save_state(&current_state);
                     }
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Borrowed(b"{\"success\":true}".as_ref()))
-                        .unwrap()
+                    ok_response()
                 }
 
                 "/api/add_venta" => {
@@ -102,10 +111,7 @@ fn main() {
                         current_state.ventas.push(venta);
                         let _ = storage.save_state(&current_state);
                     }
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Borrowed(b"{\"success\":true}".as_ref()))
-                        .unwrap()
+                    ok_response()
                 }
 
                 "/api/update_venta" => {
@@ -115,10 +121,7 @@ fn main() {
                             let _ = storage.save_state(&current_state);
                         }
                     }
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Borrowed(b"{\"success\":true}".as_ref()))
-                        .unwrap()
+                    ok_response()
                 }
 
                 "/api/delete_venta" => {
@@ -128,19 +131,13 @@ fn main() {
                         current_state.ventas.retain(|v| v.id != req.id);
                         let _ = storage.save_state(&current_state);
                     }
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Borrowed(b"{\"success\":true}".as_ref()))
-                        .unwrap()
+                    ok_response()
                 }
 
                 "/api/save_template" => {
                     current_state.mensaje_template = Some(body_str.to_string());
                     let _ = storage.save_state(&current_state);
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Borrowed(b"{\"success\":true}".as_ref()))
-                        .unwrap()
+                    ok_response()
                 }
 
                 "/api/import_backup" => {
@@ -156,20 +153,14 @@ fn main() {
                                 "{{\"success\":true,\"cuentas\":{},\"ventas\":{}}}",
                                 total_c, total_v
                             );
-                            Response::builder()
-                                .header("Content-Type", "application/json")
-                                .body(Cow::Owned(resp.into_bytes()))
-                                .unwrap()
+                            json_response(resp)
                         }
                         Err(err) => {
                             let resp = format!(
                                 "{{\"success\":false,\"error\":\"{}\"}}",
                                 err.replace('"', "\\\"")
                             );
-                            Response::builder()
-                                .header("Content-Type", "application/json")
-                                .body(Cow::Owned(resp.into_bytes()))
-                                .unwrap()
+                            json_response(resp)
                         }
                     }
                 }
@@ -177,16 +168,14 @@ fn main() {
                 "/api/export_backup" => {
                     let json = BackupManager::exportar_backup(&current_state.cuentas, &current_state.ventas)
                         .unwrap_or_else(|_| "{}".to_string());
-                    Response::builder()
-                        .header("Content-Type", "application/json")
-                        .body(Cow::Owned(json.into_bytes()))
-                        .unwrap()
+                    json_response(json)
                 }
 
                 _ => {
                     // Servir la interfaz gráfica HTML por defecto
                     Response::builder()
                         .header("Content-Type", "text/html; charset=utf-8")
+                        .header("Access-Control-Allow-Origin", "*")
                         .body(Cow::Borrowed(INDEX_HTML.as_bytes()))
                         .unwrap()
                 }

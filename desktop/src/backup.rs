@@ -11,11 +11,7 @@ impl BackupManager {
         }
 
         let parsed: BackupData = serde_json::from_str(clean)
-            .map_err(|e| format!("Formato JSON no válido o corrupto: {}", e))?;
-
-        if parsed.cuentas.is_empty() && parsed.ventas.is_empty() {
-            return Err("El respaldo no contiene registros de cuentas ni de ventas.".to_string());
-        }
+            .map_err(|e| format!("Formato JSON no compatible o corrupto: {}", e))?;
 
         Ok((parsed.cuentas, parsed.ventas))
     }
@@ -34,5 +30,53 @@ impl BackupManager {
 
         serde_json::to_string_pretty(&backup)
             .map_err(|e| format!("Error generando archivo JSON de exportación: {}", e))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parsear_backup_valido() {
+        let sample_json = r#"{
+            "version": 2,
+            "fecha_exportacion": "2026-11-01",
+            "total_cuentas": 1,
+            "total_ventas": 1,
+            "cuentas": [
+                {
+                    "id": 1,
+                    "correo": "test@netflix.com",
+                    "contrasena_correo": "123",
+                    "contrasena_plataforma": "456",
+                    "tipo_cuenta": "Netflix",
+                    "costo_compra": 50.0,
+                    "fecha_creacion": "2026-10-01",
+                    "fecha_fin": "2026-11-01",
+                    "estado": "activa"
+                }
+            ],
+            "ventas": [
+                {
+                    "id": 1,
+                    "cuenta_id": 1,
+                    "numero_celular_cliente": "76992490",
+                    "cantidad_perfiles": 1,
+                    "precio_venta_por_perfil": 15.0,
+                    "duracion_dias": 30,
+                    "fecha_inicio": "2026-10-05",
+                    "fecha_fin": "2026-11-04"
+                }
+            ]
+        }"#;
+
+        let res = BackupManager::parsear_backup(sample_json);
+        assert!(res.is_ok());
+        let (cuentas, ventas) = res.unwrap();
+        assert_eq!(cuentas.len(), 1);
+        assert_eq!(ventas.len(), 1);
+        assert_eq!(cuentas[0].correo, "test@netflix.com");
+        assert_eq!(ventas[0].numero_celular_cliente, "76992490");
     }
 }

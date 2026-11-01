@@ -554,7 +554,7 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
 
     async function fetchState() {
       try {
-        const res = await fetch('gestor://api/state');
+        const res = await fetch('/api/state');
         appState = await res.json();
         renderAll();
       } catch (e) {
@@ -795,7 +795,7 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
 
     async function saveTemplate() {
       const t = document.getElementById('templateText').value;
-      await fetch('gestor://api/save_template', { method: 'POST', body: t });
+      await fetch('/api/save_template', { method: 'POST', body: t });
       alert('¡Plantilla de WhatsApp guardada con éxito!');
     }
 
@@ -874,14 +874,14 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
       }
 
       const endpoint = idVal ? 'update_cuenta' : 'add_cuenta';
-      await fetch(`gestor://api/${endpoint}`, { method: 'POST', body: JSON.stringify(cuenta) });
+      await fetch(`/api/${endpoint}`, { method: 'POST', body: JSON.stringify(cuenta) });
       closeModal('modalCuenta');
       fetchState();
     }
 
     async function deleteCuenta(id) {
       if (confirm(`¿Eliminar la cuenta #${id}? Las ventas vinculadas también se borrarán en cascada.`)) {
-        await fetch('gestor://api/delete_cuenta', { method: 'POST', body: JSON.stringify({ id }) });
+        await fetch('/api/delete_cuenta', { method: 'POST', body: JSON.stringify({ id }) });
         fetchState();
       }
     }
@@ -966,14 +966,14 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
       };
 
       const endpoint = idVal ? 'update_venta' : 'add_venta';
-      await fetch(`gestor://api/${endpoint}`, { method: 'POST', body: JSON.stringify(venta) });
+      await fetch(`/api/${endpoint}`, { method: 'POST', body: JSON.stringify(venta) });
       closeModal('modalVenta');
       fetchState();
     }
 
     async function deleteVenta(id) {
       if (confirm(`¿Eliminar la venta #${id}?`)) {
-        await fetch('gestor://api/delete_venta', { method: 'POST', body: JSON.stringify({ id }) });
+        await fetch('/api/delete_venta', { method: 'POST', body: JSON.stringify({ id }) });
         fetchState();
       }
     }
@@ -991,10 +991,14 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
       reader.onload = async function(e) {
         const jsonContent = e.target.result;
         try {
-          const res = await fetch('gestor://api/import_backup', { method: 'POST', body: jsonContent });
+          const res = await fetch('/api/import_backup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: jsonContent
+          });
           const result = await res.json();
           if (result.success) {
-            alert(`✅ ¡Copia de seguridad importada con éxito!\n\nCuentas: ${result.cuentas}\nVentas: ${result.ventas}`);
+            alert(`✅ ¡Copia de seguridad importada con éxito!\n\nCuentas cargadas: ${result.cuentas}\nVentas cargadas: ${result.ventas}`);
             fetchState();
           } else {
             alert('❌ Error al importar respaldo: ' + result.error);
@@ -1009,7 +1013,7 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
 
     async function exportBackup() {
       try {
-        const res = await fetch('gestor://api/export_backup');
+        const res = await fetch('/api/export_backup');
         const jsonStr = await res.text();
         const blob = new Blob([jsonStr], { type: 'application/json' });
         const now = new Date();
