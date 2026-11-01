@@ -106,6 +106,29 @@ fn main() {
                     ok_response()
                 }
 
+                "/api/toggle_cuenta_estado" => {
+                    #[derive(serde::Deserialize)]
+                    struct ToggleReq { id: i64 }
+                    if let Ok(req) = serde_json::from_str::<ToggleReq>(&body_str) {
+                        if let Some(c) = current_state.cuentas.iter_mut().find(|c| c.id == req.id) {
+                            c.estado = if c.estado.to_lowercase() == "inhabilitada" {
+                                "activa".to_string()
+                            } else {
+                                "inhabilitada".to_string()
+                            };
+                            let _ = storage.save_state(&current_state);
+                        }
+                    }
+                    ok_response()
+                }
+
+                "/api/clear_db" => {
+                    current_state.cuentas.clear();
+                    current_state.ventas.clear();
+                    let _ = storage.save_state(&current_state);
+                    ok_response()
+                }
+
                 "/api/add_venta" => {
                     if let Ok(mut venta) = serde_json::from_str::<Venta>(&body_str) {
                         venta.id = StorageManager::next_venta_id(&current_state.ventas);
@@ -151,6 +174,14 @@ fn main() {
                     } else {
                         json_response("{\"success\":false,\"error\":\"JSON invalido\"}".to_string())
                     }
+                }
+
+                "/api/clipboard/paste" => {
+                    let text = crate::clipboard::get_clipboard_text().unwrap_or_default();
+                    #[derive(serde::Serialize)]
+                    struct ClipResp { success: bool, text: String }
+                    let resp = serde_json::to_string(&ClipResp { success: true, text }).unwrap_or_default();
+                    json_response(resp)
                 }
 
                 "/api/import_backup" => {

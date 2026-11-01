@@ -73,7 +73,68 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
     button.btn-success { background: var(--success); border-color: var(--success); color: #000; }
     button.btn-danger { background: rgba(255,82,82,0.1); border-color: var(--danger); color: var(--danger); }
     button.btn-danger:hover { background: var(--danger); color: #fff; }
+    button.btn-warning { background: rgba(255,171,0,0.15); border-color: var(--warning); color: var(--warning); }
+    button.btn-warning:hover { background: var(--warning); color: #000; }
     button.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+    /* Inputs with Action (Paste) & Chips */
+    .input-with-action { display: flex; gap: 8px; width: 100%; }
+    .input-with-action input { flex: 1; min-width: 0; }
+    .btn-paste {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: var(--radius);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-paste:hover {
+      background: rgba(0, 229, 255, 0.18);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .service-chips { display: flex; gap: 8px; width: 100%; }
+    .chip-btn {
+      flex: 1;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .chip-btn:hover { color: var(--text); border-color: var(--primary); }
+    .chip-btn.active {
+      background: rgba(124, 77, 255, 0.25);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(124, 77, 255, 0.3);
+    }
+    .duration-chips { display: flex; gap: 8px; margin-top: 6px; }
+    .duration-chip {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .duration-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .duration-chip.active { background: rgba(0, 229, 255, 0.15); border-color: var(--accent); color: var(--accent); }
 
     /* Navigation Bar */
     nav {
@@ -304,8 +365,9 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
     </div>
     <div class="header-actions">
       <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileSelect(event)">
-      <button onclick="document.getElementById('fileInput').click()">📥 Importar Backup de Celular</button>
-      <button class="btn-success" onclick="exportBackup()">📤 Descargar Backup para Celular</button>
+      <button onclick="document.getElementById('fileInput').click()">📥 Importar Backup</button>
+      <button class="btn-success" onclick="exportBackup()">📤 Exportar Backup</button>
+      <button class="btn-danger" onclick="confirmarLimpiarBD()" title="Elimina todos los datos locales para reiniciar o cambiar de base de datos">🗑️ Borrar Base de Datos</button>
     </div>
   </header>
 
@@ -390,6 +452,7 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
               <th>Correo</th>
               <th>Clave Plataforma</th>
               <th>Costo</th>
+              <th>Vigencia Proveedor</th>
               <th>Ganancia Generada</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -484,33 +547,60 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
       <div class="modal-body">
         <input type="hidden" id="cuentaId">
         <div class="form-group">
-          <label>Servicio / Plataforma</label>
-          <input type="text" id="cuentaServicio" placeholder="Ej: Netflix, Spotify, ChatGPT, Gemini">
+          <label>Tipo de Servicio</label>
+          <div class="service-chips">
+            <button type="button" class="chip-btn active" id="chipServicioChatGPT" onclick="selectServiceOption('Chat GPT')">Chat GPT</button>
+            <button type="button" class="chip-btn" id="chipServicioGemini" onclick="selectServiceOption('Gemini')">Gemini</button>
+            <button type="button" class="chip-btn" id="chipServicioOtros" onclick="selectServiceOption('Otros')">Otros</button>
+          </div>
+          <input type="text" id="cuentaServicioOtro" placeholder="Especificar otro servicio (ej: Netflix, Spotify, Canva...)" style="display:none; margin-top:8px;">
         </div>
         <div class="form-group">
           <label>Correo Electrónico</label>
-          <input type="email" id="cuentaCorreo" placeholder="correo@ejemplo.com">
+          <div class="input-with-action">
+            <input type="email" id="cuentaCorreo" placeholder="ejemplo@correo.com">
+            <button type="button" class="btn-paste" onclick="pasteInto('cuentaCorreo')" title="Pegar desde el portapapeles">📋 Pegar</button>
+          </div>
         </div>
         <div class="form-group">
-          <label>Contraseña de la Plataforma</label>
-          <input type="text" id="cuentaClavePlataforma" placeholder="Contraseña de acceso">
+          <label id="lblClavePlataforma">Contraseña Plataforma (Chat GPT)</label>
+          <div class="input-with-action">
+            <input type="text" id="cuentaClavePlataforma" placeholder="Contraseña de acceso a la plataforma">
+            <button type="button" class="btn-paste" onclick="pasteInto('cuentaClavePlataforma')" title="Pegar desde el portapapeles">📋 Pegar</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Contraseña del Correo (Opcional)</label>
-          <input type="text" id="cuentaClaveCorreo" placeholder="Contraseña del correo original">
+          <div class="input-with-action">
+            <input type="text" id="cuentaClaveCorreo" placeholder="Contraseña del correo original">
+            <button type="button" class="btn-paste" onclick="pasteInto('cuentaClaveCorreo')" title="Pegar desde el portapapeles">📋 Pegar</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Costo de Compra (Bs.)</label>
-          <input type="number" step="0.5" id="cuentaCosto" placeholder="50.0">
+          <input type="number" step="0.5" id="cuentaCosto" placeholder="0.00">
         </div>
-        <div class="form-group">
-          <label>Fecha de Compra</label>
-          <input type="date" id="cuentaFecha">
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>Fecha Inicio (Registro)</label>
+            <input type="date" id="cuentaFechaCreacion" onchange="onFechaCreacionChange()">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Fecha Fin (Proveedor)</label>
+            <input type="date" id="cuentaFechaFin">
+          </div>
+        </div>
+        <div class="form-group" id="grpCuentaEstado" style="display:none;">
+          <label>Estado de la Cuenta</label>
+          <select id="cuentaEstado">
+            <option value="activa">ACTIVA (Disponible para ventas)</option>
+            <option value="inhabilitada">INHABILITADA (No disponible para ventas)</option>
+          </select>
         </div>
       </div>
       <div class="modal-footer">
         <button onclick="closeModal('modalCuenta')">Cancelar</button>
-        <button class="btn-primary" onclick="saveCuenta()">Guardar Cuenta</button>
+        <button class="btn-primary" onclick="saveCuenta()">Guardar Cuenta Maestra</button>
       </div>
     </div>
   </div>
@@ -519,39 +609,49 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
   <div id="modalVenta" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modalVentaTitle">Registrar Venta de Perfil</h3>
+        <h3 id="modalVentaTitle">Registrar Nueva Venta</h3>
         <button onclick="closeModal('modalVenta')">✕</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="ventaId">
         <div class="form-group">
-          <label>Celular del Cliente</label>
-          <input type="text" id="ventaCelular" placeholder="Ej: 76992490">
-        </div>
-        <div class="form-group">
-          <label>Seleccionar Cuenta Maestra</label>
+          <label>1. Seleccionar Cuenta del Inventario</label>
           <select id="ventaCuentaId"></select>
         </div>
         <div class="form-group">
-          <label>Cantidad de Perfiles</label>
-          <input type="number" id="ventaCantidad" value="1" min="1">
+          <label>2. Celular del Cliente</label>
+          <div class="input-with-action">
+            <input type="text" id="ventaCelular" placeholder="Pega o escribe (+591 76992490)">
+            <button type="button" class="btn-paste" onclick="pasteInto('ventaCelular')" title="Pegar desde el portapapeles">📋 Pegar</button>
+          </div>
         </div>
         <div class="form-group">
-          <label>Precio por Perfil (Bs.)</label>
-          <input type="number" step="0.5" id="ventaPrecio" placeholder="15.0">
+          <label>3. Precio de Venta (Bs.)</label>
+          <input type="number" step="0.5" id="ventaPrecio" placeholder="15.00">
         </div>
         <div class="form-group">
-          <label>Duración (Días)</label>
-          <input type="number" id="ventaDias" value="30">
+          <label>4. Duración (Días)</label>
+          <input type="number" id="ventaDias" value="30" oninput="onVentaDiasChange()">
+          <div class="duration-chips">
+            <button type="button" class="duration-chip active" id="chipDias30" onclick="setVentaDuracion(30)">30 días</button>
+            <button type="button" class="duration-chip" id="chipDias60" onclick="setVentaDuracion(60)">60 días</button>
+            <button type="button" class="duration-chip" id="chipDias90" onclick="setVentaDuracion(90)">90 días</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Fecha de Inicio</label>
-          <input type="date" id="ventaFechaInicio">
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>Fecha de Inicio</label>
+            <input type="date" id="ventaFechaInicio" onchange="onVentaFechaInicioChange()">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Fecha Fin (Vencimiento)</label>
+            <input type="date" id="ventaFechaFin">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
         <button onclick="closeModal('modalVenta')">Cancelar</button>
-        <button class="btn-primary" onclick="saveVenta()">Guardar Venta</button>
+        <button class="btn-primary" onclick="saveVenta()">Guardar y Copiar Mensaje</button>
       </div>
     </div>
   </div>
@@ -667,6 +767,8 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           .reduce((sum, v) => sum + (v.precio_venta_por_perfil * v.cantidad_perfiles), 0);
         const gananciaCuenta = ingresosCuenta - c.costo_compra;
         const recuperada = gananciaCuenta >= 0;
+        const esActiva = (c.estado || 'activa').toLowerCase() === 'activa';
+        const vigenciaStr = c.fecha_fin ? `${c.fecha_creacion || ''} → ${c.fecha_fin}` : (c.fecha_creacion || 'Sin fecha');
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -675,15 +777,19 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           <td>${c.correo}</td>
           <td><code>${c.contrasena_plataforma}</code></td>
           <td>Bs. ${c.costo_compra.toFixed(2)}</td>
+          <td><small style="color:var(--text-muted)">${vigenciaStr}</small></td>
           <td>
             <span class="badge ${recuperada ? 'badge-success' : 'badge-warning'}">
               Bs. ${gananciaCuenta >= 0 ? '+' : ''}${gananciaCuenta.toFixed(2)} (${recuperada ? 'Ganancia' : 'Recuperando'})
             </span>
           </td>
-          <td><span class="badge ${c.estado === 'activa' ? 'badge-info' : 'badge-danger'}">${c.estado}</span></td>
+          <td><span class="badge ${esActiva ? 'badge-success' : 'badge-danger'}">${esActiva ? 'ACTIVA' : 'INHABILITADA'}</span></td>
           <td>
-            <button class="btn-sm" onclick="editCuenta(${c.id})">✏️</button>
-            <button class="btn-sm btn-danger" onclick="deleteCuenta(${c.id})">🗑️</button>
+            <button class="btn-sm" onclick="editCuenta(${c.id})" title="Editar">✏️</button>
+            <button class="btn-sm ${esActiva ? 'btn-warning' : 'btn-success'}" onclick="toggleCuentaEstado(${c.id})" title="${esActiva ? 'Desactivar / Inhabilitar cuenta' : 'Activar cuenta'}">
+              ${esActiva ? '⏸️ Desactivar' : '▶️ Activar'}
+            </button>
+            <button class="btn-sm btn-danger" onclick="deleteCuenta(${c.id})" title="Eliminar cuenta">🗑️</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -939,16 +1045,99 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       return Math.round(diffTime / (1000 * 60 * 60 * 24));
     }
 
-    /* Modales */
+    /* Selector de Servicios (Chips) */
+    let currentServicioOpcion = 'Chat GPT';
+
+    function selectServiceOption(opcion) {
+      currentServicioOpcion = opcion;
+      const chipGpt = document.getElementById('chipServicioChatGPT');
+      const chipGem = document.getElementById('chipServicioGemini');
+      const chipOtro = document.getElementById('chipServicioOtros');
+      if (chipGpt) chipGpt.classList.toggle('active', opcion === 'Chat GPT');
+      if (chipGem) chipGem.classList.toggle('active', opcion === 'Gemini');
+      if (chipOtro) chipOtro.classList.toggle('active', opcion === 'Otros');
+
+      const otroInput = document.getElementById('cuentaServicioOtro');
+      if (otroInput) {
+        if (opcion === 'Otros') {
+          otroInput.style.display = 'block';
+          otroInput.focus();
+        } else {
+          otroInput.style.display = 'none';
+        }
+      }
+      const lbl = document.getElementById('lblClavePlataforma');
+      if (lbl) {
+        lbl.textContent = `Contraseña Plataforma (${opcion === 'Otros' ? (otroInput.value.trim() || 'Servicio') : opcion})`;
+      }
+    }
+
+    function getServicioSeleccionado() {
+      if (currentServicioOpcion === 'Otros') {
+        const val = document.getElementById('cuentaServicioOtro').value.trim();
+        return val || 'Otros';
+      }
+      return currentServicioOpcion;
+    }
+
+    function onFechaCreacionChange() {
+      const fIni = document.getElementById('cuentaFechaCreacion').value;
+      if (fIni) {
+        const d = new Date(fIni + 'T00:00:00');
+        const dFin = new Date(d.getTime() + 30 * 24 * 60 * 60 * 1000);
+        document.getElementById('cuentaFechaFin').value = dFin.toISOString().split('T')[0];
+      }
+    }
+
+    /* Pegado desde Portapapeles */
+    async function pasteInto(elemId) {
+      let text = '';
+      // 1. Intentar mediante la API nativa de Rust en Windows (Win32 pura sin restricciones)
+      try {
+        const res = await fetch('/api/clipboard/paste');
+        const data = await res.json();
+        if (data.success && data.text) {
+          text = data.text;
+        }
+      } catch (err) {}
+
+      // 2. Si no hubo texto en backend, intentar navigator.clipboard
+      if (!text && navigator.clipboard && navigator.clipboard.readText) {
+        try {
+          text = await navigator.clipboard.readText();
+        } catch (err) {}
+      }
+
+      if (text) {
+        const el = document.getElementById(elemId);
+        if (el) {
+          el.value = text.trim();
+          showToast('📋 Pegado desde portapapeles');
+        }
+      } else {
+        showToast('⚠️ No se encontró texto en el portapapeles');
+      }
+    }
+
+    /* Modales Cuenta */
     function openNuevaCuentaModal() {
-      document.getElementById('modalCuentaTitle').textContent = 'Nueva Cuenta Maestra';
+      document.getElementById('modalCuentaTitle').textContent = 'Registrar Cuenta Maestra';
       document.getElementById('cuentaId').value = '';
-      document.getElementById('cuentaServicio').value = '';
+      selectServiceOption('Chat GPT');
+      document.getElementById('cuentaServicioOtro').value = '';
       document.getElementById('cuentaCorreo').value = '';
       document.getElementById('cuentaClavePlataforma').value = '';
       document.getElementById('cuentaClaveCorreo').value = '';
       document.getElementById('cuentaCosto').value = '';
-      document.getElementById('cuentaFecha').value = new Date().toISOString().split('T')[0];
+
+      const hoy = new Date();
+      const hoyStr = hoy.toISOString().split('T')[0];
+      const fin = new Date(hoy.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const finStr = fin.toISOString().split('T')[0];
+
+      document.getElementById('cuentaFechaCreacion').value = hoyStr;
+      document.getElementById('cuentaFechaFin').value = finStr;
+      document.getElementById('grpCuentaEstado').style.display = 'none';
       document.getElementById('modalCuenta').classList.add('active');
     }
 
@@ -957,66 +1146,149 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       if (!c) return;
       document.getElementById('modalCuentaTitle').textContent = 'Editar Cuenta Maestra #' + id;
       document.getElementById('cuentaId').value = c.id;
-      document.getElementById('cuentaServicio').value = c.tipo_cuenta;
-      document.getElementById('cuentaCorreo').value = c.correo;
-      document.getElementById('cuentaClavePlataforma').value = c.contrasena_plataforma;
-      document.getElementById('cuentaClaveCorreo').value = c.contrasena_correo;
-      document.getElementById('cuentaCosto').value = c.costo_compra;
-      document.getElementById('cuentaFecha').value = c.fecha_creacion;
+
+      if (c.tipo_cuenta === 'Chat GPT' || c.tipo_cuenta === 'Gemini') {
+        selectServiceOption(c.tipo_cuenta);
+      } else {
+        selectServiceOption('Otros');
+        document.getElementById('cuentaServicioOtro').value = c.tipo_cuenta || '';
+      }
+
+      document.getElementById('cuentaCorreo').value = c.correo || '';
+      document.getElementById('cuentaClavePlataforma').value = c.contrasena_plataforma || '';
+      document.getElementById('cuentaClaveCorreo').value = c.contrasena_correo || '';
+      document.getElementById('cuentaCosto').value = c.costo_compra || 0;
+      document.getElementById('cuentaFechaCreacion').value = c.fecha_creacion || new Date().toISOString().split('T')[0];
+      document.getElementById('cuentaFechaFin').value = c.fecha_fin || '';
+
+      document.getElementById('grpCuentaEstado').style.display = 'block';
+      document.getElementById('cuentaEstado').value = (c.estado || 'activa').toLowerCase();
+
       document.getElementById('modalCuenta').classList.add('active');
     }
 
     async function saveCuenta() {
       const idVal = document.getElementById('cuentaId').value;
-      const cuenta = {
-        id: idVal ? parseInt(idVal) : 0,
-        tipo_cuenta: document.getElementById('cuentaServicio').value.trim() || 'Otro',
-        correo: document.getElementById('cuentaCorreo').value.trim(),
-        contrasena_plataforma: document.getElementById('cuentaClavePlataforma').value.trim(),
-        contrasena_correo: document.getElementById('cuentaClaveCorreo').value.trim(),
-        costo_compra: parseFloat(document.getElementById('cuentaCosto').value) || 0.0,
-        fecha_creacion: document.getElementById('cuentaFecha').value || new Date().toISOString().split('T')[0],
-        fecha_fin: '',
-        estado: 'activa'
-      };
+      const servicio = getServicioSeleccionado();
+      const correo = document.getElementById('cuentaCorreo').value.trim();
+      const clavePlat = document.getElementById('cuentaClavePlataforma').value.trim();
 
-      if (!cuenta.correo) {
+      if (!correo) {
         alert('Por favor ingresa el correo de la cuenta.');
         return;
       }
+      if (!clavePlat) {
+        alert('Por favor ingresa la contraseña de la plataforma.');
+        return;
+      }
+
+      const fIni = document.getElementById('cuentaFechaCreacion').value || new Date().toISOString().split('T')[0];
+      const fFin = document.getElementById('cuentaFechaFin').value || '';
+      const estadoVal = document.getElementById('cuentaEstado').value || 'activa';
+
+      const cuenta = {
+        id: idVal ? parseInt(idVal) : 0,
+        tipo_cuenta: servicio,
+        correo: correo,
+        contrasena_plataforma: clavePlat,
+        contrasena_correo: document.getElementById('cuentaClaveCorreo').value.trim(),
+        costo_compra: parseFloat(document.getElementById('cuentaCosto').value) || 0.0,
+        fecha_creacion: fIni,
+        fecha_fin: fFin,
+        estado: idVal ? estadoVal : 'activa'
+      };
 
       const endpoint = idVal ? 'update_cuenta' : 'add_cuenta';
       await fetch(`/api/${endpoint}`, { method: 'POST', body: JSON.stringify(cuenta) });
       closeModal('modalCuenta');
       fetchState();
+      showToast('✅ Cuenta maestra guardada');
+    }
+
+    async function toggleCuentaEstado(id) {
+      await fetch('/api/toggle_cuenta_estado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      fetchState();
+      showToast('🔄 Estado de la cuenta actualizado');
     }
 
     async function deleteCuenta(id) {
       if (confirm(`¿Eliminar la cuenta #${id}? Las ventas vinculadas también se borrarán en cascada.`)) {
         await fetch('/api/delete_cuenta', { method: 'POST', body: JSON.stringify({ id }) });
         fetchState();
+        showToast('🗑️ Cuenta eliminada');
       }
     }
 
+    /* Duracion de Venta Chips y Fechas */
+    function setVentaDuracion(dias) {
+      document.getElementById('ventaDias').value = dias;
+      const c30 = document.getElementById('chipDias30');
+      const c60 = document.getElementById('chipDias60');
+      const c90 = document.getElementById('chipDias90');
+      if (c30) c30.classList.toggle('active', dias === 30);
+      if (c60) c60.classList.toggle('active', dias === 60);
+      if (c90) c90.classList.toggle('active', dias === 90);
+      recalcularVentaFechaFin();
+    }
+
+    function onVentaDiasChange() {
+      const dias = parseInt(document.getElementById('ventaDias').value) || 30;
+      const c30 = document.getElementById('chipDias30');
+      const c60 = document.getElementById('chipDias60');
+      const c90 = document.getElementById('chipDias90');
+      if (c30) c30.classList.toggle('active', dias === 30);
+      if (c60) c60.classList.toggle('active', dias === 60);
+      if (c90) c90.classList.toggle('active', dias === 90);
+      recalcularVentaFechaFin();
+    }
+
+    function onVentaFechaInicioChange() {
+      recalcularVentaFechaFin();
+    }
+
+    function recalcularVentaFechaFin() {
+      const inicio = document.getElementById('ventaFechaInicio').value;
+      const dias = parseInt(document.getElementById('ventaDias').value) || 30;
+      if (inicio) {
+        const d = new Date(inicio + 'T00:00:00');
+        const finDate = new Date(d.getTime() + dias * 24 * 60 * 60 * 1000);
+        document.getElementById('ventaFechaFin').value = finDate.toISOString().split('T')[0];
+      }
+    }
+
+    /* Modales Venta */
     function openNuevaVentaModal() {
       if (appState.cuentas.length === 0) {
         alert('Primero debes registrar al menos una Cuenta Maestra.');
         return;
       }
-      document.getElementById('modalVentaTitle').textContent = 'Registrar Venta de Perfil';
+      document.getElementById('modalVentaTitle').textContent = 'Registrar Nueva Venta';
       document.getElementById('ventaId').value = '';
       document.getElementById('ventaCelular').value = '';
-      document.getElementById('ventaCantidad').value = '1';
       document.getElementById('ventaPrecio').value = '';
-      document.getElementById('ventaDias').value = '30';
-      document.getElementById('ventaFechaInicio').value = new Date().toISOString().split('T')[0];
+
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('ventaFechaInicio').value = hoy;
+      setVentaDuracion(30);
 
       const select = document.getElementById('ventaCuentaId');
       select.innerHTML = '';
+
+      // Mostrar cuentas con el contador de ventas de cada una
       appState.cuentas.forEach(c => {
+        const ventasCuenta = appState.ventas.filter(v => v.cuenta_id === c.id);
+        const esInactiva = (c.estado || 'activa').toLowerCase() === 'inhabilitada';
+
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = `${c.tipo_cuenta} - ${c.correo}`;
+        opt.textContent = `${c.tipo_cuenta} - ${c.correo} • (${ventasCuenta.length} ventas)${esInactiva ? ' [INHABILITADA]' : ''}`;
+        if (esInactiva) {
+          opt.disabled = true;
+        }
         select.appendChild(opt);
       });
 
@@ -1028,18 +1300,19 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       if (!v) return;
       document.getElementById('modalVentaTitle').textContent = 'Editar Venta #' + id;
       document.getElementById('ventaId').value = v.id;
-      document.getElementById('ventaCelular').value = v.numero_celular_cliente;
-      document.getElementById('ventaCantidad').value = v.cantidad_perfiles;
-      document.getElementById('ventaPrecio').value = v.precio_venta_por_perfil;
-      document.getElementById('ventaDias').value = v.duracion_dias;
-      document.getElementById('ventaFechaInicio').value = v.fecha_inicio;
+      document.getElementById('ventaCelular').value = v.numero_celular_cliente || '';
+      document.getElementById('ventaPrecio').value = v.precio_venta_por_perfil || '';
+      document.getElementById('ventaDias').value = v.duracion_dias || 30;
+      document.getElementById('ventaFechaInicio').value = v.fecha_inicio || '';
+      document.getElementById('ventaFechaFin').value = v.fecha_fin || '';
 
       const select = document.getElementById('ventaCuentaId');
       select.innerHTML = '';
       appState.cuentas.forEach(c => {
+        const ventasCuenta = appState.ventas.filter(x => x.cuenta_id === c.id);
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = `${c.tipo_cuenta} - ${c.correo}`;
+        opt.textContent = `${c.tipo_cuenta} - ${c.correo} • (${ventasCuenta.length} ventas)`;
         if (c.id === v.cuenta_id) opt.selected = true;
         select.appendChild(opt);
       });
@@ -1056,21 +1329,21 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       }
 
       const cuentaId = parseInt(document.getElementById('ventaCuentaId').value);
-      const cantidad = parseInt(document.getElementById('ventaCantidad').value) || 1;
+      if (!cuentaId) {
+        alert('Por favor selecciona una cuenta maestra válida.');
+        return;
+      }
+
       const precio = parseFloat(document.getElementById('ventaPrecio').value) || 0.0;
       const dias = parseInt(document.getElementById('ventaDias').value) || 30;
       const inicio = document.getElementById('ventaFechaInicio').value || new Date().toISOString().split('T')[0];
-
-      // Calcular fecha fin
-      const [y, m, d] = inicio.split('-').map(Number);
-      const finDate = new Date(y, m - 1, d + dias);
-      const finStr = finDate.toISOString().split('T')[0];
+      const finStr = document.getElementById('ventaFechaFin').value;
 
       const venta = {
         id: idVal ? parseInt(idVal) : 0,
         cuenta_id: cuentaId,
         numero_celular_cliente: cel,
-        cantidad_perfiles: cantidad,
+        cantidad_perfiles: 1, // Siempre 1 perfil por venta como en el celular
         precio_venta_por_perfil: precio,
         duracion_dias: dias,
         fecha_inicio: inicio,
@@ -1080,13 +1353,39 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       const endpoint = idVal ? 'update_venta' : 'add_venta';
       await fetch(`/api/${endpoint}`, { method: 'POST', body: JSON.stringify(venta) });
       closeModal('modalVenta');
+
+      // Copiar automáticamente el mensaje al portapapeles al guardar
+      const c = appState.cuentas.find(x => x.id === cuentaId) || {};
+      let t = appState.mensaje_template || DEFAULT_TEMPLATE;
+      t = t.replace(/{servicio}/gi, c.tipo_cuenta || 'Servicio')
+           .replace(/{dias}/gi, dias.toString())
+           .replace(/{correo}/gi, c.correo || '')
+           .replace(/{cuenta}/gi, c.correo || '')
+           .replace(/{contrasena}/gi, c.contrasena_plataforma || '')
+           .replace(/{clave}/gi, c.contrasena_plataforma || '')
+           .replace(/{fecha_inicio}/gi, inicio)
+           .replace(/{fecha_fin}/gi, finStr)
+           .replace(/{perfil}/gi, 'Perfil 1')
+           .replace(/{pin}/gi, '0000');
+
+      try {
+        await fetch('/api/clipboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: t })
+        });
+      } catch (e) {}
+      fallbackCopyText(t);
+
       fetchState();
+      showToast('✅ ¡Venta guardada y mensaje copiado al portapapeles!');
     }
 
     async function deleteVenta(id) {
       if (confirm(`¿Eliminar la venta #${id}?`)) {
         await fetch('/api/delete_venta', { method: 'POST', body: JSON.stringify({ id }) });
         fetchState();
+        showToast('🗑️ Venta eliminada');
       }
     }
 
@@ -1094,10 +1393,36 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       document.getElementById(modalId).classList.remove('active');
     }
 
+    /* Limpiar Base de Datos */
+    async function confirmarLimpiarBD() {
+      const confirmacion = confirm(
+        '⚠️ ¿Estás seguro de que deseas ELIMINAR TODA la base de datos local en esta PC?\n\n' +
+        '• Se borrarán todas las cuentas maestras y todas las ventas registradas.\n' +
+        '• Esto te permitirá importar una nueva base de datos completamente limpia.\n\n' +
+        '¿Deseas continuar?'
+      );
+      if (confirmacion) {
+        await fetch('/api/clear_db', { method: 'POST' });
+        fetchState();
+        showToast('🗑️ Base de datos eliminada. Todo limpio.');
+      }
+    }
+
     /* Importar y Exportar Backup */
     async function handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
+
+      const continuar = confirm(
+        'ℹ️ NOTA DE IMPORTACIÓN:\n\n' +
+        'Al importar este archivo de respaldo del celular, los datos de esta PC se sincronizarán y actualizarán con el contenido del backup.\n\n' +
+        '¿Deseas continuar con la importación?'
+      );
+
+      if (!continuar) {
+        event.target.value = '';
+        return;
+      }
 
       const reader = new FileReader();
       reader.onload = async function(e) {
@@ -1118,6 +1443,10 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
         } catch (err) {
           alert('Error procesando el archivo: ' + err);
         }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
       };
       reader.readAsText(file);
       event.target.value = '';

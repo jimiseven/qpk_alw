@@ -61,6 +61,70 @@ pub fn set_clipboard_text(text: &str) -> bool {
     }
 }
 
+#[cfg(target_os = "windows")]
+pub fn get_clipboard_text() -> Option<String> {
+    use std::ffi::c_void;
+    use std::ptr;
+
+    type HWND = *mut c_void;
+    type HANDLE = *mut c_void;
+    type HGLOBAL = *mut c_void;
+    type BOOL = i32;
+    type UINT = u32;
+
+    const CF_UNICODETEXT: UINT = 13;
+
+    #[link(name = "user32")]
+    unsafe extern "system" {
+        fn OpenClipboard(hwnd: HWND) -> BOOL;
+        fn CloseClipboard() -> BOOL;
+        fn GetClipboardData(uFormat: UINT) -> HANDLE;
+    }
+
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn GlobalLock(hMem: HGLOBAL) -> *mut c_void;
+        fn GlobalUnlock(hMem: HGLOBAL) -> BOOL;
+    }
+
+    unsafe {
+        if OpenClipboard(ptr::null_mut()) == 0 {
+            return None;
+        }
+
+        let handle = GetClipboardData(CF_UNICODETEXT);
+        if handle.is_null() {
+            CloseClipboard();
+            return None;
+        }
+
+        let locked = GlobalLock(handle);
+        if locked.is_null() {
+            CloseClipboard();
+            return None;
+        }
+
+        let ptr = locked as *const u16;
+        let mut len = 0;
+        while *ptr.add(len) != 0 {
+            len += 1;
+        }
+
+        let slice = std::slice::from_raw_parts(ptr, len);
+        let result = String::from_utf16_lossy(slice);
+
+        GlobalUnlock(handle);
+        CloseClipboard();
+
+        Some(result)
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn get_clipboard_text() -> Option<String> {
+    None
+}
+
 #[cfg(not(target_os = "windows"))]
 pub fn set_clipboard_text(_text: &str) -> bool {
     false
@@ -72,7 +136,11 @@ mod tests {
 
     #[test]
     fn test_set_clipboard_text() {
-        let ok = set_clipboard_text("Hola desde Gestor Cuentas Desktop! 🔥");
+        let text = "Prueba Portapapeles Gestor Cuentas 🔥 123";
+        let ok = set_clipboard_text(text);
         assert!(ok);
+
+        let retrieved = get_clipboard_text();
+        assert_eq!(retrieved, Some(text.to_string()));
     }
 }
