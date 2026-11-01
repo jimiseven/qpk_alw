@@ -80,6 +80,12 @@ interface InventarioDao {
         insertVentas(ventas)
     }
 
+    @Transaction
+    suspend fun clearAllData() {
+        deleteAllVentas()
+        deleteAllCuentas()
+    }
+
     // ==========================================
     // OPERACIONES CRUD PARA VENTA
     // ==========================================

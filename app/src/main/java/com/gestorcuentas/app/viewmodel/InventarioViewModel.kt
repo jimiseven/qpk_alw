@@ -273,6 +273,19 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
     }
 
     /**
+     * Elimina todas las cuentas maestras y ventas de la base de datos local.
+     */
+    fun limpiarBaseDeDatos(onComplete: () -> Unit = {}) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.limpiarBaseDeDatos()
+            repository.optimizeDatabase()
+            withContext(Dispatchers.Main) {
+                onComplete()
+            }
+        }
+    }
+
+    /**
      * Mantenimiento preventivo de SQLite (PRAGMA optimize).
      */
     fun ejecutarMantenimientoDatabase(onComplete: () -> Unit = {}) {

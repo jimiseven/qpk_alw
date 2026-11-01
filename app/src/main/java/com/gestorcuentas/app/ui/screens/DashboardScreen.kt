@@ -90,6 +90,7 @@ fun DashboardScreen(
     var mostrarSheetNuevaCuenta by remember { mutableStateOf(false) }
     var mostrarSheetEstadisticas by remember { mutableStateOf(false) }
     var mostrarSheetCopiaSeguridad by remember { mutableStateOf(false) }
+    var mostrarDialogoConfirmarLimpiar by remember { mutableStateOf(false) }
 
     var jsonImportarPendiente by remember { mutableStateOf<String?>(null) }
     var resumenImportarCuentas by remember { mutableStateOf(0) }
@@ -369,7 +370,7 @@ fun DashboardScreen(
                     }
                 }
 
-                // Botón + Cuenta
+                // Botón Cuenta
                 Surface(
                     onClick = { mostrarSheetNuevaCuenta = true },
                     shape = RoundedCornerShape(12.dp),
@@ -394,7 +395,7 @@ fun DashboardScreen(
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
-                            text = "+ Cuenta",
+                            text = "Cuenta",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -681,7 +682,61 @@ fun DashboardScreen(
                     Toast.makeText(context, "Error en el archivo de respaldo: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                 }
             },
+            onLimpiarBaseDatos = {
+                mostrarDialogoConfirmarLimpiar = true
+            },
             onDismiss = { mostrarSheetCopiaSeguridad = false }
+        )
+    }
+
+    // Diálogo de Confirmación: Eliminar Base de Datos
+    if (mostrarDialogoConfirmarLimpiar) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoConfirmarLimpiar = false },
+            shape = RoundedCornerShape(16.dp),
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = DangerRed,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "⚠️ ¿Eliminar Base de Datos Local?",
+                    fontWeight = FontWeight.Bold,
+                    color = DangerRed
+                )
+            },
+            text = {
+                Text(
+                    text = "Esta acción eliminará permanentemente todas las cuentas maestras y todas las ventas registradas en tu teléfono.\n\nEsto te permitirá comenzar desde cero o importar una copia de seguridad limpia.\n\n¿Estás seguro de que deseas continuar?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.limpiarBaseDeDatos {
+                            Toast.makeText(context, "🗑️ Base de datos eliminada. Todo limpio.", Toast.LENGTH_LONG).show()
+                            mostrarDialogoConfirmarLimpiar = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = DangerRed,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Sí, Borrar Todo", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoConfirmarLimpiar = false }) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 

@@ -74,6 +74,10 @@ class InventarioRepository(
         dao.restaurarBaseDeDatos(cuentas, ventas)
     }
 
+    suspend fun limpiarBaseDeDatos() {
+        dao.clearAllData()
+    }
+
     // Mantenimiento y Verificación de Integridad SQLite
     fun optimizeDatabase() {
         database?.optimizeDatabase()

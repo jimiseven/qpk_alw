@@ -33,6 +33,7 @@ fun CopiaSeguridadBottomSheet(
     onExportar: () -> Unit,
     onImportar: () -> Unit,
     onRestaurarTexto: (String) -> Unit = {},
+    onLimpiarBaseDatos: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -224,6 +225,46 @@ fun CopiaSeguridadBottomSheet(
                     Column {
                         Text("Importar Archivo JSON...", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
                         Text("Restaura tus datos seleccionando un archivo .json previo", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+
+            // Opción Borrar Base de Datos Local
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onDismiss()
+                        onLimpiarBaseDatos()
+                    },
+                shape = RoundedCornerShape(14.dp),
+                border = BorderStroke(1.dp, com.gestorcuentas.app.ui.theme.DangerRed.copy(alpha = 0.5f)),
+                colors = CardDefaults.cardColors(containerColor = com.gestorcuentas.app.ui.theme.DangerRed.copy(alpha = 0.08f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    FilledTonalIconButton(
+                        onClick = {
+                            onDismiss()
+                            onLimpiarBaseDatos()
+                        },
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = com.gestorcuentas.app.ui.theme.DangerRed.copy(alpha = 0.15f),
+                            contentColor = com.gestorcuentas.app.ui.theme.DangerRed
+                        ),
+                        modifier = Modifier.size(42.dp)
+                    ) {
+                        Icon(Icons.Default.DeleteForever, contentDescription = null, tint = com.gestorcuentas.app.ui.theme.DangerRed, modifier = Modifier.size(20.dp))
+                    }
+
+                    Column {
+                        Text("Borrar Base de Datos...", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall, color = com.gestorcuentas.app.ui.theme.DangerRed)
+                        Text("Elimina todas las cuentas y ventas para reiniciar o cargar una copia nueva", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
