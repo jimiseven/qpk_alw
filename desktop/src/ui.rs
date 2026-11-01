@@ -656,6 +656,22 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
     </div>
   </div>
 
+  <!-- MODAL: CONFIRMACION MODERNA -->
+  <div id="customConfirmModal" class="modal-overlay" style="display:none; z-index:1000000;">
+    <div class="modal-card" style="max-width: 480px; border-color: #2563eb; box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 20px rgba(37, 99, 235, 0.25);">
+      <div class="modal-header">
+        <h3 id="customConfirmTitle" style="color: #38bdf8; font-size: 1.05rem; display:flex; align-items:center; gap:8px;">⚠️ Confirmación</h3>
+        <button onclick="closeConfirmModal(false)">✕</button>
+      </div>
+      <div class="modal-body" id="customConfirmMessage" style="color: #f1f5f9; font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; padding: 22px;">
+      </div>
+      <div class="modal-footer" style="gap: 12px; background: rgba(15, 23, 42, 0.6);">
+        <button onclick="closeConfirmModal(false)" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); cursor:pointer; padding:8px 16px; border-radius:var(--radius);">Cancelar</button>
+        <button id="customConfirmOkBtn" class="btn-primary" onclick="closeConfirmModal(true)">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let appState = { cuentas: [], ventas: [], mensaje_template: null };
     let currentVentaFilter = 'todas';
@@ -932,7 +948,7 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
     async function saveTemplate() {
       const t = document.getElementById('templateText').value;
       await fetch('/api/save_template', { method: 'POST', body: t });
-      alert('¡Plantilla de WhatsApp guardada con éxito!');
+      showToast('✅ ¡Plantilla de WhatsApp guardada con éxito!');
     }
 
     async function copyWhatsAppMsg(ventaId) {
@@ -1005,7 +1021,7 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       }
     }
 
-    function showToast(msg) {
+    function showToast(msg, duration = 4000) {
       let toast = document.getElementById('toastNotification');
       if (!toast) {
         toast = document.createElement('div');
@@ -1013,21 +1029,41 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
         toast.style.position = 'fixed';
         toast.style.bottom = '28px';
         toast.style.right = '28px';
-        toast.style.backgroundColor = '#0f172a';
-        toast.style.color = '#38bdf8';
-        toast.style.border = '1px solid #2563eb';
-        toast.style.padding = '14px 24px';
-        toast.style.borderRadius = '10px';
-        toast.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
+        toast.style.backgroundColor = 'rgba(15, 23, 42, 0.96)';
+        toast.style.backdropFilter = 'blur(12px)';
+        toast.style.padding = '14px 22px';
+        toast.style.borderRadius = '12px';
         toast.style.zIndex = '999999';
         toast.style.fontWeight = '600';
         toast.style.fontSize = '0.95rem';
         toast.style.display = 'flex';
         toast.style.alignItems = 'center';
-        toast.style.gap = '10px';
-        toast.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        toast.style.gap = '12px';
+        toast.style.maxWidth = '520px';
+        toast.style.wordBreak = 'break-word';
+        toast.style.whiteSpace = 'pre-line';
+        toast.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
         document.body.appendChild(toast);
       }
+
+      // Estilización dinámica según tipo de notificación
+      if (msg.includes('❌') || msg.toLowerCase().includes('error')) {
+        toast.style.borderColor = '#ef4444';
+        toast.style.border = '1px solid #ef4444';
+        toast.style.color = '#fca5a5';
+        toast.style.boxShadow = '0 10px 35px rgba(0,0,0,0.7), 0 0 16px rgba(239, 68, 68, 0.35)';
+      } else if (msg.includes('⚠️') || msg.toLowerCase().includes('atención') || msg.toLowerCase().includes('ingresa') || msg.toLowerCase().includes('primero')) {
+        toast.style.borderColor = '#f59e0b';
+        toast.style.border = '1px solid #f59e0b';
+        toast.style.color = '#fde68a';
+        toast.style.boxShadow = '0 10px 35px rgba(0,0,0,0.7), 0 0 16px rgba(245, 158, 11, 0.35)';
+      } else {
+        toast.style.borderColor = '#2563eb';
+        toast.style.border = '1px solid #2563eb';
+        toast.style.color = '#38bdf8';
+        toast.style.boxShadow = '0 10px 35px rgba(0,0,0,0.7), 0 0 16px rgba(37, 99, 235, 0.35)';
+      }
+
       toast.textContent = msg;
       toast.style.opacity = '1';
       toast.style.transform = 'translateY(0) scale(1)';
@@ -1036,8 +1072,47 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       toast._timer = setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(12px) scale(0.95)';
-      }, 3500);
+      }, duration);
     }
+
+    // Modal de confirmación estilizado nativamente con tema oscuro
+    let confirmResolver = null;
+
+    function showConfirmModal(title, message, confirmText = 'Aceptar', isDanger = false) {
+      return new Promise((resolve) => {
+        confirmResolver = resolve;
+        const modal = document.getElementById('customConfirmModal');
+        const titleEl = document.getElementById('customConfirmTitle');
+        const msgEl = document.getElementById('customConfirmMessage');
+        const btnOk = document.getElementById('customConfirmOkBtn');
+
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        btnOk.textContent = confirmText;
+
+        if (isDanger) {
+          btnOk.className = 'btn-danger';
+        } else {
+          btnOk.className = 'btn-primary';
+        }
+
+        modal.style.display = 'flex';
+      });
+    }
+
+    function closeConfirmModal(result) {
+      const modal = document.getElementById('customConfirmModal');
+      modal.style.display = 'none';
+      if (confirmResolver) {
+        confirmResolver(result);
+        confirmResolver = null;
+      }
+    }
+
+    // Redirigir alert() estándar al sistema visual de toasts oscuros
+    window.alert = function(msg) {
+      showToast(msg, 4500);
+    };
 
     function calcularDiasRestantes(fechaFinStr) {
       if (!fechaFinStr) return 0;
@@ -1178,11 +1253,13 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       const clavePlat = document.getElementById('cuentaClavePlataforma').value.trim();
 
       if (!correo) {
-        alert('Por favor ingresa el correo de la cuenta.');
+        showToast('⚠️ Por favor ingresa el correo de la cuenta.');
+        document.getElementById('cuentaCorreo').focus();
         return;
       }
       if (!clavePlat) {
-        alert('Por favor ingresa la contraseña de la plataforma.');
+        showToast('⚠️ Por favor ingresa la contraseña de la plataforma.');
+        document.getElementById('cuentaClavePlataforma').focus();
         return;
       }
 
@@ -1220,7 +1297,13 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
     }
 
     async function deleteCuenta(id) {
-      if (confirm(`¿Eliminar la cuenta #${id}? Las ventas vinculadas también se borrarán en cascada.`)) {
+      const ok = await showConfirmModal(
+        'Eliminar Cuenta Maestra',
+        `¿Eliminar la cuenta #${id}?\n\nLas ventas vinculadas a esta cuenta también se borrarán en cascada.`,
+        'Eliminar Cuenta',
+        true
+      );
+      if (ok) {
         await fetch('/api/delete_cuenta', { method: 'POST', body: JSON.stringify({ id }) });
         fetchState();
         showToast('🗑️ Cuenta eliminada');
@@ -1267,7 +1350,7 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
     /* Modales Venta */
     function openNuevaVentaModal() {
       if (appState.cuentas.length === 0) {
-        alert('Primero debes registrar al menos una Cuenta Maestra.');
+        showToast('⚠️ Primero debes registrar al menos una Cuenta Maestra.');
         return;
       }
       document.getElementById('modalVentaTitle').textContent = 'Registrar Nueva Venta';
@@ -1328,13 +1411,14 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       const idVal = document.getElementById('ventaId').value;
       const cel = document.getElementById('ventaCelular').value.trim();
       if (!cel) {
-        alert('Por favor ingresa el número celular del cliente.');
+        showToast('⚠️ Por favor ingresa el número celular del cliente.');
+        document.getElementById('ventaCelular').focus();
         return;
       }
 
       const cuentaId = parseInt(document.getElementById('ventaCuentaId').value);
       if (!cuentaId) {
-        alert('Por favor selecciona una cuenta maestra válida.');
+        showToast('⚠️ Por favor selecciona una cuenta maestra válida.');
         return;
       }
 
@@ -1386,7 +1470,13 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
     }
 
     async function deleteVenta(id) {
-      if (confirm(`¿Eliminar la venta #${id}?`)) {
+      const ok = await showConfirmModal(
+        'Eliminar Venta',
+        `¿Deseas eliminar la venta registrada #${id}?`,
+        'Eliminar Venta',
+        true
+      );
+      if (ok) {
         await fetch('/api/delete_venta', { method: 'POST', body: JSON.stringify({ id }) });
         fetchState();
         showToast('🗑️ Venta eliminada');
@@ -1399,11 +1489,14 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
 
     /* Limpiar Base de Datos */
     async function confirmarLimpiarBD() {
-      const confirmacion = confirm(
-        '⚠️ ¿Estás seguro de que deseas ELIMINAR TODA la base de datos local en esta PC?\n\n' +
+      const confirmacion = await showConfirmModal(
+        '⚠️ Eliminar Base de Datos Local',
+        '¿Estás seguro de que deseas ELIMINAR TODA la base de datos local en esta PC?\n\n' +
         '• Se borrarán todas las cuentas maestras y todas las ventas registradas.\n' +
-        '• Esto te permitirá importar una nueva base de datos completamente limpia.\n\n' +
-        '¿Deseas continuar?'
+        '• Esto te permitirá importar una nueva base de datos limpia.\n\n' +
+        '¿Deseas continuar?',
+        'Sí, Borrar Todo',
+        true
       );
       if (confirmacion) {
         await fetch('/api/clear_db', { method: 'POST' });
@@ -1414,13 +1507,16 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
 
     /* Importar y Exportar Backup */
     async function handleFileSelect(event) {
-      const file = event.target.files[0];
+      const file = event.target.files && event.target.files[0];
       if (!file) return;
 
-      const continuar = confirm(
-        'ℹ️ NOTA DE IMPORTACIÓN:\n\n' +
+      const continuar = await showConfirmModal(
+        '📥 Importar Copia de Seguridad',
+        `Vas a importar el archivo "${file.name}".\n\n` +
         'Al importar este archivo de respaldo del celular, los datos de esta PC se sincronizarán y actualizarán con el contenido del backup.\n\n' +
-        '¿Deseas continuar con la importación?'
+        '¿Deseas continuar con la importación?',
+        'Restaurar Respaldo',
+        false
       );
 
       if (!continuar) {
@@ -1439,18 +1535,18 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           });
           const result = await res.json();
           if (result.success) {
-            alert(`✅ ¡Copia de seguridad importada con éxito!\n\nCuentas cargadas: ${result.cuentas}\nVentas cargadas: ${result.ventas}`);
+            showToast(`✅ ¡Copia de seguridad importada con éxito!\n\nCuentas cargadas: ${result.cuentas}\nVentas cargadas: ${result.ventas}`);
             fetchState();
           } else {
-            alert('❌ Error al importar respaldo: ' + result.error);
+            showToast('❌ Error al importar respaldo: ' + result.error);
           }
         } catch (err) {
-          alert('Error procesando el archivo: ' + err);
+          showToast('❌ Error procesando el archivo: ' + err);
         }
         event.target.value = '';
       };
       reader.onerror = function() {
-        alert('Error al leer el archivo en disco.');
+        showToast('❌ Error al leer el archivo en disco.');
         event.target.value = '';
       };
       reader.readAsText(file);
@@ -1460,32 +1556,22 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       try {
         const res = await fetch('/api/export_backup');
         const data = await res.json();
+        if (data.cancelled) {
+          showToast('ℹ️ Exportación cancelada por el usuario');
+          return;
+        }
         if (!data.success) {
-          alert('Error al exportar el respaldo.');
+          showToast('❌ Error al exportar el respaldo.');
           return;
         }
 
-        // Descarga por navegador
-        try {
-          const blob = new Blob([data.json_data], { type: 'application/json' });
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = data.filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        } catch (e) {
-          console.warn('Descarga por blob no disponible:', e);
-        }
-
-        let msg = `✅ ¡Copia de seguridad exportada con éxito!\n\nArchivo: ${data.filename}`;
+        let msg = `✅ ¡Copia de seguridad guardada con éxito!\n\nArchivo: ${data.filename}`;
         if (data.saved_path) {
-          msg += `\n\n📁 Guardado directamente en tu carpeta de Descargas:\n${data.saved_path}`;
+          msg += `\n📁 Ubicación:\n${data.saved_path}`;
         }
-        msg += `\n\nPásalo a tu celular y restáuralo en la app móvil.`;
-        alert(msg);
+        showToast(msg, 6000);
       } catch (e) {
-        alert('Error al exportar: ' + e);
+        showToast('❌ Error al exportar: ' + e);
       }
     }
 

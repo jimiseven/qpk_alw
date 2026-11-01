@@ -38,6 +38,77 @@ fn ok_response() -> Response<Cow<'static, [u8]>> {
     json_response("{\"success\":true}".to_string())
 }
 
+#[allow(non_snake_case)]
+#[repr(C)]
+struct OPENFILENAMEW {
+    lStructSize: u32,
+    hwndOwner: *mut std::ffi::c_void,
+    hInstance: *mut std::ffi::c_void,
+    lpstrFilter: *const u16,
+    lpstrCustomFilter: *mut u16,
+    nMaxCustFilter: u32,
+    nFilterIndex: u32,
+    lpstrFile: *mut u16,
+    nMaxFile: u32,
+    lpstrFileTitle: *mut u16,
+    nMaxFileTitle: u32,
+    lpstrInitialDir: *const u16,
+    lpstrTitle: *const u16,
+    Flags: u32,
+    nFileOffset: u16,
+    nFileExtension: u16,
+    lpstrDefExt: *const u16,
+    lCustData: usize,
+    lpfnHook: *mut std::ffi::c_void,
+    lpTemplateName: *const u16,
+    pvReserved: *mut std::ffi::c_void,
+    dwReserved: u32,
+    FlagsEx: u32,
+}
+
+#[link(name = "comdlg32")]
+unsafe extern "system" {
+    fn GetSaveFileNameW(lpofn: *mut OPENFILENAMEW) -> i32;
+}
+
+fn prompt_save_file_path(default_name: &str) -> Option<std::path::PathBuf> {
+    use std::ffi::{OsStr, OsString};
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+    use std::path::PathBuf;
+
+    let mut file_buf = [0u16; 1024];
+    let def_name_w: Vec<u16> = OsStr::new(default_name).encode_wide().collect();
+    for (i, &ch) in def_name_w.iter().take(file_buf.len() - 1).enumerate() {
+        file_buf[i] = ch;
+    }
+
+    let filter_text = "Archivos de Respaldo JSON (*.json)\0*.json\0Todos los archivos (*.*)\0*.*\0\0";
+    let filter_w: Vec<u16> = filter_text.encode_utf16().collect();
+    let title_text = "Seleccione la ubicación donde desea guardar la copia de seguridad\0";
+    let title_w: Vec<u16> = title_text.encode_utf16().collect();
+    let def_ext: Vec<u16> = "json\0".encode_utf16().collect();
+
+    let mut ofn: OPENFILENAMEW = unsafe { std::mem::zeroed() };
+    ofn.lStructSize = std::mem::size_of::<OPENFILENAMEW>() as u32;
+    ofn.lpstrFilter = filter_w.as_ptr();
+    ofn.nFilterIndex = 1;
+    ofn.lpstrFile = file_buf.as_mut_ptr();
+    ofn.nMaxFile = file_buf.len() as u32;
+    ofn.lpstrTitle = title_w.as_ptr();
+    ofn.lpstrDefExt = def_ext.as_ptr();
+    // OFN_OVERWRITEPROMPT (0x02) | OFN_PATHMUSTEXIST (0x800) | OFN_NOCHANGEDIR (0x08)
+    ofn.Flags = 0x00000002 | 0x00000800 | 0x00000008;
+
+    let res = unsafe { GetSaveFileNameW(&mut ofn) };
+    if res != 0 {
+        let len = file_buf.iter().position(|&c| c == 0).unwrap_or(file_buf.len());
+        let os_str = OsString::from_wide(&file_buf[..len]);
+        Some(PathBuf::from(os_str))
+    } else {
+        None
+    }
+}
+
 fn main() {
     let storage = StorageManager::new();
     let initial_state = storage.load_state();
@@ -214,32 +285,49 @@ fn main() {
                         .unwrap_or_else(|_| "{}".to_string());
 
                     let now = chrono::Local::now();
-                    let filename = format!("gestor_backup_{}.json", now.format("%Y%m%d_%H%M%S"));
-                    let mut saved_path_str = String::new();
-
-                    if let Some(mut path) = dirs::download_dir() {
-                        path.push(&filename);
-                        if let Ok(_) = std::fs::write(&path, &json) {
-                            saved_path_str = path.to_string_lossy().to_string();
-                        }
-                    }
+                    let default_filename = format!("gestor_backup_{}.json", now.format("%Y%m%d_%H%M%S"));
 
                     #[derive(serde::Serialize)]
                     struct ExportResp {
                         success: bool,
+                        cancelled: bool,
                         filename: String,
                         saved_path: String,
-                        json_data: String,
                     }
 
-                    let resp = ExportResp {
-                        success: true,
-                        filename,
-                        saved_path: saved_path_str,
-                        json_data: json,
-                    };
+                    if let Some(target_path) = prompt_save_file_path(&default_filename) {
+                        let filename = target_path
+                            .file_name()
+                            .map(|n| n.to_string_lossy().to_string())
+                            .unwrap_or(default_filename);
+                        let saved_path = target_path.to_string_lossy().to_string();
 
-                    json_response(serde_json::to_string(&resp).unwrap_or_default())
+                        if let Ok(_) = std::fs::write(&target_path, &json) {
+                            let resp = ExportResp {
+                                success: true,
+                                cancelled: false,
+                                filename,
+                                saved_path,
+                            };
+                            json_response(serde_json::to_string(&resp).unwrap_or_default())
+                        } else {
+                            let resp = ExportResp {
+                                success: false,
+                                cancelled: false,
+                                filename: String::new(),
+                                saved_path: String::new(),
+                            };
+                            json_response(serde_json::to_string(&resp).unwrap_or_default())
+                        }
+                    } else {
+                        let resp = ExportResp {
+                            success: false,
+                            cancelled: true,
+                            filename: String::new(),
+                            saved_path: String::new(),
+                        };
+                        json_response(serde_json::to_string(&resp).unwrap_or_default())
+                    }
                 }
 
                 _ => {
