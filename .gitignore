@@ -18,5 +18,6 @@ local.properties
 # Rust desktop build
 /desktop/target/
 target/
+*.WebView2/
 **/*.rs.bk
 Cargo.lock.temp

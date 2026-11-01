@@ -121,7 +121,8 @@ qpk_alw/
 Ambos ejecutables finales listos para usar se encuentran en la raíz del repositorio:
 
 * 📱 **[Descargar GestorCuentas.apk](GestorCuentas.apk)** *(Android 8.0 a 14+ — 1.96 MB)*
-* 💻 **[Descargar GestorCuentas.exe](GestorCuentas.exe)** *(Windows 10 / 11 64-bit — 892 KB)*
+* 💻 **[Descargar GestorCuentas_Windows.zip](GestorCuentas_Windows.zip)** *(Windows 10 / 11 64-bit portable — 495 KB, incluye `GestorCuentas.exe` y `WebView2Loader.dll`)*
+* 💻 **[GestorCuentas.exe](GestorCuentas.exe)** *(Requiere tener `WebView2Loader.dll` en la misma carpeta)*
 
 ---
 
