@@ -14,3 +14,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Rust desktop build
+/desktop/target/
+target/
+**/*.rs.bk
+Cargo.lock.temp
