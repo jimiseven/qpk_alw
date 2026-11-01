@@ -21,3 +21,5 @@ target/
 *.WebView2/
 **/*.rs.bk
 Cargo.lock.temp
+*.jpg
+*.jpeg

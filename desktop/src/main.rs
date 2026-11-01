@@ -3,6 +3,7 @@
 mod models;
 mod storage;
 mod backup;
+mod clipboard;
 mod ui;
 
 use std::borrow::Cow;
@@ -138,6 +139,18 @@ fn main() {
                     current_state.mensaje_template = Some(body_str.to_string());
                     let _ = storage.save_state(&current_state);
                     ok_response()
+                }
+
+                "/api/clipboard" => {
+                    #[derive(serde::Deserialize)]
+                    struct ClipReq { text: String }
+                    if let Ok(req) = serde_json::from_str::<ClipReq>(&body_str) {
+                        let ok = crate::clipboard::set_clipboard_text(&req.text);
+                        let resp = format!("{{\"success\":{}}}", ok);
+                        json_response(resp)
+                    } else {
+                        json_response("{\"success\":false,\"error\":\"JSON invalido\"}".to_string())
+                    }
                 }
 
                 "/api/import_backup" => {

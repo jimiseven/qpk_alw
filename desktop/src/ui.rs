@@ -1,9 +1,10 @@
-pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
+pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Cuentas y Perfiles</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Ccircle cx='54' cy='54' r='48' fill='%230F172A' stroke='%232563EB' stroke-width='3'/%3E%3Cpath fill='%23F8FAFC' d='M76.94,46.42 C76.64,46.07 75.46,44.99 74.83,44.70 C69.53,41.23 62.87,44.18 61.81,47.97 C67.74,44.63 71.64,45.90 76.94,46.42 L76.94,46.42 Z M30.83,46.42 C36.13,45.92 40.31,44.81 45.80,47.97 C44.45,42.81 35.27,41.13 30.83,46.42 L30.83,46.42 Z M49.79,46.83 C49.59,47.03 49.20,47.32 48.83,47.59 C47.68,48.54 46.08,49.62 45.66,51.06 C45.58,52.00 46.13,54.03 46.47,54.88 C46.97,53.73 47.40,51.58 47.40,51.58 C47.40,51.58 48.83,50.57 50.39,49.47 C50.78,49.14 51.19,48.83 51.63,48.33 C52.92,46.66 52.18,43.15 51.19,41.45 C51.07,41.90 50.21,46.65 49.79,46.83 L49.79,46.83 Z M27.23,39.79 C26.92,40.68 27.27,41.84 27.87,42.35 C28.46,42.88 29.07,42.80 29.05,42.82 C29.07,42.81 29.04,42.27 29.16,41.80 C29.16,41.76 29.63,40.43 29.64,40.42 C29.96,39.47 29.94,37.64 29.89,37.56 C29.87,37.48 27.73,37.88 27.23,39.79 L27.23,39.79 Z M78.69,37.56 C78.63,37.64 78.27,39.35 78.56,40.37 C78.68,40.92 78.94,41.39 79.14,41.86 C79.35,42.32 79.52,42.82 79.52,42.82 C79.52,42.82 80.07,42.72 80.52,42.15 C80.96,41.61 81.22,40.66 81.01,39.86 C80.69,38.14 78.74,37.47 78.69,37.56 L78.69,37.56 Z M57.40,49.47 C58.96,50.57 60.39,51.58 60.39,51.58 C60.39,51.58 60.81,53.73 61.32,54.88 C62.81,51.19 61.99,50.41 61.20,49.53 C60.37,48.63 58.18,47.01 58.01,46.83 C57.60,46.66 56.72,41.90 56.60,41.45 C55.66,43.06 54.88,46.67 56.16,48.33 C56.60,48.83 57.01,49.14 57.40,49.47 L57.40,49.47 Z M30.85,46.45 C30.88,46.43 30.90,46.41 30.93,46.39 C30.90,46.40 30.86,46.41 30.83,46.42 L30.85,46.45 Z M42.95,45.60 C43.52,45.18 45.69,43.52 45.44,42.86 C42.88,36.00 33.29,37.14 32.08,43.36 L33.61,45.18 L42.95,45.60 Z M72.84,45.18 L74.37,43.36 C73.64,39.58 69.59,37.40 65.76,38.44 C62.07,39.46 60.54,42.95 61.24,43.62 C61.90,44.25 62.76,45.05 63.50,45.60 L72.84,45.18 Z M59.52,36.23 C62.67,34.85 65.30,32.82 67.64,30.38 C69.54,28.38 71.29,28.33 73.64,29.41 C74.53,29.82 79.12,32.12 79.92,32.31 C81.44,32.67 80.67,30.27 79.32,29.52 C75.00,27.11 70.07,24.47 65.67,27.07 C63.77,28.20 59.67,31.78 57.58,31.92 C56.52,31.99 56.13,32.38 56.10,33.41 C56.19,33.89 56.24,34.39 56.37,34.87 C56.86,36.66 57.76,37.01 59.52,36.23 L59.52,36.23 Z M28.59,31.99 C28.59,31.99 32.64,29.99 34.01,29.39 C36.37,28.37 38.06,28.39 39.94,30.33 C42.77,33.25 44.71,34.73 48.68,36.51 C49.68,36.96 50.46,36.66 50.90,35.64 C51.19,34.95 51.41,34.21 51.49,33.47 C51.60,32.42 51.16,32.09 50.11,31.90 C47.82,31.47 45.15,29.16 43.06,27.70 C40.28,25.76 36.76,25.67 33.59,26.81 C32.22,27.31 28.27,29.30 27.31,30.57 C27.02,30.96 26.81,31.75 27.03,32.09 C27.42,32.70 28.07,32.12 28.59,31.99 L28.59,31.99 Z M67.49,71.71 C65.93,71.38 62.56,71.00 61.10,71.51 C56.72,73.02 52.33,73.09 47.87,71.92 C44.73,71.10 43.88,71.07 40.12,71.71 C46.85,81.93 61.71,80.91 67.49,71.71 L67.49,71.71 Z M84.22,56.21 C83.73,55.69 79.12,50.73 78.50,50.40 C78.76,53.01 79.56,52.18 79.27,55.86 C78.91,60.66 75.38,60.35 71.18,60.36 C67.34,60.38 66.83,58.65 63.81,57.45 C61.63,56.58 59.02,57.02 57.69,59.08 C57.12,59.95 56.20,60.44 55.05,60.37 C54.28,60.33 53.52,60.33 52.75,60.37 C51.45,60.44 50.53,59.94 49.82,58.90 C48.89,57.52 47.38,56.96 45.84,57.01 C44.17,57.06 42.65,57.82 41.27,58.81 C38.42,60.89 36.52,60.22 33.48,60.37 C30.38,60.52 28.33,58.19 28.31,55.42 C28.30,52.56 28.79,52.56 29.11,50.37 C27.14,51.60 24.50,54.13 22.91,57.22 C21.83,59.32 21.84,61.57 22.27,63.82 C23.54,70.42 32.29,70.84 38.95,70.23 C40.67,70.07 42.39,69.77 44.10,69.49 C45.81,69.20 47.50,69.08 49.16,69.71 C50.01,70.03 50.87,70.45 51.75,70.55 C53.73,70.76 55.78,70.95 57.64,70.07 C59.53,69.18 61.48,68.99 63.44,69.49 C68.76,70.85 79.54,71.44 83.39,67.42 C84.46,66.29 85.15,65.03 85.41,63.50 C85.84,60.92 85.60,58.45 84.22,56.21 L84.22,56.21 Z M30.83,46.42 C30.80,46.48 30.78,46.54 30.75,46.60 C30.78,46.55 30.82,46.50 30.85,46.45 L30.83,46.42 Z M76.78,46.43 C76.84,46.47 76.88,46.50 76.94,46.53 C76.88,46.50 76.82,46.48 76.76,46.46 L76.78,46.43 Z'/%3E%3C/svg%3E">
   <style>
     :root {
       --bg: #121214;
@@ -34,8 +35,20 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
       align-items: center;
       user-select: none;
     }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand svg { width: 32px; height: 32px; fill: var(--primary); }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      box-shadow: 0 0 14px rgba(37,99,235,0.45);
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+    .brand-logo-container:hover { transform: scale(1.08); }
+    .brand-logo { width: 42px; height: 42px; border-radius: 50%; display: block; }
     .brand h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.5px; }
     .brand span { font-size: 0.75rem; color: var(--success); background: rgba(0,230,118,0.1); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(0,230,118,0.3); }
 
@@ -277,7 +290,12 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
   <!-- Header -->
   <header>
     <div class="brand">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/></svg>
+      <div class="brand-logo-container" title="Logo Oficial Gestor de Cuentas">
+        <svg class="brand-logo" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="54" cy="54" r="48" fill="#0F172A" stroke="#2563EB" stroke-width="2.5" />
+          <path fill="#F8FAFC" d="M76.94,46.42 C76.64,46.07 75.46,44.99 74.83,44.70 C69.53,41.23 62.87,44.18 61.81,47.97 C67.74,44.63 71.64,45.90 76.94,46.42 L76.94,46.42 Z M30.83,46.42 C36.13,45.92 40.31,44.81 45.80,47.97 C44.45,42.81 35.27,41.13 30.83,46.42 L30.83,46.42 Z M49.79,46.83 C49.59,47.03 49.20,47.32 48.83,47.59 C47.68,48.54 46.08,49.62 45.66,51.06 C45.58,52.00 46.13,54.03 46.47,54.88 C46.97,53.73 47.40,51.58 47.40,51.58 C47.40,51.58 48.83,50.57 50.39,49.47 C50.78,49.14 51.19,48.83 51.63,48.33 C52.92,46.66 52.18,43.15 51.19,41.45 C51.07,41.90 50.21,46.65 49.79,46.83 L49.79,46.83 Z M27.23,39.79 C26.92,40.68 27.27,41.84 27.87,42.35 C28.46,42.88 29.07,42.80 29.05,42.82 C29.07,42.81 29.04,42.27 29.16,41.80 C29.16,41.76 29.63,40.43 29.64,40.42 C29.96,39.47 29.94,37.64 29.89,37.56 C29.87,37.48 27.73,37.88 27.23,39.79 L27.23,39.79 Z M78.69,37.56 C78.63,37.64 78.27,39.35 78.56,40.37 C78.68,40.92 78.94,41.39 79.14,41.86 C79.35,42.32 79.52,42.82 79.52,42.82 C79.52,42.82 80.07,42.72 80.52,42.15 C80.96,41.61 81.22,40.66 81.01,39.86 C80.69,38.14 78.74,37.47 78.69,37.56 L78.69,37.56 Z M57.40,49.47 C58.96,50.57 60.39,51.58 60.39,51.58 C60.39,51.58 60.81,53.73 61.32,54.88 C62.81,51.19 61.99,50.41 61.20,49.53 C60.37,48.63 58.18,47.01 58.01,46.83 C57.60,46.66 56.72,41.90 56.60,41.45 C55.66,43.06 54.88,46.67 56.16,48.33 C56.60,48.83 57.01,49.14 57.40,49.47 L57.40,49.47 Z M30.85,46.45 C30.88,46.43 30.90,46.41 30.93,46.39 C30.90,46.40 30.86,46.41 30.83,46.42 L30.85,46.45 Z M42.95,45.60 C43.52,45.18 45.69,43.52 45.44,42.86 C42.88,36.00 33.29,37.14 32.08,43.36 L33.61,45.18 L42.95,45.60 Z M72.84,45.18 L74.37,43.36 C73.64,39.58 69.59,37.40 65.76,38.44 C62.07,39.46 60.54,42.95 61.24,43.62 C61.90,44.25 62.76,45.05 63.50,45.60 L72.84,45.18 Z M59.52,36.23 C62.67,34.85 65.30,32.82 67.64,30.38 C69.54,28.38 71.29,28.33 73.64,29.41 C74.53,29.82 79.12,32.12 79.92,32.31 C81.44,32.67 80.67,30.27 79.32,29.52 C75.00,27.11 70.07,24.47 65.67,27.07 C63.77,28.20 59.67,31.78 57.58,31.92 C56.52,31.99 56.13,32.38 56.10,33.41 C56.19,33.89 56.24,34.39 56.37,34.87 C56.86,36.66 57.76,37.01 59.52,36.23 L59.52,36.23 Z M28.59,31.99 C28.59,31.99 32.64,29.99 34.01,29.39 C36.37,28.37 38.06,28.39 39.94,30.33 C42.77,33.25 44.71,34.73 48.68,36.51 C49.68,36.96 50.46,36.66 50.90,35.64 C51.19,34.95 51.41,34.21 51.49,33.47 C51.60,32.42 51.16,32.09 50.11,31.90 C47.82,31.47 45.15,29.16 43.06,27.70 C40.28,25.76 36.76,25.67 33.59,26.81 C32.22,27.31 28.27,29.30 27.31,30.57 C27.02,30.96 26.81,31.75 27.03,32.09 C27.42,32.70 28.07,32.12 28.59,31.99 L28.59,31.99 Z M67.49,71.71 C65.93,71.38 62.56,71.00 61.10,71.51 C56.72,73.02 52.33,73.09 47.87,71.92 C44.73,71.10 43.88,71.07 40.12,71.71 C46.85,81.93 61.71,80.91 67.49,71.71 L67.49,71.71 Z M84.22,56.21 C83.73,55.69 79.12,50.73 78.50,50.40 C78.76,53.01 79.56,52.18 79.27,55.86 C78.91,60.66 75.38,60.35 71.18,60.36 C67.34,60.38 66.83,58.65 63.81,57.45 C61.63,56.58 59.02,57.02 57.69,59.08 C57.12,59.95 56.20,60.44 55.05,60.37 C54.28,60.33 53.52,60.33 52.75,60.37 C51.45,60.44 50.53,59.94 49.82,58.90 C48.89,57.52 47.38,56.96 45.84,57.01 C44.17,57.06 42.65,57.82 41.27,58.81 C38.42,60.89 36.52,60.22 33.48,60.37 C30.38,60.52 28.33,58.19 28.31,55.42 C28.30,52.56 28.79,52.56 29.11,50.37 C27.14,51.60 24.50,54.13 22.91,57.22 C21.83,59.32 21.84,61.57 22.27,63.82 C23.54,70.42 32.29,70.84 38.95,70.23 C40.67,70.07 42.39,69.77 44.10,69.49 C45.81,69.20 47.50,69.08 49.16,69.71 C50.01,70.03 50.87,70.45 51.75,70.55 C53.73,70.76 55.78,70.95 57.64,70.07 C59.53,69.18 61.48,68.99 63.44,69.49 C68.76,70.85 79.54,71.44 83.39,67.42 C84.46,66.29 85.15,65.03 85.41,63.50 C85.84,60.92 85.60,58.45 84.22,56.21 L84.22,56.21 Z M30.83,46.42 C30.80,46.48 30.78,46.54 30.75,46.60 C30.78,46.55 30.82,46.50 30.85,46.45 L30.83,46.42 Z M76.78,46.43 C76.84,46.47 76.88,46.50 76.94,46.53 C76.88,46.50 76.82,46.48 76.76,46.46 L76.78,46.43 Z" />
+        </svg>
+      </div>
       <div>
         <h1>Gestor de Cuentas</h1>
         <small style="color:var(--text-muted)">Versión Desktop (Windows Nativo)</small>
@@ -445,10 +463,10 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
     <!-- TAB: PLANTILLA -->
     <div id="tab-plantilla" class="tab-pane">
       <div class="template-box">
-        <h3>💬 Plantilla de Mensaje para WhatsApp</h3>
+        <h3>💬 Plantilla de Mensaje para WhatsApp / Entrega</h3>
         <p style="color:var(--text-muted); font-size:0.85rem; margin:8px 0 16px;">
-          Esta plantilla se utilizará cuando pulses el botón "Copiar Mensaje" en una venta. Puedes personalizarla con las siguientes etiquetas:
-          <br><code>{servicio}</code>, <code>{cuenta}</code>, <code>{clave}</code>, <code>{perfil}</code>, <code>{pin}</code>, <code>{fecha_fin}</code>
+          Esta plantilla es compatible con la aplicación del celular. Se utilizará automáticamente al hacer clic en <strong>"💬 Copiar"</strong> en cualquier venta. Puedes personalizarla con las siguientes variables:
+          <br><code>{servicio}</code>, <code>{dias}</code>, <code>{correo}</code> (o <code>{cuenta}</code>), <code>{contrasena}</code> (o <code>{clave}</code>), <code>{fecha_inicio}</code>, <code>{fecha_fin}</code>, <code>{perfil}</code>, <code>{pin}</code>
         </p>
         <textarea id="templateText"></textarea>
         <button class="btn-primary" onclick="saveTemplate()">Guardar Plantilla</button>
@@ -542,15 +560,23 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
     let appState = { cuentas: [], ventas: [], mensaje_template: null };
     let currentVentaFilter = 'todas';
 
-    const DEFAULT_TEMPLATE = `👋 ¡Hola! Aquí tienes los accesos para tu cuenta de *{servicio}*:
+    const DEFAULT_TEMPLATE = `Datos para ingresar a la cuenta de {servicio}
 
-📧 *Correo:* {cuenta}
-🔑 *Contraseña:* {clave}
-👤 *Perfil:* {perfil}
-🔒 *PIN:* {pin}
-📅 *Vencimiento:* {fecha_fin}
+Cuenta {servicio} ({dias} dias)
+Correo: {correo}
+Contrasena: {contrasena}
 
-¡Gracias por tu preferencia! 🙌`;
+Fecha ini: {fecha_inicio}
+Fecha end: {fecha_fin}
+
+Reglas para el uso de la cuenta:
+
+- No modificar ningun dato de la cuenta, en caso de modificar algun dato de la cuenta, retiro la cuenta del grupo de trabajo y te quitare el acceso, no cubrire la garantia y el tiempo de servicio.
+- Evita salirte de la cuenta.
+- Referentemente, usa la aplicacion movil en el celular y en computadora navegador Google Chrome NO PESTAÑA INCOGNITO 
+- Link para pc preferentemente la pagina oficial en tu navegador
+
+Ingresa ahora por favor y te paso los codigos de activacion`;
 
     async function fetchState() {
       try {
@@ -799,22 +825,108 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
       alert('¡Plantilla de WhatsApp guardada con éxito!');
     }
 
-    function copyWhatsAppMsg(ventaId) {
+    async function copyWhatsAppMsg(ventaId) {
       const v = appState.ventas.find(x => x.id === ventaId);
       if (!v) return;
       const c = appState.cuentas.find(x => x.id === v.cuenta_id) || {};
       let t = appState.mensaje_template || DEFAULT_TEMPLATE;
 
-      t = t.replace(/{servicio}/g, c.tipo_cuenta || 'Servicio')
-           .replace(/{cuenta}/g, c.correo || '')
-           .replace(/{clave}/g, c.contrasena_plataforma || '')
-           .replace(/{perfil}/g, 'Perfil 1')
-           .replace(/{pin}/g, '0000')
-           .replace(/{fecha_fin}/g, v.fecha_fin || '');
+      // Calcular duracion en dias si no está explícita
+      let dias = v.duracion_dias || 30;
+      if (v.fecha_inicio && v.fecha_fin) {
+        const dIni = new Date(v.fecha_inicio + 'T00:00:00');
+        const dFin = new Date(v.fecha_fin + 'T00:00:00');
+        const diff = Math.round((dFin - dIni) / (1000 * 60 * 60 * 24));
+        if (diff > 0) dias = diff;
+      }
 
-      navigator.clipboard.writeText(t).then(() => {
-        alert('✅ Mensaje de WhatsApp copiado al portapapeles listo para enviar al cliente.');
-      });
+      t = t.replace(/{servicio}/gi, c.tipo_cuenta || 'Servicio')
+           .replace(/{dias}/gi, dias.toString())
+           .replace(/{correo}/gi, c.correo || '')
+           .replace(/{cuenta}/gi, c.correo || '')
+           .replace(/{contrasena}/gi, c.contrasena_plataforma || '')
+           .replace(/{clave}/gi, c.contrasena_plataforma || '')
+           .replace(/{fecha_inicio}/gi, v.fecha_inicio || '')
+           .replace(/{fecha_fin}/gi, v.fecha_fin || '')
+           .replace(/{perfil}/gi, 'Perfil 1')
+           .replace(/{pin}/gi, '0000');
+
+      let copiado = false;
+
+      // 1. Enviar al backend nativo en Rust (Win32 API pura de Windows)
+      try {
+        const res = await fetch('/api/clipboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: t })
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          copiado = true;
+        }
+      } catch (err) {
+        console.warn('Fallo en clipboard backend:', err);
+      }
+
+      // 2. Fallback de navegador (execCommand / Clipboard API)
+      fallbackCopyText(t);
+
+      showToast('✅ ¡Mensaje de entrega copiado al portapapeles!');
+    }
+
+    function fallbackCopyText(text) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      } catch (e) {
+        console.warn('execCommand copy fallback error:', e);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => {});
+      }
+    }
+
+    function showToast(msg) {
+      let toast = document.getElementById('toastNotification');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toastNotification';
+        toast.style.position = 'fixed';
+        toast.style.bottom = '28px';
+        toast.style.right = '28px';
+        toast.style.backgroundColor = '#0f172a';
+        toast.style.color = '#38bdf8';
+        toast.style.border = '1px solid #2563eb';
+        toast.style.padding = '14px 24px';
+        toast.style.borderRadius = '10px';
+        toast.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
+        toast.style.zIndex = '999999';
+        toast.style.fontWeight = '600';
+        toast.style.fontSize = '0.95rem';
+        toast.style.display = 'flex';
+        toast.style.alignItems = 'center';
+        toast.style.gap = '10px';
+        toast.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0) scale(1)';
+
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px) scale(0.95)';
+      }, 3500);
     }
 
     function calcularDiasRestantes(fechaFinStr) {
@@ -1037,4 +1149,4 @@ pub const INDEX_HTML: &str = r#"<!DOCTYPE html>
   </script>
 </body>
 </html>
-"#;
+"##;
