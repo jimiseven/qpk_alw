@@ -373,11 +373,11 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
 
   <!-- Navigation -->
   <nav>
-    <div class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
-    <div class="nav-tab" onclick="switchTab('cuentas')">💼 Cuentas Maestras</div>
-    <div class="nav-tab" onclick="switchTab('ventas')">🏷️ Ventas y Perfiles</div>
-    <div class="nav-tab" onclick="switchTab('clientes')">👥 Clientes</div>
-    <div class="nav-tab" onclick="switchTab('plantilla')">💬 Plantilla WhatsApp</div>
+    <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
+    <div class="nav-tab" data-tab="cuentas" onclick="switchTab('cuentas')">💼 Cuentas Maestras</div>
+    <div class="nav-tab" data-tab="ventas" onclick="switchTab('ventas')">🏷️ Ventas y Perfiles</div>
+    <div class="nav-tab" data-tab="clientes" onclick="switchTab('clientes')">👥 Clientes</div>
+    <div class="nav-tab" data-tab="plantilla" onclick="switchTab('plantilla')">💬 Plantilla WhatsApp</div>
   </nav>
 
   <!-- Main Content -->
@@ -699,8 +699,12 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
     function switchTab(tabId) {
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-      event.currentTarget.classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
+
+      const tabNav = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+      if (tabNav) tabNav.classList.add('active');
+
+      const pane = document.getElementById('tab-' + tabId);
+      if (pane) pane.classList.add('active');
     }
 
     function renderDashboard() {
@@ -1445,29 +1449,41 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
         }
         event.target.value = '';
       };
-      reader.readAsText(file);
-    }
+      reader.onerror = function() {
+        alert('Error al leer el archivo en disco.');
+        event.target.value = '';
       };
       reader.readAsText(file);
-      event.target.value = '';
     }
 
     async function exportBackup() {
       try {
         const res = await fetch('/api/export_backup');
-        const jsonStr = await res.text();
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const now = new Date();
-        const dateStr = now.toISOString().replace(/[-:T]/g, '').slice(0, 14);
-        const fileName = `gestor_backup_${dateStr}.json`;
+        const data = await res.json();
+        if (!data.success) {
+          alert('Error al exportar el respaldo.');
+          return;
+        }
 
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        alert(`✅ Archivo descargado como "${fileName}".\nPásalo a tu celular y restáuralo en la app móvil.`);
+        // Descarga por navegador
+        try {
+          const blob = new Blob([data.json_data], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = data.filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } catch (e) {
+          console.warn('Descarga por blob no disponible:', e);
+        }
+
+        let msg = `✅ ¡Copia de seguridad exportada con éxito!\n\nArchivo: ${data.filename}`;
+        if (data.saved_path) {
+          msg += `\n\n📁 Guardado directamente en tu carpeta de Descargas:\n${data.saved_path}`;
+        }
+        msg += `\n\nPásalo a tu celular y restáuralo en la app móvil.`;
+        alert(msg);
       } catch (e) {
         alert('Error al exportar: ' + e);
       }

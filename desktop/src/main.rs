@@ -212,7 +212,34 @@ fn main() {
                 "/api/export_backup" => {
                     let json = BackupManager::exportar_backup(&current_state.cuentas, &current_state.ventas)
                         .unwrap_or_else(|_| "{}".to_string());
-                    json_response(json)
+
+                    let now = chrono::Local::now();
+                    let filename = format!("gestor_backup_{}.json", now.format("%Y%m%d_%H%M%S"));
+                    let mut saved_path_str = String::new();
+
+                    if let Some(mut path) = dirs::download_dir() {
+                        path.push(&filename);
+                        if let Ok(_) = std::fs::write(&path, &json) {
+                            saved_path_str = path.to_string_lossy().to_string();
+                        }
+                    }
+
+                    #[derive(serde::Serialize)]
+                    struct ExportResp {
+                        success: bool,
+                        filename: String,
+                        saved_path: String,
+                        json_data: String,
+                    }
+
+                    let resp = ExportResp {
+                        success: true,
+                        filename,
+                        saved_path: saved_path_str,
+                        json_data: json,
+                    };
+
+                    json_response(serde_json::to_string(&resp).unwrap_or_default())
                 }
 
                 _ => {
