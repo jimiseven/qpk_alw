@@ -23,7 +23,3 @@ target/
 Cargo.lock.temp
 *.jpg
 *.jpeg
-
-# Binarios APK de Android (no subir binarios pesados al git)
-*.apk
-GestorCuentas.apk
