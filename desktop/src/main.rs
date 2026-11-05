@@ -330,6 +330,116 @@ fn main() {
                     }
                 }
 
+                "/api/renovar_venta" => {
+                    #[derive(serde::Deserialize)]
+                    struct RenovarVentaReq {
+                        venta_id: i64,
+                        dias: i32,
+                        monto_cobrado: f64,
+                    }
+                    if let Ok(req) = serde_json::from_str::<RenovarVentaReq>(&body_str) {
+                        let hoy = chrono::Local::now().naive_local().date();
+                        let mut nueva_fecha_str = String::new();
+                        let mut servicio = String::new();
+                        let mut correo = String::new();
+                        let mut encontrada = false;
+
+                        if let Some(v) = current_state.ventas.iter_mut().find(|v| v.id == req.venta_id) {
+                            encontrada = true;
+                            let fecha_base = chrono::NaiveDate::parse_from_str(&v.fecha_fin, "%Y-%m-%d")
+                                .unwrap_or(hoy);
+                            let fecha_calculo = if fecha_base >= hoy { fecha_base } else { hoy };
+                            let nueva_fecha = fecha_calculo + chrono::Duration::days(req.dias as i64);
+                            nueva_fecha_str = nueva_fecha.format("%Y-%m-%d").to_string();
+
+                            v.fecha_fin = nueva_fecha_str.clone();
+                            v.precio_venta_por_perfil += req.monto_cobrado;
+                            v.renovaciones_count += 1;
+                            v.ultima_renovacion = hoy.format("%Y-%m-%d").to_string();
+
+                            let cuenta_id = v.cuenta_id;
+                            if let Some(c) = current_state.cuentas.iter().find(|c| c.id == cuenta_id) {
+                                servicio = c.tipo_cuenta.clone();
+                                correo = c.correo.clone();
+                            }
+                        }
+
+                        if encontrada {
+                            let _ = storage.save_state(&current_state);
+                            let mensaje = format!(
+                                "🎉 *¡Tu suscripción ha sido RENOVADA exitosamente!* 🚀\n\n📦 *Servicio:* {}\n📧 *Usuario:* {}\n📅 *Nueva fecha de vencimiento:* {} (+{} días)\n⚡ *Estado:* ACTIVO\n\n¡Gracias por tu confianza y preferencia! 😊🙌",
+                                servicio, correo, nueva_fecha_str, req.dias
+                            );
+                            crate::clipboard::set_clipboard_text(&mensaje);
+
+                            #[derive(serde::Serialize)]
+                            struct RenovarVentaResp {
+                                success: bool,
+                                nueva_fecha_fin: String,
+                                mensaje: String,
+                            }
+                            let resp = serde_json::to_string(&RenovarVentaResp {
+                                success: true,
+                                nueva_fecha_fin: nueva_fecha_str,
+                                mensaje,
+                            }).unwrap_or_default();
+                            json_response(resp)
+                        } else {
+                            json_response("{\"success\":false,\"error\":\"Venta no encontrada\"}".to_string())
+                        }
+                    } else {
+                        json_response("{\"success\":false,\"error\":\"JSON invalido\"}".to_string())
+                    }
+                }
+
+                "/api/renovar_cuenta" => {
+                    #[derive(serde::Deserialize)]
+                    struct RenovarCuentaReq {
+                        cuenta_id: i64,
+                        dias: i32,
+                        costo_renovacion: f64,
+                    }
+                    if let Ok(req) = serde_json::from_str::<RenovarCuentaReq>(&body_str) {
+                        let hoy = chrono::Local::now().naive_local().date();
+                        let mut nueva_fecha_str = String::new();
+                        let mut encontrada = false;
+
+                        if let Some(c) = current_state.cuentas.iter_mut().find(|c| c.id == req.cuenta_id) {
+                            encontrada = true;
+                            let fecha_base = chrono::NaiveDate::parse_from_str(&c.fecha_fin, "%Y-%m-%d")
+                                .unwrap_or(hoy);
+                            let fecha_calculo = if fecha_base >= hoy { fecha_base } else { hoy };
+                            let nueva_fecha = fecha_calculo + chrono::Duration::days(req.dias as i64);
+                            nueva_fecha_str = nueva_fecha.format("%Y-%m-%d").to_string();
+
+                            c.fecha_fin = nueva_fecha_str.clone();
+                            c.costo_compra += req.costo_renovacion;
+                            c.renovaciones_count += 1;
+                            c.ultima_renovacion = hoy.format("%Y-%m-%d").to_string();
+                            c.estado = "activa".to_string();
+                        }
+
+                        if encontrada {
+                            let _ = storage.save_state(&current_state);
+
+                            #[derive(serde::Serialize)]
+                            struct RenovarCuentaResp {
+                                success: bool,
+                                nueva_fecha_fin: String,
+                            }
+                            let resp = serde_json::to_string(&RenovarCuentaResp {
+                                success: true,
+                                nueva_fecha_fin: nueva_fecha_str,
+                            }).unwrap_or_default();
+                            json_response(resp)
+                        } else {
+                            json_response("{\"success\":false,\"error\":\"Cuenta no encontrada\"}".to_string())
+                        }
+                    } else {
+                        json_response("{\"success\":false,\"error\":\"JSON invalido\"}".to_string())
+                    }
+                }
+
                 _ => {
                     // Servir la interfaz gráfica HTML por defecto
                     Response::builder()

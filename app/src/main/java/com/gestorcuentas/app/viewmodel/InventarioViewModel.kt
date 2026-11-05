@@ -225,6 +225,81 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
         }
     }
 
+    /**
+     * Procesa la renovación de una venta existente.
+     * Si la venta sigue activa, extiende sumando a la fechaFin actual.
+     * Si la venta ya está vencida, extiende a partir de la fecha de hoy.
+     */
+    fun renovarVenta(
+        venta: Venta,
+        dias: Int,
+        montoCobrado: Double,
+        onSuccess: (nuevaFechaFin: String, mensajeWhatsApp: String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val hoy = DateUtils.obtenerFechaHoy()
+            val fechaBase = if (venta.fechaFin >= hoy) venta.fechaFin else hoy
+            val nuevaFechaFin = DateUtils.calcularFechaFin(fechaBase, dias)
+
+            val ventaActualizada = venta.copy(
+                precioVentaPorPerfil = venta.precioVentaPorPerfil + montoCobrado,
+                duracionDias = venta.duracionDias + dias,
+                fechaFin = nuevaFechaFin,
+                renovacionesCount = venta.renovacionesCount + 1,
+                ultimaRenovacion = hoy
+            )
+
+            repository.updateVenta(ventaActualizada)
+
+            val cuenta = allVentasConCuenta.value.find { it.venta.id == venta.id }?.cuenta
+            val servicio = cuenta?.tipoCuenta ?: "Servicio"
+            val correo = cuenta?.correo ?: ""
+            val mensaje = com.gestorcuentas.app.utils.MensajeEntregaUtils.generarMensajeRenovacion(
+                servicio = servicio,
+                correo = correo,
+                nuevaFechaFin = nuevaFechaFin,
+                diasRenovados = dias
+            )
+
+            withContext(Dispatchers.Main) {
+                onSuccess(nuevaFechaFin, mensaje)
+            }
+        }
+    }
+
+    /**
+     * Procesa la renovación de una cuenta maestra con el proveedor.
+     * Si la cuenta sigue activa, extiende desde su fechaFin actual.
+     * Si ya estaba vencida, extiende desde la fecha de hoy.
+     * Acumula el costo en costoCompra para mantener estadísticas exactas.
+     */
+    fun renovarCuentaMaestra(
+        cuenta: Cuenta,
+        dias: Int,
+        costoRenovacion: Double,
+        onSuccess: (nuevaFechaFin: String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val hoy = DateUtils.obtenerFechaHoy()
+            val fechaBase = if (cuenta.fechaFin.isNotBlank() && cuenta.fechaFin >= hoy) cuenta.fechaFin else hoy
+            val nuevaFechaFin = DateUtils.calcularFechaFin(fechaBase, dias)
+
+            val cuentaActualizada = cuenta.copy(
+                costoCompra = cuenta.costoCompra + costoRenovacion,
+                fechaFin = nuevaFechaFin,
+                renovacionesCount = cuenta.renovacionesCount + 1,
+                ultimaRenovacion = hoy,
+                estado = "activa"
+            )
+
+            repository.updateCuenta(cuentaActualizada)
+
+            withContext(Dispatchers.Main) {
+                onSuccess(nuevaFechaFin)
+            }
+        }
+    }
+
     // ==========================================
     // COPIA DE SEGURIDAD (BACKUP) Y RESTAURACIÓN
     // ==========================================

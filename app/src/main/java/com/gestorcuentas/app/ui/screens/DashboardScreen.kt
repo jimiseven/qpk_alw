@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
@@ -84,6 +85,7 @@ fun DashboardScreen(
     // Estados para edición y eliminación de venta
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
+    var ventaARenovar by remember { mutableStateOf<VentaConCuenta?>(null) }
 
     // BottomSheets en la Zona del Pulgar (Thumb Zone)
     var mostrarSheetNuevaVenta by remember { mutableStateOf(false) }
@@ -604,6 +606,7 @@ fun DashboardScreen(
                                         hoy = hoy,
                                         onEditarVenta = { ventaAEditar = item.venta },
                                         onEliminarVenta = { ventaAEliminar = item.venta },
+                                        onRenovarVenta = { ventaARenovar = item },
                                         onCopiarMensaje = {
                                             val cuenta = item.cuenta
                                             val venta = item.venta
@@ -814,6 +817,28 @@ fun DashboardScreen(
             }
         )
     }
+
+    // BottomSheet Renovar Venta
+    ventaARenovar?.let { vConCuenta ->
+        RenovarVentaBottomSheet(
+            ventaConCuenta = vConCuenta,
+            onDismiss = { ventaARenovar = null },
+            onConfirmar = { dias, precio ->
+                viewModel.renovarVenta(
+                    venta = vConCuenta.venta,
+                    dias = dias,
+                    montoCobrado = precio,
+                    onSuccess = { nuevaFecha, mensajeWhatsApp ->
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Renovación", mensajeWhatsApp)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "✅ Venta renovada hasta $nuevaFecha y mensaje copiado al portapapeles", Toast.LENGTH_LONG).show()
+                        ventaARenovar = null
+                    }
+                )
+            }
+        )
+    }
 }
 
 /**
@@ -902,6 +927,7 @@ fun VentaConDiasItem(
     hoy: java.time.LocalDate = remember { java.time.LocalDate.now() },
     onEditarVenta: () -> Unit,
     onEliminarVenta: () -> Unit,
+    onRenovarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
@@ -936,12 +962,29 @@ fun VentaConDiasItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = cuenta?.tipoCuenta?.uppercase() ?: "SERVICIO",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = cuenta?.tipoCuenta?.uppercase() ?: "SERVICIO",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (venta.renovacionesCount > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = "🔄 x${venta.renovacionesCount}",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
@@ -978,39 +1021,53 @@ fun VentaConDiasItem(
                     )
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    FilledTonalIconButton(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    FilledTonalButton(
+                        onClick = onRenovarVenta,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Renovar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    }
+
+                    IconButton(
                         onClick = onCopiarMensaje,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
                             Icons.Default.ContentCopy,
                             contentDescription = "Copiar Mensaje",
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(17.dp)
                         )
                     }
 
                     IconButton(
                         onClick = onEditarVenta,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
                             Icons.Default.Edit,
                             contentDescription = "Editar Venta",
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(17.dp)
                         )
                     }
 
                     IconButton(
                         onClick = onEliminarVenta,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = "Eliminar Venta",
                             tint = DangerRed,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(17.dp)
                         )
                     }
                 }

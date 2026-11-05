@@ -51,5 +51,11 @@ data class Venta(
     val fechaInicio: String, // Formato YYYY-MM-DD
 
     @ColumnInfo(name = "fecha_fin")
-    val fechaFin: String // Calculada sumando duracionDias a fechaInicio
+    val fechaFin: String, // Calculada sumando duracionDias a fechaInicio
+
+    @ColumnInfo(name = "renovaciones_count", defaultValue = "0")
+    val renovacionesCount: Int = 0,
+
+    @ColumnInfo(name = "ultima_renovacion", defaultValue = "''")
+    val ultimaRenovacion: String = ""
 )

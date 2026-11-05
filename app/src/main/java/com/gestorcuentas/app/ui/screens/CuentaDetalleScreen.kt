@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -55,6 +56,8 @@ fun CuentaDetalleScreen(
     var mostrarSheetNuevaVenta by remember { mutableStateOf(false) }
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
+    var mostrarDialogoRenovarCuenta by remember { mutableStateOf(false) }
+    var ventaARenovar by remember { mutableStateOf<Venta?>(null) }
 
     fun copiarTexto(label: String, texto: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -291,12 +294,38 @@ fun CuentaDetalleScreen(
 
                             if (cuenta.fechaCreacion.isNotBlank() || cuenta.fechaFin.isNotBlank()) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                                Text("Vigencia Cuenta Maestra (Proveedor):", style = MaterialTheme.typography.labelSmall)
-                                Text(
-                                    "${DateUtils.formatearFechaLegible(cuenta.fechaCreacion)} al ${if (cuenta.fechaFin.isNotBlank()) DateUtils.formatearFechaLegible(cuenta.fechaFin) else "Indefinida"}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text("Vigencia Cuenta Maestra (Proveedor):", style = MaterialTheme.typography.labelSmall)
+                                        Text(
+                                            "${DateUtils.formatearFechaLegible(cuenta.fechaCreacion)} al ${if (cuenta.fechaFin.isNotBlank()) DateUtils.formatearFechaLegible(cuenta.fechaFin) else "Indefinida"}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        if (cuenta.renovacionesCount > 0) {
+                                            Text(
+                                                "🔄 Renovada ${cuenta.renovacionesCount} ${if (cuenta.renovacionesCount == 1) "vez" else "veces"} (Última: ${DateUtils.formatearFechaLegible(cuenta.ultimaRenovacion)})",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        }
+                                    }
+                                    FilledTonalButton(
+                                        onClick = { mostrarDialogoRenovarCuenta = true },
+                                        shape = RoundedCornerShape(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                        modifier = Modifier.height(34.dp)
+                                    ) {
+                                        Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Renovar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                    }
+                                }
                             }
                         }
                     }
@@ -380,6 +409,7 @@ fun CuentaDetalleScreen(
                             hoy = hoy,
                             onEditar = { ventaAEditar = venta },
                             onEliminar = { ventaAEliminar = venta },
+                            onRenovar = { ventaARenovar = venta },
                             onCopiarMensaje = {
                                 val mensaje = MensajeEntregaUtils.generarMensaje(
                                     context = context,
@@ -493,6 +523,37 @@ fun CuentaDetalleScreen(
             }
         )
     }
+
+    // Diálogo Renovar Cuenta Maestra con Proveedor
+    if (mostrarDialogoRenovarCuenta && cuentaConVentas != null) {
+        RenovarCuentaDialog(
+            cuenta = cuentaConVentas.cuenta,
+            onDismiss = { mostrarDialogoRenovarCuenta = false },
+            onConfirmar = { dias, costo ->
+                viewModel.renovarCuentaMaestra(cuentaConVentas.cuenta, dias, costo) { nuevaFecha ->
+                    Toast.makeText(context, "✅ Cuenta maestra renovada hasta $nuevaFecha", Toast.LENGTH_LONG).show()
+                    mostrarDialogoRenovarCuenta = false
+                }
+            }
+        )
+    }
+
+    // BottomSheet Renovar Venta de Cliente
+    ventaARenovar?.let { venta ->
+        RenovarVentaBottomSheet(
+            ventaConCuenta = com.gestorcuentas.app.data.entity.VentaConCuenta(venta, cuentaConVentas?.cuenta),
+            onDismiss = { ventaARenovar = null },
+            onConfirmar = { dias, precio ->
+                viewModel.renovarVenta(venta, dias, precio) { nuevaFecha, mensajeWhatsApp ->
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("Renovación Cliente", mensajeWhatsApp)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(context, "✅ Venta renovada hasta $nuevaFecha y mensaje copiado", Toast.LENGTH_LONG).show()
+                    ventaARenovar = null
+                }
+            }
+        )
+    }
 }
 
 /**
@@ -505,7 +566,8 @@ fun VentaItemCard(
     hoy: java.time.LocalDate = remember { java.time.LocalDate.now() },
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
-    onCopiarMensaje: () -> Unit
+    onCopiarMensaje: () -> Unit,
+    onRenovar: () -> Unit
 ) {
     val diasRestantes = remember(venta.fechaFin, hoy) {
         DateUtils.calcularDiasRestantes(venta.fechaFin, hoy)
@@ -556,17 +618,45 @@ fun VentaItemCard(
                             fontWeight = FontWeight.Bold
                         )
                     }
+                    if (venta.renovacionesCount > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = "🔄 x${venta.renovacionesCount}",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
 
-                Row {
-                    IconButton(onClick = onCopiarMensaje) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copiar Mensaje", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    FilledTonalButton(
+                        onClick = onRenovar,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Renovar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                     }
-                    IconButton(onClick = onEditar) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar Venta", modifier = Modifier.size(18.dp))
+                    IconButton(onClick = onCopiarMensaje, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copiar Mensaje", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(17.dp))
                     }
-                    IconButton(onClick = onEliminar) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = DangerRed, modifier = Modifier.size(18.dp))
+                    IconButton(onClick = onEditar, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar Venta", modifier = Modifier.size(17.dp))
+                    }
+                    IconButton(onClick = onEliminar, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = DangerRed, modifier = Modifier.size(17.dp))
                     }
                 }
             }

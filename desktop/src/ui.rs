@@ -656,6 +656,94 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
     </div>
   </div>
 
+  <!-- MODAL: RENOVAR VENTA -->
+  <div id="modalRenovarVenta" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="color:#00e676; display:flex; align-items:center; gap:8px;">🔄 Renovar Suscripción de Cliente</h3>
+        <button onclick="closeModal('modalRenovarVenta')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="renovarVentaId">
+        <div style="background:var(--surface-light); padding:12px; border-radius:var(--radius); margin-bottom:14px; border:1px solid var(--border);">
+          <div style="font-weight:700; color:var(--text);" id="renovarVentaCliente">Cliente: </div>
+          <div style="color:var(--text-muted); font-size:0.85rem;" id="renovarVentaServicio">Servicio: </div>
+          <div style="color:var(--text-muted); font-size:0.85rem;" id="renovarVentaFechaActual">Vencimiento actual: </div>
+        </div>
+
+        <div class="form-group">
+          <label>Duración Adicional (Días)</label>
+          <input type="number" id="renovarVentaDias" value="30" oninput="calcularPrevisualizacionRenovarVenta()">
+          <div class="duration-chips">
+            <button type="button" class="duration-chip active" id="chipRenovarVenta30" onclick="setRenovarVentaDuracion(30)">+30 días</button>
+            <button type="button" class="duration-chip" id="chipRenovarVenta60" onclick="setRenovarVentaDuracion(60)">+60 días</button>
+            <button type="button" class="duration-chip" id="chipRenovarVenta90" onclick="setRenovarVentaDuracion(90)">+90 días</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Monto a Cobrar por la Renovación (Bs.)</label>
+          <input type="number" step="0.5" id="renovarVentaPrecio" placeholder="0.00">
+        </div>
+
+        <div style="background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.3); padding:12px; border-radius:var(--radius); margin-top:14px;">
+          <div style="font-size:0.8rem; color:var(--text-muted);">Nueva fecha calculada:</div>
+          <div style="font-size:1.15rem; font-weight:700; color:var(--success);" id="renovarVentaNuevaFechaPreview">----</div>
+          <div id="renovarVentaAlertaProveedor" style="display:none; color:var(--warning); font-size:0.8rem; margin-top:6px; font-weight:600;">
+            ⚠️ ¡Atención! La fecha del cliente superará la vigencia con el proveedor. Recuerda renovar la cuenta maestra.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('modalRenovarVenta')">Cancelar</button>
+        <button class="btn-primary" onclick="confirmarRenovarVenta()">Confirmar y Copiar Mensaje</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RENOVAR CUENTA MAESTRA -->
+  <div id="modalRenovarCuenta" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="color:#7c4dff; display:flex; align-items:center; gap:8px;">🔄 Renovar Cuenta con Proveedor</h3>
+        <button onclick="closeModal('modalRenovarCuenta')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="renovarCuentaId">
+        <div style="background:var(--surface-light); padding:12px; border-radius:var(--radius); margin-bottom:14px; border:1px solid var(--border);">
+          <div style="font-weight:700; color:var(--text);" id="renovarCuentaServicio">Servicio: </div>
+          <div style="color:var(--text-muted); font-size:0.85rem;" id="renovarCuentaCorreo">Correo: </div>
+          <div style="color:var(--text-muted); font-size:0.85rem;" id="renovarCuentaFechaActual">Vencimiento actual: </div>
+        </div>
+
+        <div class="form-group">
+          <label>Días Adicionales con Proveedor</label>
+          <input type="number" id="renovarCuentaDias" value="30" oninput="calcularPrevisualizacionRenovarCuenta()">
+          <div class="duration-chips">
+            <button type="button" class="duration-chip active" id="chipRenovarCuenta30" onclick="setRenovarCuentaDuracion(30)">+30 días</button>
+            <button type="button" class="duration-chip" id="chipRenovarCuenta60" onclick="setRenovarCuentaDuracion(60)">+60 días</button>
+            <button type="button" class="duration-chip" id="chipRenovarCuenta90" onclick="setRenovarCuentaDuracion(90)">+90 días</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Costo de Renovación pagado al Proveedor (Bs.)</label>
+          <input type="number" step="0.5" id="renovarCuentaCosto" placeholder="0.00">
+          <small style="color:var(--text-muted)">Se sumará automáticamente a la inversión de esta cuenta.</small>
+        </div>
+
+        <div style="background:rgba(124,77,255,0.1); border:1px solid rgba(124,77,255,0.3); padding:12px; border-radius:var(--radius); margin-top:14px;">
+          <div style="font-size:0.8rem; color:var(--text-muted);">Nueva fecha con el proveedor:</div>
+          <div style="font-size:1.15rem; font-weight:700; color:var(--primary);" id="renovarCuentaNuevaFechaPreview">----</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('modalRenovarCuenta')">Cancelar</button>
+        <button class="btn-primary" onclick="confirmarRenovarCuenta()">Confirmar Renovación</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: CONFIRMACION MODERNA -->
   <div id="customConfirmModal" class="modal-overlay" style="display:none; z-index:1000000;">
     <div class="modal-card" style="max-width: 480px; border-color: #2563eb; box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 20px rgba(37, 99, 235, 0.25);">
@@ -789,11 +877,14 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
         const recuperada = gananciaCuenta >= 0;
         const esActiva = (c.estado || 'activa').toLowerCase() === 'activa';
         const vigenciaStr = c.fecha_fin ? `${c.fecha_creacion || ''} → ${c.fecha_fin}` : (c.fecha_creacion || 'Sin fecha');
+        const renovacionesBadge = (c.renovaciones_count && c.renovaciones_count > 0)
+          ? ` <span class="badge badge-info" title="Renovada ${c.renovaciones_count} veces con proveedor">🔄 x${c.renovaciones_count}</span>`
+          : '';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>#${c.id}</td>
-          <td><strong>${c.tipo_cuenta || 'Otro'}</strong></td>
+          <td><strong>${c.tipo_cuenta || 'Otro'}</strong>${renovacionesBadge}</td>
           <td>${c.correo}</td>
           <td><code>${c.contrasena_plataforma}</code></td>
           <td>Bs. ${c.costo_compra.toFixed(2)}</td>
@@ -805,6 +896,7 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           </td>
           <td><span class="badge ${esActiva ? 'badge-success' : 'badge-danger'}">${esActiva ? 'ACTIVA' : 'INHABILITADA'}</span></td>
           <td>
+            <button class="btn-sm btn-primary" onclick="openRenovarCuentaModal(${c.id})" title="Renovar vigencia con proveedor">🔄 Renovar</button>
             <button class="btn-sm" onclick="editCuenta(${c.id})" title="Editar">✏️</button>
             <button class="btn-sm ${esActiva ? 'btn-warning' : 'btn-success'}" onclick="toggleCuentaEstado(${c.id})" title="${esActiva ? 'Desactivar / Inhabilitar cuenta' : 'Activar cuenta'}">
               ${esActiva ? '⏸️ Desactivar' : '▶️ Activar'}
@@ -864,10 +956,13 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
         }
 
         const total = (v.precio_venta_por_perfil * v.cantidad_perfiles).toFixed(2);
+        const renovacionesBadge = (v.renovaciones_count && v.renovaciones_count > 0)
+          ? ` <span class="badge badge-info" title="Renovada ${v.renovaciones_count} veces">🔄 x${v.renovaciones_count}</span>`
+          : '';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${v.numero_celular_cliente}</strong></td>
+          <td><strong>${v.numero_celular_cliente}</strong>${renovacionesBadge}</td>
           <td>${cuenta.tipo_cuenta || 'Cuenta Eliminada'}</td>
           <td>${v.cantidad_perfiles}</td>
           <td>Bs. ${v.precio_venta_por_perfil.toFixed(2)}</td>
@@ -876,7 +971,8 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           <td>${v.fecha_fin}</td>
           <td><span class="badge ${badgeClass}">${diasText}</span></td>
           <td>
-            <button class="btn-sm btn-primary" title="Copiar mensaje WhatsApp" onclick="copyWhatsAppMsg(${v.id})">💬 Copiar</button>
+            <button class="btn-sm btn-primary" title="Renovar suscripción de cliente" onclick="openRenovarVentaModal(${v.id})">🔄 Renovar</button>
+            <button class="btn-sm" title="Copiar mensaje WhatsApp" onclick="copyWhatsAppMsg(${v.id})">💬 Copiar</button>
             <button class="btn-sm" onclick="editVenta(${v.id})">✏️</button>
             <button class="btn-sm btn-danger" onclick="deleteVenta(${v.id})">🗑️</button>
           </td>
@@ -1485,6 +1581,168 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
 
     function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('active');
+    }
+
+    /* Renovación de Ventas */
+    let ventaARenovarGlobal = null;
+
+    function openRenovarVentaModal(id) {
+      const v = appState.ventas.find(x => x.id === id);
+      if (!v) return;
+      ventaARenovarGlobal = v;
+
+      const c = appState.cuentas.find(x => x.id === v.cuenta_id) || {};
+      document.getElementById('renovarVentaId').value = v.id;
+      document.getElementById('renovarVentaCliente').textContent = 'Cliente: ' + (v.numero_celular_cliente || 'Sin teléfono');
+      document.getElementById('renovarVentaServicio').textContent = 'Servicio: ' + (c.tipo_cuenta || 'Servicio') + ' • ' + (c.correo || '');
+      document.getElementById('renovarVentaFechaActual').textContent = 'Vencimiento actual: ' + (v.fecha_fin || 'No definido');
+      document.getElementById('renovarVentaPrecio').value = (v.precio_venta_por_perfil || 15).toFixed(2);
+      
+      setRenovarVentaDuracion(30);
+      document.getElementById('modalRenovarVenta').classList.add('active');
+    }
+
+    function setRenovarVentaDuracion(dias) {
+      document.getElementById('renovarVentaDias').value = dias;
+      document.querySelectorAll('#modalRenovarVenta .duration-chip').forEach(c => c.classList.remove('active'));
+      const chip = document.getElementById('chipRenovarVenta' + dias);
+      if (chip) chip.classList.add('active');
+      calcularPrevisualizacionRenovarVenta();
+    }
+
+    function calcularPrevisualizacionRenovarVenta() {
+      if (!ventaARenovarGlobal) return;
+      const dias = parseInt(document.getElementById('renovarVentaDias').value) || 30;
+      const hoyStr = new Date().toISOString().split('T')[0];
+      const fechaBaseStr = ventaARenovarGlobal.fecha_fin || hoyStr;
+      
+      let baseDate;
+      if (fechaBaseStr >= hoyStr) {
+        const [y, m, d] = fechaBaseStr.split('-').map(Number);
+        baseDate = new Date(y, m - 1, d);
+      } else {
+        const [y, m, d] = hoyStr.split('-').map(Number);
+        baseDate = new Date(y, m - 1, d);
+      }
+      
+      baseDate.setDate(baseDate.getDate() + dias);
+      const nuevaY = baseDate.getFullYear();
+      const nuevaM = String(baseDate.getMonth() + 1).padStart(2, '0');
+      const nuevaD = String(baseDate.getDate()).padStart(2, '0');
+      const nuevaFechaStr = `${nuevaY}-${nuevaM}-${nuevaD}`;
+      
+      document.getElementById('renovarVentaNuevaFechaPreview').textContent = `${nuevaFechaStr} (+${dias} días)`;
+
+      // Alerta si supera la vigencia con el proveedor
+      const c = appState.cuentas.find(x => x.id === ventaARenovarGlobal.cuenta_id);
+      const alerta = document.getElementById('renovarVentaAlertaProveedor');
+      if (c && c.fecha_fin && nuevaFechaStr > c.fecha_fin) {
+        alerta.style.display = 'block';
+        alerta.textContent = `⚠️ ¡Atención! La fecha (${nuevaFechaStr}) superará la vigencia de la cuenta con el proveedor (${c.fecha_fin}). Recuerda renovar la cuenta maestra.`;
+      } else {
+        alerta.style.display = 'none';
+      }
+    }
+
+    async function confirmarRenovarVenta() {
+      const id = parseInt(document.getElementById('renovarVentaId').value);
+      const dias = parseInt(document.getElementById('renovarVentaDias').value) || 30;
+      const monto = parseFloat(document.getElementById('renovarVentaPrecio').value) || 0.0;
+
+      try {
+        const res = await fetch('/api/renovar_venta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ venta_id: id, dias, monto_cobrado: monto })
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeModal('modalRenovarVenta');
+          if (data.mensaje) {
+            fallbackCopyText(data.mensaje);
+          }
+          fetchState();
+          showToast(`✅ ¡Venta renovada hasta ${data.nueva_fecha_fin} y mensaje de confirmación copiado al portapapeles!`, 6000);
+        } else {
+          showToast('❌ Error: ' + (data.error || 'No se pudo renovar'));
+        }
+      } catch (err) {
+        showToast('❌ Error al procesar la renovación: ' + err);
+      }
+    }
+
+    /* Renovación de Cuentas Maestras */
+    let cuentaARenovarGlobal = null;
+
+    function openRenovarCuentaModal(id) {
+      const c = appState.cuentas.find(x => x.id === id);
+      if (!c) return;
+      cuentaARenovarGlobal = c;
+
+      document.getElementById('renovarCuentaId').value = c.id;
+      document.getElementById('renovarCuentaServicio').textContent = 'Servicio: ' + (c.tipo_cuenta || 'Servicio');
+      document.getElementById('renovarCuentaCorreo').textContent = 'Correo: ' + (c.correo || '');
+      document.getElementById('renovarCuentaFechaActual').textContent = 'Vencimiento actual: ' + (c.fecha_fin || 'No definido');
+      document.getElementById('renovarCuentaCosto').value = (c.costo_compra || 0).toFixed(2);
+
+      setRenovarCuentaDuracion(30);
+      document.getElementById('modalRenovarCuenta').classList.add('active');
+    }
+
+    function setRenovarCuentaDuracion(dias) {
+      document.getElementById('renovarCuentaDias').value = dias;
+      document.querySelectorAll('#modalRenovarCuenta .duration-chip').forEach(c => c.classList.remove('active'));
+      const chip = document.getElementById('chipRenovarCuenta' + dias);
+      if (chip) chip.classList.add('active');
+      calcularPrevisualizacionRenovarCuenta();
+    }
+
+    function calcularPrevisualizacionRenovarCuenta() {
+      if (!cuentaARenovarGlobal) return;
+      const dias = parseInt(document.getElementById('renovarCuentaDias').value) || 30;
+      const hoyStr = new Date().toISOString().split('T')[0];
+      const fechaBaseStr = cuentaARenovarGlobal.fecha_fin || hoyStr;
+
+      let baseDate;
+      if (fechaBaseStr >= hoyStr) {
+        const [y, m, d] = fechaBaseStr.split('-').map(Number);
+        baseDate = new Date(y, m - 1, d);
+      } else {
+        const [y, m, d] = hoyStr.split('-').map(Number);
+        baseDate = new Date(y, m - 1, d);
+      }
+
+      baseDate.setDate(baseDate.getDate() + dias);
+      const nuevaY = baseDate.getFullYear();
+      const nuevaM = String(baseDate.getMonth() + 1).padStart(2, '0');
+      const nuevaD = String(baseDate.getDate()).padStart(2, '0');
+      const nuevaFechaStr = `${nuevaY}-${nuevaM}-${nuevaD}`;
+
+      document.getElementById('renovarCuentaNuevaFechaPreview').textContent = `${nuevaFechaStr} (+${dias} días)`;
+    }
+
+    async function confirmarRenovarCuenta() {
+      const id = parseInt(document.getElementById('renovarCuentaId').value);
+      const dias = parseInt(document.getElementById('renovarCuentaDias').value) || 30;
+      const costo = parseFloat(document.getElementById('renovarCuentaCosto').value) || 0.0;
+
+      try {
+        const res = await fetch('/api/renovar_cuenta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cuenta_id: id, dias, costo_renovacion: costo })
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeModal('modalRenovarCuenta');
+          fetchState();
+          showToast(`✅ ¡Cuenta maestra renovada con proveedor hasta ${data.nueva_fecha_fin}! Inversión actualizada.`);
+        } else {
+          showToast('❌ Error: ' + (data.error || 'No se pudo renovar'));
+        }
+      } catch (err) {
+        showToast('❌ Error al procesar la renovación: ' + err);
+      }
     }
 
     /* Limpiar Base de Datos */

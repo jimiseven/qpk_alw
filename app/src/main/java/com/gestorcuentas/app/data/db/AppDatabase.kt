@@ -17,7 +17,7 @@ import com.gestorcuentas.app.data.entity.Venta
         Cuenta::class,
         Venta::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -82,6 +82,15 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE ventas ADD COLUMN renovaciones_count INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE ventas ADD COLUMN ultima_renovacion TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE cuentas ADD COLUMN renovaciones_count INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE cuentas ADD COLUMN ultima_renovacion TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -89,7 +98,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "inventario_cuentas_db"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .fallbackToDestructiveMigration()
                 .build()
 

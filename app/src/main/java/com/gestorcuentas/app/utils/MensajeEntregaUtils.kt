@@ -96,4 +96,24 @@ Ingresa ahora por favor y te paso los codigos de activacion"""
             .replace("{fecha_inicio}", fechaIniFormateada)
             .replace("{fecha_fin}", fechaFinFormateada)
     }
+
+    /**
+     * Construye el mensaje de confirmación de renovación de servicio para enviar al cliente por WhatsApp.
+     */
+    fun generarMensajeRenovacion(
+        servicio: String,
+        correo: String,
+        nuevaFechaFin: String,
+        diasRenovados: Int
+    ): String {
+        val fechaFinFormateada = DateUtils.formatearFechaLegible(nuevaFechaFin)
+        return """¡Hola! Tu servicio de $servicio ha sido renovado con éxito ✅
+
+Detalles de tu renovación:
+• Servicio: $servicio ($diasRenovados días)
+• Cuenta: $correo
+• Nueva fecha de vencimiento: $fechaFinFormateada
+
+Tu acceso continúa activo con las mismas credenciales. ¡Muchas gracias por tu preferencia y confianza!"""
+    }
 }

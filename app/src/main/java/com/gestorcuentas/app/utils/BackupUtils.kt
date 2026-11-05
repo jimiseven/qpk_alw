@@ -33,6 +33,8 @@ object BackupUtils {
             obj.put("fecha_creacion", c.fechaCreacion)
             obj.put("fecha_fin", c.fechaFin)
             obj.put("estado", c.estado)
+            obj.put("renovaciones_count", c.renovacionesCount)
+            obj.put("ultima_renovacion", c.ultimaRenovacion)
             cuentasArray.put(obj)
         }
         root.put("cuentas", cuentasArray)
@@ -48,6 +50,8 @@ object BackupUtils {
             obj.put("duracion_dias", v.duracionDias)
             obj.put("fecha_inicio", v.fechaInicio)
             obj.put("fecha_fin", v.fechaFin)
+            obj.put("renovaciones_count", v.renovacionesCount)
+            obj.put("ultima_renovacion", v.ultimaRenovacion)
             ventasArray.put(obj)
         }
         root.put("ventas", ventasArray)
@@ -86,7 +90,9 @@ object BackupUtils {
                         costoCompra = c.optDouble("costo_compra", 0.0),
                         fechaCreacion = c.optString("fecha_creacion", DateUtils.obtenerFechaHoy()),
                         fechaFin = c.optString("fecha_fin", ""),
-                        estado = c.optString("estado", "activa")
+                        estado = c.optString("estado", "activa"),
+                        renovacionesCount = c.optInt("renovaciones_count", 0),
+                        ultimaRenovacion = c.optString("ultima_renovacion", "")
                     )
                 )
             }
@@ -105,7 +111,9 @@ object BackupUtils {
                         precioVentaPorPerfil = v.optDouble("precio_venta_por_perfil", 0.0),
                         duracionDias = v.optInt("duracion_dias", 30),
                         fechaInicio = v.optString("fecha_inicio", DateUtils.obtenerFechaHoy()),
-                        fechaFin = v.optString("fecha_fin", "")
+                        fechaFin = v.optString("fecha_fin", ""),
+                        renovacionesCount = v.optInt("renovaciones_count", 0),
+                        ultimaRenovacion = v.optString("ultima_renovacion", "")
                     )
                 )
             }

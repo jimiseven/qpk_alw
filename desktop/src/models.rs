@@ -20,6 +20,10 @@ pub struct Cuenta {
     pub fecha_fin: String,
     #[serde(default = "default_estado")]
     pub estado: String,
+    #[serde(default)]
+    pub renovaciones_count: i32,
+    #[serde(default)]
+    pub ultima_renovacion: String,
 }
 
 fn default_tipo_cuenta() -> String {
@@ -48,6 +52,10 @@ pub struct Venta {
     pub fecha_inicio: String,
     #[serde(default)]
     pub fecha_fin: String,
+    #[serde(default)]
+    pub renovaciones_count: i32,
+    #[serde(default)]
+    pub ultima_renovacion: String,
 }
 
 fn default_perfiles() -> i32 {

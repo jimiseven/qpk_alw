@@ -41,5 +41,11 @@ data class Cuenta(
     @ColumnInfo(name = "fecha_fin", defaultValue = "''")
     val fechaFin: String = "", // Fecha de vencimiento de la cuenta con el proveedor
 
-    val estado: String = "activa" // 'activa', 'inhabilitada'
+    val estado: String = "activa", // 'activa', 'inhabilitada'
+
+    @ColumnInfo(name = "renovaciones_count", defaultValue = "0")
+    val renovacionesCount: Int = 0,
+
+    @ColumnInfo(name = "ultima_renovacion", defaultValue = "''")
+    val ultimaRenovacion: String = ""
 )
