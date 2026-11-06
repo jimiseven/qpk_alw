@@ -696,7 +696,7 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
         </div>
       </div>
       <div class="modal-footer">
-        <button onclick="closeModal('modalRenovarVenta')">Cancelar</button>
+        <button type="button" onclick="closeModal('modalRenovarVenta')">⬅️ Volver atrás</button>
         <button class="btn-primary" onclick="confirmarRenovarVenta()">Confirmar y Copiar Mensaje</button>
       </div>
     </div>
@@ -739,7 +739,7 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
         </div>
       </div>
       <div class="modal-footer">
-        <button onclick="closeModal('modalRenovarCuenta')">Cancelar</button>
+        <button type="button" onclick="closeModal('modalRenovarCuenta')">⬅️ Volver atrás</button>
         <button class="btn-primary" onclick="confirmarRenovarCuenta()">Confirmar Renovación</button>
       </div>
     </div>
