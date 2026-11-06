@@ -990,7 +990,7 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${v.numero_celular_cliente}</strong>${renovacionesBadge}</td>
+          <td><strong>${v.numero_celular_cliente}</strong> <button class="btn-sm" style="padding:2px 6px; font-size:0.75rem; margin-left:4px;" title="Copiar celular" onclick="copyToClipboard('${v.numero_celular_cliente}'); showToast('📋 Número copiado: ${v.numero_celular_cliente}')">📋</button>${renovacionesBadge}</td>
           <td>${cuenta.tipo_cuenta || 'Cuenta Eliminada'}</td>
           <td>${v.cantidad_perfiles}</td>
           <td>Bs. ${v.precio_venta_por_perfil.toFixed(2)}</td>
@@ -1000,7 +1000,6 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           <td><span class="badge ${badgeClass}">${diasText}</span></td>
           <td>
             <button class="btn-sm btn-primary" title="Renovar suscripción de cliente" onclick="openRenovarVentaModal(${v.id})">🔄</button>
-            <button class="btn-sm" title="Copiar celular de cliente" onclick="copyToClipboard('${v.numero_celular_cliente}'); showToast('📋 Número copiado: ${v.numero_celular_cliente}')">📱</button>
             <button class="btn-sm" title="Copiar mensaje WhatsApp" onclick="copyWhatsAppMsg(${v.id})">💬</button>
             <button class="btn-sm" title="Editar venta" onclick="editVenta(${v.id})">✏️</button>
             <button class="btn-sm btn-danger" title="Eliminar venta" onclick="deleteVenta(${v.id})">🗑️</button>
