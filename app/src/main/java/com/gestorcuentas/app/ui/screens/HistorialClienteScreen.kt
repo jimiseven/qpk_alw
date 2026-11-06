@@ -12,13 +12,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,7 +39,6 @@ import com.gestorcuentas.app.data.entity.Venta
 import com.gestorcuentas.app.data.entity.VentaConCuenta
 import com.gestorcuentas.app.ui.theme.AccentGreen
 import com.gestorcuentas.app.ui.theme.DangerRed
-import com.gestorcuentas.app.ui.theme.DangerRed
 import com.gestorcuentas.app.ui.theme.WarningAmber
 import com.gestorcuentas.app.utils.DateUtils
 import com.gestorcuentas.app.utils.MensajeEntregaUtils
@@ -44,6 +49,18 @@ enum class FiltroHistorial {
     TODOS,
     ACTIVAS,
     VENCIDAS
+}
+
+enum class OrdenHistorial(val titulo: String) {
+    ULTIMO_VENDIDO("Último vendido"),
+    MAS_DIAS("Más días arriba"),
+    MENOS_DIAS("Menos días arriba");
+
+    fun siguiente(): OrdenHistorial = when (this) {
+        ULTIMO_VENDIDO -> MAS_DIAS
+        MAS_DIAS -> MENOS_DIAS
+        MENOS_DIAS -> ULTIMO_VENDIDO
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +77,7 @@ fun HistorialClienteScreen(
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
     var ventaARenovar by remember { mutableStateOf<VentaConCuenta?>(null) }
     var filtroEstado by remember { mutableStateOf(FiltroHistorial.TODOS) }
+    var ordenVentas by remember { mutableStateOf(OrdenHistorial.ULTIMO_VENDIDO) }
 
     // Búsqueda inteligente con normalización y tolerancia de prefijos internacionales WhatsApp (+591, etc.)
     val historialFiltrado = remember(allVentasConCuenta, busquedaCelular) {
@@ -79,14 +97,23 @@ fun HistorialClienteScreen(
         historialFiltrado.count { DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) < 0 }
     }
 
-    val listaFinal = remember(historialFiltrado, filtroEstado, hoy) {
-        when (filtroEstado) {
+    val listaFinal = remember(historialFiltrado, filtroEstado, ordenVentas, hoy) {
+        val filtrada = when (filtroEstado) {
             FiltroHistorial.TODOS -> historialFiltrado
             FiltroHistorial.ACTIVAS -> historialFiltrado.filter {
                 DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) >= 0
             }
             FiltroHistorial.VENCIDAS -> historialFiltrado.filter {
                 DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy) < 0
+            }
+        }
+        when (ordenVentas) {
+            OrdenHistorial.ULTIMO_VENDIDO -> filtrada.sortedByDescending { it.venta.id }
+            OrdenHistorial.MAS_DIAS -> filtrada.sortedByDescending {
+                DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy)
+            }
+            OrdenHistorial.MENOS_DIAS -> filtrada.sortedBy {
+                DateUtils.calcularDiasRestantes(it.venta.fechaFin, hoy)
             }
         }
     }
@@ -206,6 +233,54 @@ fun HistorialClienteScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
+            }
+
+            // Selector Cíclico de Orden de Ventas (3 Estados: Último vendido -> Más días arriba -> Menos días arriba)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.Sort,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        "Orden:",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                FilledTonalButton(
+                    onClick = { ordenVentas = ordenVentas.siguiente() },
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    val (icono, descripcion) = when (ordenVentas) {
+                        OrdenHistorial.ULTIMO_VENDIDO -> Icons.Default.Schedule to "Último vendido"
+                        OrdenHistorial.MAS_DIAS -> Icons.Default.ArrowUpward to "Más días arriba"
+                        OrdenHistorial.MENOS_DIAS -> Icons.Default.ArrowDownward to "Menos días arriba"
+                    }
+                    Icon(icono, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        descripcion,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Default.SwapVert, contentDescription = "Cambiar orden", modifier = Modifier.size(16.dp))
+                }
             }
 
             if (busquedaCelular.isNotBlank()) {
@@ -371,6 +446,7 @@ fun HistorialVentaCard(
 ) {
     val venta = item.venta
     val cuenta = item.cuenta
+    val context = LocalContext.current
     val dias = remember(venta.fechaFin, hoy) {
         DateUtils.calcularDiasRestantes(venta.fechaFin, hoy)
     }
@@ -437,7 +513,52 @@ fun HistorialVentaCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            Text("Cliente: ${venta.numeroCelularCliente}", fontWeight = FontWeight.Bold)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    "Cliente:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Celular Cliente", venta.numeroCelularCliente)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "📋 Celular copiado: ${venta.numeroCelularCliente}", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Phone,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            venta.numeroCelularCliente,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = "Copiar celular",
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+
             if (cuenta != null) {
                 Text("Cuenta: ${cuenta.correo}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -464,47 +585,72 @@ fun HistorialVentaCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Botones de acción: Renovar, Copiar Mensaje, Editar y Eliminar
+            // Botones de acción: Renovar (solo icono), Copiar Número, Copiar Mensaje, Editar y Eliminar
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                FilledTonalButton(
+                // 1. Renovar venta: SOLO ICONO (sin texto)
+                FilledTonalIconButton(
                     onClick = onRenovarVenta,
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.size(42.dp),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Renovar", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Icon(
+                        Icons.Default.Autorenew,
+                        contentDescription = "Renovar Venta",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
 
+                // 2. Copiar solo número de cliente al portapapeles
+                FilledTonalIconButton(
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Celular Cliente", venta.numeroCelularCliente)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "📋 Celular copiado: ${venta.numeroCelularCliente}", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.size(42.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Phone,
+                        contentDescription = "Copiar Teléfono del Cliente",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // 3. Copiar mensaje WhatsApp
                 Button(
                     onClick = onCopiarMensaje,
-                    modifier = Modifier.weight(1.2f),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+                    modifier = Modifier.height(42.dp)
                 ) {
                     Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Copiar", style = MaterialTheme.typography.labelMedium)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Mensaje", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                 }
 
-                OutlinedButton(
+                // 4. Editar Venta
+                OutlinedIconButton(
                     onClick = onEditarVenta,
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp)
+                    modifier = Modifier.size(42.dp),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = "Editar", modifier = Modifier.size(18.dp))
                 }
 
+                // 5. Eliminar Venta
                 IconButton(
                     onClick = onEliminarVenta,
-                    modifier = Modifier.size(38.dp)
+                    modifier = Modifier.size(42.dp)
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = DangerRed, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = DangerRed, modifier = Modifier.size(20.dp))
                 }
             }
         }

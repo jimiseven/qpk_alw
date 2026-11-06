@@ -467,11 +467,12 @@ pub const INDEX_HTML: &str = r##"<!DOCTYPE html>
     <div id="tab-ventas" class="tab-pane">
       <div class="table-container">
         <div class="table-toolbar">
-          <div style="display:flex; gap:10px;">
+          <div style="display:flex; gap:8px; align-items:center;">
             <button id="filterTodas" class="btn-sm btn-primary" onclick="filterVentas('todas')">Todas</button>
             <button id="filterActivas" class="btn-sm" onclick="filterVentas('activas')">Activas</button>
             <button id="filterVencidas" class="btn-sm" onclick="filterVentas('vencidas')">Vencidas</button>
             <button id="filterHoy" class="btn-sm" onclick="filterVentas('hoy')">Vencen Hoy</button>
+            <button id="btnOrdenVentas" class="btn-sm" onclick="toggleOrdenVentas()" title="Cambiar orden de ventas" style="margin-left:6px; background:rgba(124,77,255,0.15); border-color:var(--primary); color:var(--text);">🕒 Último vendido ⇅</button>
           </div>
           <div class="search-box">
             <input type="text" id="searchVentas" placeholder="Buscar por celular de cliente..." oninput="renderVentas()">
@@ -896,7 +897,7 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           </td>
           <td><span class="badge ${esActiva ? 'badge-success' : 'badge-danger'}">${esActiva ? 'ACTIVA' : 'INHABILITADA'}</span></td>
           <td>
-            <button class="btn-sm btn-primary" onclick="openRenovarCuentaModal(${c.id})" title="Renovar vigencia con proveedor">🔄 Renovar</button>
+            <button class="btn-sm btn-primary" onclick="openRenovarCuentaModal(${c.id})" title="Renovar vigencia con proveedor">🔄</button>
             <button class="btn-sm" onclick="editCuenta(${c.id})" title="Editar">✏️</button>
             <button class="btn-sm ${esActiva ? 'btn-warning' : 'btn-success'}" onclick="toggleCuentaEstado(${c.id})" title="${esActiva ? 'Desactivar / Inhabilitar cuenta' : 'Activar cuenta'}">
               ${esActiva ? '⏸️ Desactivar' : '▶️ Activar'}
@@ -908,9 +909,28 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       });
     }
 
+    let currentVentaOrden = 'ultimo'; // 'ultimo', 'mas_dias', 'menos_dias'
+
+    function toggleOrdenVentas() {
+      const btn = document.getElementById('btnOrdenVentas');
+      if (currentVentaOrden === 'ultimo') {
+        currentVentaOrden = 'mas_dias';
+        if (btn) btn.textContent = '⬆️ Más días arriba ⇅';
+      } else if (currentVentaOrden === 'mas_dias') {
+        currentVentaOrden = 'menos_dias';
+        if (btn) btn.textContent = '⬇️ Menos días arriba ⇅';
+      } else {
+        currentVentaOrden = 'ultimo';
+        if (btn) btn.textContent = '🕒 Último vendido ⇅';
+      }
+      renderVentas();
+    }
+
     function filterVentas(tipo) {
       currentVentaFilter = tipo;
-      document.querySelectorAll('#tab-ventas .table-toolbar button').forEach(b => b.classList.remove('btn-primary'));
+      document.querySelectorAll('#tab-ventas .table-toolbar button').forEach(b => {
+        if (b.id !== 'btnOrdenVentas') b.classList.remove('btn-primary');
+      });
       if (tipo === 'todas') document.getElementById('filterTodas').classList.add('btn-primary');
       if (tipo === 'activas') document.getElementById('filterActivas').classList.add('btn-primary');
       if (tipo === 'vencidas') document.getElementById('filterVencidas').classList.add('btn-primary');
@@ -931,6 +951,14 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
         list = list.filter(v => calcularDiasRestantes(v.fecha_fin) < 0);
       } else if (currentVentaFilter === 'hoy') {
         list = list.filter(v => calcularDiasRestantes(v.fecha_fin) === 0);
+      }
+
+      if (currentVentaOrden === 'ultimo') {
+        list.sort((a, b) => (b.id || 0) - (a.id || 0));
+      } else if (currentVentaOrden === 'mas_dias') {
+        list.sort((a, b) => calcularDiasRestantes(b.fecha_fin) - calcularDiasRestantes(a.fecha_fin));
+      } else if (currentVentaOrden === 'menos_dias') {
+        list.sort((a, b) => calcularDiasRestantes(a.fecha_fin) - calcularDiasRestantes(b.fecha_fin));
       }
 
       if (list.length === 0) {
@@ -971,10 +999,11 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
           <td>${v.fecha_fin}</td>
           <td><span class="badge ${badgeClass}">${diasText}</span></td>
           <td>
-            <button class="btn-sm btn-primary" title="Renovar suscripción de cliente" onclick="openRenovarVentaModal(${v.id})">🔄 Renovar</button>
-            <button class="btn-sm" title="Copiar mensaje WhatsApp" onclick="copyWhatsAppMsg(${v.id})">💬 Copiar</button>
-            <button class="btn-sm" onclick="editVenta(${v.id})">✏️</button>
-            <button class="btn-sm btn-danger" onclick="deleteVenta(${v.id})">🗑️</button>
+            <button class="btn-sm btn-primary" title="Renovar suscripción de cliente" onclick="openRenovarVentaModal(${v.id})">🔄</button>
+            <button class="btn-sm" title="Copiar celular de cliente" onclick="copyToClipboard('${v.numero_celular_cliente}'); showToast('📋 Número copiado: ${v.numero_celular_cliente}')">📱</button>
+            <button class="btn-sm" title="Copiar mensaje WhatsApp" onclick="copyWhatsAppMsg(${v.id})">💬</button>
+            <button class="btn-sm" title="Editar venta" onclick="editVenta(${v.id})">✏️</button>
+            <button class="btn-sm btn-danger" title="Eliminar venta" onclick="deleteVenta(${v.id})">🗑️</button>
           </td>
         `;
         tbody.appendChild(tr);

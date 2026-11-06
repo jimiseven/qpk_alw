@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -85,57 +86,73 @@ fun CuentaDetalleScreen(
                 }
             )
         },
-        // Barra Inferior de Acciones Ergonómicas (Thumb Zone)
+        // Barra Inferior de Acciones Ergonómicas (Thumb Zone) - Distribución Equilibrada solo con Iconos
         bottomBar = {
             if (cuentaConVentas != null) {
                 Surface(
-                    tonalElevation = 6.dp,
-                    shadowElevation = 8.dp,
+                    tonalElevation = 8.dp,
+                    shadowElevation = 10.dp,
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            .navigationBarsPadding()
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        OutlinedButton(
+                        // 1. Editar Cuenta
+                        FilledTonalIconButton(
                             onClick = { mostrarDialogoEditarCuenta = true },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.size(52.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         ) {
-                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Editar", fontWeight = FontWeight.SemiBold)
+                            Icon(Icons.Default.Edit, contentDescription = "Editar Cuenta", modifier = Modifier.size(24.dp))
                         }
 
-                        FilledTonalButton(
+                        // 2. Renovar Cuenta Maestra
+                        FilledTonalIconButton(
                             onClick = { mostrarDialogoRenovarCuenta = true },
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.weight(1.1f)
+                            modifier = Modifier.size(52.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) {
-                            Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Renovar", fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.Autorenew, contentDescription = "Renovar Cuenta Maestra", modifier = Modifier.size(24.dp))
                         }
 
-                        IconButton(
+                        // 3. Eliminar Cuenta
+                        FilledTonalIconButton(
                             onClick = { mostrarDialogoEliminarCuenta = true },
-                            modifier = Modifier.size(44.dp)
+                            modifier = Modifier.size(52.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = DangerRed.copy(alpha = 0.12f),
+                                contentColor = DangerRed
+                            )
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Eliminar Cuenta", tint = DangerRed)
+                            Icon(Icons.Default.Delete, contentDescription = "Eliminar Cuenta", modifier = Modifier.size(24.dp), tint = DangerRed)
                         }
 
+                        // 4. Vender Perfil (Acción Principal)
                         if (!estaInhabilitada) {
-                            Button(
+                            FilledIconButton(
                                 onClick = { mostrarSheetNuevaVenta = true },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1.2f)
+                                modifier = Modifier.size(52.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             ) {
-                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Vender", fontWeight = FontWeight.Bold)
+                                Icon(Icons.Default.AddShoppingCart, contentDescription = "Vender Perfil", modifier = Modifier.size(25.dp))
                             }
                         }
                     }
@@ -588,6 +605,7 @@ fun VentaItemCard(
     onCopiarMensaje: () -> Unit,
     onRenovar: () -> Unit
 ) {
+    val context = LocalContext.current
     val diasRestantes = remember(venta.fechaFin, hoy) {
         DateUtils.calcularDiasRestantes(venta.fechaFin, hoy)
     }
@@ -619,11 +637,34 @@ fun VentaItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        venta.numeroCelularCliente,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Celular Cliente", venta.numeroCelularCliente)
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(context, "📋 Celular copiado: ${venta.numeroCelularCliente}", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                venta.numeroCelularCliente,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                Icons.Default.ContentCopy,
+                                contentDescription = "Copiar Celular",
+                                modifier = Modifier.size(13.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
                         shape = RoundedCornerShape(6.dp),
@@ -658,24 +699,20 @@ fun VentaItemCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    FilledTonalButton(
+                    FilledTonalIconButton(
                         onClick = onRenovar,
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                        modifier = Modifier.height(32.dp)
+                        modifier = Modifier.size(34.dp)
                     ) {
-                        Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(15.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Renovar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Autorenew, contentDescription = "Renovar Venta", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                     }
-                    IconButton(onClick = onCopiarMensaje, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copiar Mensaje", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(17.dp))
+                    IconButton(onClick = onCopiarMensaje, modifier = Modifier.size(34.dp)) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copiar Mensaje", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                     }
-                    IconButton(onClick = onEditar, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar Venta", modifier = Modifier.size(17.dp))
+                    IconButton(onClick = onEditar, modifier = Modifier.size(34.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar Venta", modifier = Modifier.size(18.dp))
                     }
-                    IconButton(onClick = onEliminar, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = DangerRed, modifier = Modifier.size(17.dp))
+                    IconButton(onClick = onEliminar, modifier = Modifier.size(34.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar Venta", tint = DangerRed, modifier = Modifier.size(18.dp))
                     }
                 }
             }
