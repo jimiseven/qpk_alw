@@ -1053,16 +1053,12 @@ Ingresa ahora por favor y te paso los codigos de activacion`;
       const c = appState.cuentas.find(x => x.id === v.cuenta_id) || {};
       let t = appState.mensaje_template || DEFAULT_TEMPLATE;
 
-      // Calcular duracion en dias si no está explícita
+      // Tomar duracion en dias del último periodo contratado (ya sea 1 mes o los días necesarios)
       let dias = v.duracion_dias || 30;
-      if (v.fecha_inicio && v.fecha_fin) {
-        const dIni = new Date(v.fecha_inicio + 'T00:00:00');
-        const dFin = new Date(v.fecha_fin + 'T00:00:00');
-        const diff = Math.round((dFin - dIni) / (1000 * 60 * 60 * 24));
-        if (diff > 0) dias = diff;
-      }
+      let textoPeriodo = (dias === 30) ? '1 mes' : (dias + ' días');
 
       t = t.replace(/{servicio}/gi, c.tipo_cuenta || 'Servicio')
+           .replace(/{periodo}/gi, textoPeriodo)
            .replace(/{dias}/gi, dias.toString())
            .replace(/{correo}/gi, c.correo || '')
            .replace(/{cuenta}/gi, c.correo || '')

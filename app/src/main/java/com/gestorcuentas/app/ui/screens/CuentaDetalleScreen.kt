@@ -106,8 +106,18 @@ fun CuentaDetalleScreen(
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text("Editar", fontWeight = FontWeight.SemiBold)
+                        }
+
+                        FilledTonalButton(
+                            onClick = { mostrarDialogoRenovarCuenta = true },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1.1f)
+                        ) {
+                            Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Renovar", fontWeight = FontWeight.Bold)
                         }
 
                         IconButton(
@@ -121,10 +131,10 @@ fun CuentaDetalleScreen(
                             Button(
                                 onClick = { mostrarSheetNuevaVenta = true },
                                 shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1.3f)
+                                modifier = Modifier.weight(1.2f)
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Text("Vender", fontWeight = FontWeight.Bold)
                             }
                         }
@@ -292,39 +302,42 @@ fun CuentaDetalleScreen(
                                 }
                             }
 
-                            if (cuenta.fechaCreacion.isNotBlank() || cuenta.fechaFin.isNotBlank()) {
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text("Vigencia Cuenta Maestra (Proveedor):", style = MaterialTheme.typography.labelSmall)
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Vigencia Cuenta Maestra (Proveedor):", style = MaterialTheme.typography.labelSmall)
+                                    val textoVigencia = if (cuenta.fechaCreacion.isNotBlank() || cuenta.fechaFin.isNotBlank()) {
+                                        "${DateUtils.formatearFechaLegible(cuenta.fechaCreacion)} al ${if (cuenta.fechaFin.isNotBlank()) DateUtils.formatearFechaLegible(cuenta.fechaFin) else "Indefinida"}"
+                                    } else {
+                                        "Sin vigencia fijada con proveedor"
+                                    }
+                                    Text(
+                                        textoVigencia,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    if (cuenta.renovacionesCount > 0) {
                                         Text(
-                                            "${DateUtils.formatearFechaLegible(cuenta.fechaCreacion)} al ${if (cuenta.fechaFin.isNotBlank()) DateUtils.formatearFechaLegible(cuenta.fechaFin) else "Indefinida"}",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Medium
+                                            "🔄 Renovada ${cuenta.renovacionesCount} ${if (cuenta.renovacionesCount == 1) "vez" else "veces"} (Última: ${DateUtils.formatearFechaLegible(cuenta.ultimaRenovacion)})",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.SemiBold
                                         )
-                                        if (cuenta.renovacionesCount > 0) {
-                                            Text(
-                                                "🔄 Renovada ${cuenta.renovacionesCount} ${if (cuenta.renovacionesCount == 1) "vez" else "veces"} (Última: ${DateUtils.formatearFechaLegible(cuenta.ultimaRenovacion)})",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                        }
                                     }
-                                    FilledTonalButton(
-                                        onClick = { mostrarDialogoRenovarCuenta = true },
-                                        shape = RoundedCornerShape(8.dp),
-                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                        modifier = Modifier.height(34.dp)
-                                    ) {
-                                        Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(16.dp))
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Renovar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                                    }
+                                }
+                                FilledTonalButton(
+                                    onClick = { mostrarDialogoRenovarCuenta = true },
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(34.dp)
+                                ) {
+                                    Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Renovar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -544,13 +557,19 @@ fun CuentaDetalleScreen(
             ventaConCuenta = com.gestorcuentas.app.data.entity.VentaConCuenta(venta, cuentaConVentas?.cuenta),
             onDismiss = { ventaARenovar = null },
             onConfirmar = { dias, precio ->
-                viewModel.renovarVenta(venta, dias, precio) { nuevaFecha, mensajeWhatsApp ->
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Renovación Cliente", mensajeWhatsApp)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, "✅ Venta renovada hasta $nuevaFecha y mensaje copiado", Toast.LENGTH_LONG).show()
-                    ventaARenovar = null
-                }
+                viewModel.renovarVenta(
+                    venta = venta,
+                    dias = dias,
+                    montoCobrado = precio,
+                    context = context,
+                    onSuccess = { nuevaFecha, mensajeWhatsApp ->
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Renovación Cliente", mensajeWhatsApp)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "✅ Venta renovada hasta $nuevaFecha y mensaje copiado", Toast.LENGTH_LONG).show()
+                        ventaARenovar = null
+                    }
+                )
             }
         )
     }

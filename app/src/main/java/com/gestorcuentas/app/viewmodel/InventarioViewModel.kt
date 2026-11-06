@@ -1,5 +1,6 @@
 package com.gestorcuentas.app.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -229,11 +230,14 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
      * Procesa la renovación de una venta existente.
      * Si la venta sigue activa, extiende sumando a la fechaFin actual.
      * Si la venta ya está vencida, extiende a partir de la fecha de hoy.
+     * Guarda en duracionDias ÚNICAMENTE el último periodo contratado (ej: 30 días / 1 mes)
+     * para que el título del mensaje generado refleje exactamente este último periodo.
      */
     fun renovarVenta(
         venta: Venta,
         dias: Int,
         montoCobrado: Double,
+        context: Context? = null,
         onSuccess: (nuevaFechaFin: String, mensajeWhatsApp: String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -243,7 +247,8 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
 
             val ventaActualizada = venta.copy(
                 precioVentaPorPerfil = venta.precioVentaPorPerfil + montoCobrado,
-                duracionDias = venta.duracionDias + dias,
+                duracionDias = dias, // SOLO el último periodo contratado (1 mes / los días necesarios)
+                fechaInicio = fechaBase, // Fecha inicio del nuevo periodo contratado
                 fechaFin = nuevaFechaFin,
                 renovacionesCount = venta.renovacionesCount + 1,
                 ultimaRenovacion = hoy
@@ -254,12 +259,29 @@ class InventarioViewModel(private val repository: InventarioRepository) : ViewMo
             val cuenta = allVentasConCuenta.value.find { it.venta.id == venta.id }?.cuenta
             val servicio = cuenta?.tipoCuenta ?: "Servicio"
             val correo = cuenta?.correo ?: ""
-            val mensaje = com.gestorcuentas.app.utils.MensajeEntregaUtils.generarMensajeRenovacion(
-                servicio = servicio,
-                correo = correo,
-                nuevaFechaFin = nuevaFechaFin,
-                diasRenovados = dias
-            )
+            val contrasena = cuenta?.contrasenaPlataforma ?: ""
+
+            // Generar el mensaje utilizando la plantilla de entrega con el último periodo
+            val mensaje = if (context != null) {
+                com.gestorcuentas.app.utils.MensajeEntregaUtils.generarMensaje(
+                    context = context,
+                    tipoCuenta = servicio,
+                    duracionDias = dias,
+                    correo = correo,
+                    contrasenaPlataforma = contrasena,
+                    fechaInicio = fechaBase,
+                    fechaFin = nuevaFechaFin
+                )
+            } else {
+                com.gestorcuentas.app.utils.MensajeEntregaUtils.generarMensaje(
+                    tipoCuenta = servicio,
+                    duracionDias = dias,
+                    correo = correo,
+                    contrasenaPlataforma = contrasena,
+                    fechaInicio = fechaBase,
+                    fechaFin = nuevaFechaFin
+                )
+            }
 
             withContext(Dispatchers.Main) {
                 onSuccess(nuevaFechaFin, mensaje)

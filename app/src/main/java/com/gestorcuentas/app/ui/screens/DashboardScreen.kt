@@ -828,6 +828,7 @@ fun DashboardScreen(
                     venta = vConCuenta.venta,
                     dias = dias,
                     montoCobrado = precio,
+                    context = context,
                     onSuccess = { nuevaFecha, mensajeWhatsApp ->
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("Renovación", mensajeWhatsApp)

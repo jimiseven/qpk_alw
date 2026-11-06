@@ -88,8 +88,18 @@ Ingresa ahora por favor y te paso los codigos de activacion"""
         val fechaFinFormateada = DateUtils.formatearFechaLegible(fechaFin)
         val plantillaFinal = if (plantilla.isBlank()) PLANTILLA_PREDETERMINADA else plantilla
 
+        val textoPeriodo = when (duracionDias) {
+            30 -> "1 mes"
+            60 -> "2 meses"
+            90 -> "3 meses"
+            180 -> "6 meses"
+            365 -> "1 año"
+            else -> "$duracionDias días"
+        }
+
         return plantillaFinal
             .replace("{servicio}", tipoCuenta)
+            .replace("{periodo}", textoPeriodo)
             .replace("{dias}", duracionDias.toString())
             .replace("{correo}", correo)
             .replace("{contrasena}", contrasenaPlataforma)
@@ -107,10 +117,16 @@ Ingresa ahora por favor y te paso los codigos de activacion"""
         diasRenovados: Int
     ): String {
         val fechaFinFormateada = DateUtils.formatearFechaLegible(nuevaFechaFin)
+        val periodoTexto = when (diasRenovados) {
+            30 -> "1 mes"
+            60 -> "2 meses"
+            90 -> "3 meses"
+            else -> "$diasRenovados días"
+        }
         return """¡Hola! Tu servicio de $servicio ha sido renovado con éxito ✅
 
 Detalles de tu renovación:
-• Servicio: $servicio ($diasRenovados días)
+• Servicio: $servicio ($periodoTexto)
 • Cuenta: $correo
 • Nueva fecha de vencimiento: $fechaFinFormateada
 

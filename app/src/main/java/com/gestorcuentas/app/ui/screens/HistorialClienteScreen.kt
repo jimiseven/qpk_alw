@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentPaste
@@ -57,6 +58,7 @@ fun HistorialClienteScreen(
 
     var ventaAEditar by remember { mutableStateOf<Venta?>(null) }
     var ventaAEliminar by remember { mutableStateOf<Venta?>(null) }
+    var ventaARenovar by remember { mutableStateOf<VentaConCuenta?>(null) }
     var filtroEstado by remember { mutableStateOf(FiltroHistorial.TODOS) }
 
     // Búsqueda inteligente con normalización y tolerancia de prefijos internacionales WhatsApp (+591, etc.)
@@ -264,6 +266,7 @@ fun HistorialClienteScreen(
                             hoy = hoy,
                             onEditarVenta = { ventaAEditar = item.venta },
                             onEliminarVenta = { ventaAEliminar = item.venta },
+                            onRenovarVenta = { ventaARenovar = item },
                             onCopiarMensaje = {
                                 val cuenta = item.cuenta
                                 val venta = item.venta
@@ -329,6 +332,29 @@ fun HistorialClienteScreen(
             }
         )
     }
+
+    // BottomSheet Renovar Venta desde Historial
+    ventaARenovar?.let { vConCuenta ->
+        RenovarVentaBottomSheet(
+            ventaConCuenta = vConCuenta,
+            onDismiss = { ventaARenovar = null },
+            onConfirmar = { dias, precio ->
+                viewModel.renovarVenta(
+                    venta = vConCuenta.venta,
+                    dias = dias,
+                    montoCobrado = precio,
+                    context = context,
+                    onSuccess = { nuevaFecha, mensajeWhatsApp ->
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Mensaje Cuenta", mensajeWhatsApp)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "✅ Venta renovada hasta $nuevaFecha y mensaje copiado", Toast.LENGTH_LONG).show()
+                        ventaARenovar = null
+                    }
+                )
+            }
+        )
+    }
 }
 
 /**
@@ -340,6 +366,7 @@ fun HistorialVentaCard(
     hoy: java.time.LocalDate = remember { java.time.LocalDate.now() },
     onEditarVenta: () -> Unit,
     onEliminarVenta: () -> Unit,
+    onRenovarVenta: () -> Unit,
     onCopiarMensaje: () -> Unit
 ) {
     val venta = item.venta
@@ -370,12 +397,29 @@ fun HistorialVentaCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = cuenta?.tipoCuenta?.uppercase() ?: "SERVICIO",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = cuenta?.tipoCuenta?.uppercase() ?: "SERVICIO",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (venta.renovacionesCount > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        ) {
+                            Text(
+                                text = "🔄 x${venta.renovacionesCount}",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
@@ -420,26 +464,38 @@ fun HistorialVentaCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Botones de acción: Copiar Mensaje, Editar y Eliminar
+            // Botones de acción: Renovar, Copiar Mensaje, Editar y Eliminar
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                FilledTonalButton(
+                    onClick = onRenovarVenta,
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Autorenew, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Renovar", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                }
+
                 Button(
                     onClick = onCopiarMensaje,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
+                    modifier = Modifier.weight(1.2f),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Copiar Mensaje", style = MaterialTheme.typography.labelMedium)
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Copiar", style = MaterialTheme.typography.labelMedium)
                 }
 
                 OutlinedButton(
                     onClick = onEditarVenta,
                     shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp)
+                    contentPadding = PaddingValues(horizontal = 10.dp)
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = "Editar", modifier = Modifier.size(18.dp))
                 }

@@ -342,6 +342,7 @@ fn main() {
                         let mut nueva_fecha_str = String::new();
                         let mut servicio = String::new();
                         let mut correo = String::new();
+                        let mut mensaje = String::new();
                         let mut encontrada = false;
 
                         if let Some(v) = current_state.ventas.iter_mut().find(|v| v.id == req.venta_id) {
@@ -352,24 +353,43 @@ fn main() {
                             let nueva_fecha = fecha_calculo + chrono::Duration::days(req.dias as i64);
                             nueva_fecha_str = nueva_fecha.format("%Y-%m-%d").to_string();
 
+                            v.duracion_dias = req.dias; // SOLO el último periodo contratado!
+                            v.fecha_inicio = fecha_calculo.format("%Y-%m-%d").to_string();
                             v.fecha_fin = nueva_fecha_str.clone();
                             v.precio_venta_por_perfil += req.monto_cobrado;
                             v.renovaciones_count += 1;
                             v.ultima_renovacion = hoy.format("%Y-%m-%d").to_string();
 
                             let cuenta_id = v.cuenta_id;
+                            let mut contrasena = String::new();
                             if let Some(c) = current_state.cuentas.iter().find(|c| c.id == cuenta_id) {
                                 servicio = c.tipo_cuenta.clone();
                                 correo = c.correo.clone();
+                                contrasena = c.contrasena_plataforma.clone();
                             }
+
+                            let default_template = "Datos para ingresar a la cuenta de {servicio}\n\nCuenta {servicio} ({dias} dias)\nCorreo: {correo}\nContrasena: {contrasena}\n\nFecha ini: {fecha_inicio}\nFecha end: {fecha_fin}\n\nReglas para el uso de la cuenta:\n\n- No modificar ningun dato de la cuenta, en caso de modificar algun dato de la cuenta, retiro la cuenta del grupo de trabajo y te quitare el acceso, no cubrire la garantia y el tiempo de servicio.\n- Evita salirte de la cuenta.\n- Referentemente, usa la aplicacion movil en el celular y en computadora navegador Google Chrome NO PESTAÑA INCOGNITO\n- Link para pc preferentemente la pagina oficial en tu navegador\n\nIngresa ahora por favor y te paso los codigos de activacion";
+                            let template = current_state.mensaje_template.as_deref().unwrap_or(default_template);
+                            let texto_periodo = if req.dias == 30 { "1 mes" } else { &format!("{} días", req.dias) };
+
+                            let mensaje_formateado = template
+                                .replace("{servicio}", &servicio)
+                                .replace("{periodo}", texto_periodo)
+                                .replace("{dias}", &req.dias.to_string())
+                                .replace("{correo}", &correo)
+                                .replace("{cuenta}", &correo)
+                                .replace("{contrasena}", &contrasena)
+                                .replace("{clave}", &contrasena)
+                                .replace("{fecha_inicio}", &fecha_calculo.format("%Y-%m-%d").to_string())
+                                .replace("{fecha_fin}", &nueva_fecha_str)
+                                .replace("{perfil}", "Perfil 1")
+                                .replace("{pin}", "0000");
+
+                            mensaje = mensaje_formateado;
                         }
 
                         if encontrada {
                             let _ = storage.save_state(&current_state);
-                            let mensaje = format!(
-                                "🎉 *¡Tu suscripción ha sido RENOVADA exitosamente!* 🚀\n\n📦 *Servicio:* {}\n📧 *Usuario:* {}\n📅 *Nueva fecha de vencimiento:* {} (+{} días)\n⚡ *Estado:* ACTIVO\n\n¡Gracias por tu confianza y preferencia! 😊🙌",
-                                servicio, correo, nueva_fecha_str, req.dias
-                            );
                             crate::clipboard::set_clipboard_text(&mensaje);
 
                             #[derive(serde::Serialize)]
